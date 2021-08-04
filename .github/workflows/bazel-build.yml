@@ -42,6 +42,7 @@ jobs:
       - name: Execute build script
         run: |
            bazel run //:gazelle 
+           bazel run @cargo_raze//:raze -- --manifest-path=$(realpath rest-ralimiter/Cargo.toml)
            bazel build //...
       - name: Bazel artifacts
         uses: actions/upload-artifact@v2
