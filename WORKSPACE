@@ -36,19 +36,35 @@ http_archive(
 )
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+
 go_register_toolchains(version = "1.16.5")
+
 go_rules_dependencies()
 
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+
+go_repository(
+    name = "org_golang_google_grpc",
+    importpath = "google.golang.org/grpc",
+    sum = "h1:Klz8I9kdtkIN6EpHHUOMLCYhTn/2WAe5a0s1hcBkdTI=",
+    version = "v1.39.0",
+)
+
 gazelle_dependencies()
+
 load("//:deps.bzl", "go_dependencies")
+
 # gazelle:repository_macro deps.bzl%go_dependencies
 go_dependencies()
 
 load("@rules_rust//rust:repositories.bzl", "rust_repositories")
+
 rust_repositories()
 
 load("@cargo_raze//:repositories.bzl", "cargo_raze_repositories")
+
 cargo_raze_repositories()
+
 load("@cargo_raze//:transitive_deps.bzl", "cargo_raze_transitive_deps")
+
 cargo_raze_transitive_deps()

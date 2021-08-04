@@ -5,7 +5,7 @@ go_library(
     srcs = ["main.go"],
     importpath = "github.com/discordnova/nova/novactl",
     visibility = ["//visibility:private"],
-    deps = ["@com_github_gofiber_fiber_v2//:go_default_library"],
+    deps = ["@com_github_gofiber_fiber_v2//:fiber"],
 )
 
 go_binary(
