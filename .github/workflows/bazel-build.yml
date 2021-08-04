@@ -41,7 +41,7 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Execute build script
         run: |
-           bazel //:gazelle 
+           bazel run //:gazelle 
            bazel build //...
       - name: Bazel artifacts
         uses: actions/upload-artifact@v2
