@@ -1,0 +1,22 @@
+[package]
+name = "rest-ratelimiter"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+tonic = "0.5"
+prost = "0.8"
+tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+
+[build-dependencies]
+tonic-build = "0.5"
+
+[package.metadata.raze]
+# The path at which to write output files.
+#
+# `cargo raze` will generate Bazel-compatible BUILD files into this path.
+# This can either be a relative path (e.g. "foo/bar"), relative to this
+# Cargo.toml file; or relative to the Bazel workspace root (e.g. "//foo/bar").
+workspace_path = "//rest-ratelimiter"
+genmode = "Remote"
+default_gen_buildrs = true
