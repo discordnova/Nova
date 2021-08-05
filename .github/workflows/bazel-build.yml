@@ -32,12 +32,6 @@ jobs:
           bazelisk-version: 1.x # optional, default is 1.x
            # Used to query bazelisk releases.  Since there's a default, this is typically not supplied by the user.
           token: ${{ github.token }}
-      # Runs a single command using the runners shell
-      - name: Mount bazel cache  # Optional
-        uses: actions/cache@v2
-        with:
-          path: "~/.cache/bazel"
-          key: bazel
       # Runs a set of commands using the runners shell
       - name: Execute build script
         run: |
