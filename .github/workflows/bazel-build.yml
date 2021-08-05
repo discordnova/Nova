@@ -41,6 +41,7 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Execute build script
         run: |
+          apt-get install -y pkg-config libssl-dev
            bazel run //:gazelle 
            bazel run @cargo_raze//:raze -- --manifest-path=$(realpath rest-ralimiter/Cargo.toml)
            bazel build //...
