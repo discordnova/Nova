@@ -1,4 +1,3 @@
-
 load("@rules_rust//cargo:cargo_build_script.bzl", "cargo_build_script")
 load("@rules_rust//rust:rust.bzl", "rust_binary")
 
@@ -12,5 +11,5 @@ cargo_build_script(
 
 rust_binary(
     name = "rest-ratelimiter",
-    srcs = ["src/main.rs"]
+    srcs = ["src/main.rs"],
 )
