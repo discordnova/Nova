@@ -20,11 +20,11 @@ http_archive(
 
 http_archive(
     name = "rules_rust",
-    sha256 = "224ebaf1156b6f2d3680e5b8c25191e71483214957dfecd25d0f29b2f283283b",
-    strip_prefix = "rules_rust-a814d859845c420fd105c629134c4a4cb47ba3f8",
+    sha256 = "accb5a89cbe63d55dcdae85938e56ff3aa56f21eb847ed826a28a83db8500ae6",
+    strip_prefix = "rules_rust-9aa49569b2b0dacecc51c05cee52708b7255bd98",
     urls = [
-        # `main` branch as of 2021-06-15
-        "https://github.com/bazelbuild/rules_rust/archive/a814d859845c420fd105c629134c4a4cb47ba3f8.tar.gz",
+        # Main branch as of 2021-02-19
+        "https://github.com/bazelbuild/rules_rust/archive/9aa49569b2b0dacecc51c05cee52708b7255bd98.tar.gz",
     ],
 )
 
@@ -71,14 +71,14 @@ load("//:deps.bzl", "go_dependencies")
 # gazelle:repository_macro deps.bzl%go_dependencies
 go_dependencies()
 
-load("@rules_rust//rust:repositories.bzl", "rust_repositories")
-
-rust_repositories()
-
 load("@cargo_raze//:repositories.bzl", "cargo_raze_repositories")
-
 cargo_raze_repositories()
 
 load("@cargo_raze//:transitive_deps.bzl", "cargo_raze_transitive_deps")
-
 cargo_raze_transitive_deps()
+
+load("@rules_rust//rust:repositories.bzl", "rust_repositories")
+rust_repositories()
+
+load("//rest-ratelimiter/cargo:crates.bzl", "raze_fetch_remote_crates")
+raze_fetch_remote_crates()
