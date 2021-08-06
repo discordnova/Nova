@@ -46,6 +46,7 @@ http_archive(
 )
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
 protobuf_deps()
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
@@ -62,8 +63,8 @@ go_repository(
     name = "org_golang_google_grpc",
     build_file_proto_mode = "disable",
     importpath = "google.golang.org/grpc",
-    sum = "h1:J0UbZOIrCAl+fpTOf8YLs4dJo8L/owV4LYVtAXQoPkw=",
-    version = "v1.22.0",
+    sum = "h1:/9BgsAsa5nWe26HqOlvlgJnqBuktYOLCgjCPqsa56W0=",
+    version = "v1.38.0",
 )
 
 load("//:deps.bzl", "go_dependencies")
@@ -72,13 +73,17 @@ load("//:deps.bzl", "go_dependencies")
 go_dependencies()
 
 load("@cargo_raze//:repositories.bzl", "cargo_raze_repositories")
+
 cargo_raze_repositories()
 
 load("@cargo_raze//:transitive_deps.bzl", "cargo_raze_transitive_deps")
+
 cargo_raze_transitive_deps()
 
 load("@rules_rust//rust:repositories.bzl", "rust_repositories")
+
 rust_repositories()
 
 load("//rest-ratelimiter/cargo:crates.bzl", "raze_fetch_remote_crates")
+
 raze_fetch_remote_crates()
