@@ -1,0 +1,39 @@
+// How does this works ?
+// Every request, the proxy (envoy) requests the rate-limiting service if
+// the requested route bucket or global rate-limit is hit.
+
+syntax = "proto3";
+package nova.ratelimit.v1;
+
+// The reponse of a RatelimitRequest, it includes the status of the reponse and
+// the bucket informations.
+message RatelimitResponse {
+    enum Status {
+        OK                  = 0;
+        RATELIMITED         = 1;
+        GLOBAL_RATELIMITED  = 2;
+    }
+    Status status = 1;
+    bool   updateAsked = 2;
+}
+
+// Requests the ratelimit status of a route request, it also takes the 
+// indentifiables of the request in question.
+message RatelimitRequest {
+    string          routeName       = 1;
+    repeated string indentifiables  = 2;
+}
+
+// Used when "updateAsked" is sed to true
+// this means the bucket is unknown to the ratelimit server.
+message CreateBucketData {
+    RatelimitRequest request    = 1;
+    int32 limit                 = 2;
+    int32 remaining             = 3;
+    int32 reset                 = 4;
+}
+
+service RatelimitService {
+    rpc GetRatelimitStatus (RatelimitRequest)   returns (RatelimitResponse);
+    rpc CreateBucket       (CreateBucketData)   returns (CreateBucketData);
+}
