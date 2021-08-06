@@ -2,6 +2,4 @@ module github.com/discordnova/nova/novactl
 
 go 1.16
 
-require (
-	github.com/gofiber/fiber/v2 v2.16.0
-)
+require github.com/spf13/cobra v1.2.1

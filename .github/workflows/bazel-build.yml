@@ -41,11 +41,11 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Execute build script
         run: |
+           sudo apt-get install build-essential -y
            bazel build //...
       - name: Bazel artifacts
         uses: actions/upload-artifact@v2
         with:
           name: bazel-artifacts
           path: |
-             bazel-out/
              bazel-bin/
