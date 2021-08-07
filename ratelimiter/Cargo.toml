@@ -8,7 +8,8 @@ tonic = "0.5"
 tonic-build = "0.5"
 prost = "0.8"
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
-redis = { version = "0.21.0", features = ["tokio-comp", "tokio-native-tls-comp", "cluster"] }
+# disabled "tokio-comp", "tokio-native-tls-comp" for now
+redis = { version = "0.21.0", features = ["cluster"] }
 
 [build-dependencies]
 tonic-build = "0.5"
