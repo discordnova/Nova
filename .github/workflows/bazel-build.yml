@@ -48,4 +48,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Executables
-          path: bazel-bin/package.tar.Gz
+          path: bazel-bin/package*
