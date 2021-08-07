@@ -1,11 +1,13 @@
+mod redis_client;
+
 use std::net::SocketAddr;
 pub mod nova_ratelimit_v1 {
     tonic::include_proto!("nova.ratelimit.v1");
 }
 
 use nova_ratelimit_v1::{
-    ratelimit_response, ratelimit_service_client, ratelimit_service_server, CreateBucketData,
-    RatelimitRequest, RatelimitResponse,
+    ratelimit_response, ratelimit_service_server, CreateBucketData, RatelimitRequest,
+    RatelimitResponse,
 };
 
 #[derive(Debug, Default)]
