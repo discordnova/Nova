@@ -50,5 +50,5 @@ jobs:
       - name: Bazel artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Executables
+          name: all-${{ matrix.os }}
           path: bazel-bin*/**/*
