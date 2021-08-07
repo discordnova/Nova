@@ -6,7 +6,7 @@ Nova builds upon [Go](https://github.com/golang/go) and [Rust](https://github.co
 
 With Nova you can be sure to build reliable and efficient Discord bots.
 
-### Disclaimer
+## Disclaimer
 
 Nova requires a good infrastructure to operate and may consume lot of resources. Its not made for small Discord Bots but for those who are present on many servers and want to ensure excellent performance.
 
@@ -25,8 +25,8 @@ Nova requires a good infrastructure to operate and may consume lot of resources.
 
 ## Contributing
 
-If you wish to contribute to Nova, go to [CONTRIBUTING]().
+If you wish to contribute to Nova, go to [CONTRIBUTING](CONTRIBUTING.md).
 
 ## License
 
-Nova is distributed under the Apache License 2.0, see [LICENSE](https://github.com/discordnova/nova/blob/main/LICENSE) for more information.
+Nova is distributed under the Apache License 2.0, see [LICENSE](LICENSE) for more information.
