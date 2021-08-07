@@ -11,7 +11,7 @@ type InternalTransporter struct {
 }
 
 // NewRabbitMqTransporter creates a rabbitmq transporter using a given url
-func NewInternalTransporter(url string) (gateway.Transporter, error) {
+func NewInternalTransporter() (gateway.Transporter, error) {
 	log.Info().Msg("using the memory transporter")
 
 	pullChannel, pushChannel := make(chan []byte), make(chan gateway.PushData)

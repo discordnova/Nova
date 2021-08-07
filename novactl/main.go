@@ -1,9 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"github.com/discordnova/nova/novactl/cmd"
+	"github.com/spf13/cobra"
 )
 
 func main() {
-	fmt.Println("Welcome to nova! The cli is being developed.")
+	rootCommand := &cobra.Command{Use: "app"}
+	rootCommand.AddCommand(cmd.VersionCommand)
+	rootCommand.AddCommand(cmd.InitializeCommand)
+	rootCommand.Execute()
 }

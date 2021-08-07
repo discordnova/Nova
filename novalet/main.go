@@ -1,8 +1,16 @@
 package main
 
-import "fmt"
+import (
+	websocketLib "github.com/discordnova/nova/gateway/lib/gateway"
+	"github.com/discordnova/nova/novalet/lib"
+)
 
 func main() {
-	fmt.Println("Hello world!")
-	fmt.Println("In the future, this binary will be used to spin up a lightweight nova instance in one binary")
+	go lib.NewNatsStandalone()
+	transporter, _ := lib.NewInternalTransporter()
+	websocket := websocketLib.NewGateway(websocketLib.GatewayConnectorOptions{
+		Transporter: transporter,
+	})
+
+	go websocket.Start()
 }

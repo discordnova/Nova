@@ -50,6 +50,7 @@ http_archive(
     ],
 )
 
+# golang configuration
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
@@ -68,6 +69,7 @@ go_dependencies()
 
 gazelle_dependencies()
 
+# needed to build the proto packages
 go_repository(
     name = "org_golang_google_grpc",
     build_file_proto_mode = "disable",
@@ -76,6 +78,7 @@ go_repository(
     version = "v1.26.0",
 )
 
+# rust environment
 load("@cargo_raze//:repositories.bzl", "cargo_raze_repositories")
 
 cargo_raze_repositories()
@@ -88,7 +91,7 @@ load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
 rust_repositories()
 
-# load for the project
+# load for the ratelimiter project crates
 load("//ratelimiter/cargo:crates.bzl", "raze_fetch_remote_crates")
 
 raze_fetch_remote_crates()

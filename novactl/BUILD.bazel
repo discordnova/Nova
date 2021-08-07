@@ -6,6 +6,10 @@ go_library(
     srcs = ["main.go"],
     importpath = "github.com/discordnova/nova/novactl",
     visibility = ["//visibility:private"],
+    deps = [
+        "//novactl/cmd",
+        "@com_github_spf13_cobra//:cobra",
+    ],
 )
 
 go_binary(
