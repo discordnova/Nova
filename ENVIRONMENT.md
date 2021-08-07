@@ -1,26 +1,25 @@
 # Developement environment
 
-Nova utilise Bazel comme gestionnaire de build. Bazel nous permet de combiner plusieurs langages (Rust, Go, ...) dans une seule pipeline tout en profitant de la compilation
-incrémentielle et de la compilation distante.
+Nova use Bazel as build manager. Bazel allows us to combine various languages (Rust, Go, ...) in a single pipeline while taking advantage of incremental compilation and remote compilation.
 
-Cependant, certaines démarches sont a suivre pour mettre a jour les dépendances des programmes. Nova utilise Gazelle pour générer les fichiers "BUILD" des projets Go et Cargo-Raze pour générer des fichiers "BUILD" contenant toutes les dépendances.
+However, some steps are to be follow to update programs dependencies. Nova use Gazelle to generate `BUILD` files of Go projects and Cargo-Raze to generate `BUILD` files of Rust projects.
 
-Quand vous éditez les dépendances d'un projet, vous devez éxécuter une commande pour mettre a jour ces fichiers.
+When you edit project dependencies, you must execute a command tu update these files.
+
+# Go
+
+To update dependencies of Go Project, execute :
+
+```
+bazel run //:gazelle
+```
 
 # Rust
 
-Pour mettre a jour ou créer un projet Rust, utilisez cette commande dans le dossier de votre projet.
+To update or create Rust project, use this comande in the folder of your project :
 
 ```
 bazel run @cargo_raze//:raze -- --manifest-path=$(realpath Cargo.toml)
 ```
 
-Si c'est un nouveau projet, assurez-vous d'avoir configuré raze dans votre Cargo.toml et de l'avoir rajouté aux sources dans le fichier WORKSPACE.
-
-# Golang
-
-Pour mettre a jour les dépendances des projets go, exécutez 
-
-```
-bazel run //:gazelle
-```
+If this is a new project, make sure you have configured Cargo-Raze in your `Cargo.toml` and added it to sources in `WORKSPACE`.
