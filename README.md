@@ -2,7 +2,7 @@
 
 Nova is an open source Discord framework for creating high-performance app.
 
-Nova builds upon [Go](https://github.com/golang/go) and [Rust](https://github.com/rust-lang/rust) with [Bazel](https://github.com/bazelbuild/bazel) to propose an effective, safe and production-ready solution.
+Nova builds upon [Go](https://github.com/golang/go) and [Rust](https://github.com/rust-lang/rust) with [Bazel](https://github.com/bazelbuild/bazel) as build system to propose an effective, safe and production-ready solution.
 
 With Nova you can be sure to build reliable and efficient Discord bots.
 
@@ -14,12 +14,14 @@ Nova requires a good infrastructure to operate and may consume lot of resources.
 
 ## Features
 
-- ### Scalability
-- ### High-Performance
-- ### Reliability
-- ### Production-ready
+- **Scalability**
+- **High-Performance**
+- **Reliability**
+- **Production-ready**
 
 ## Quick Start
+
+> SOON
 
 ## Contributing
 
