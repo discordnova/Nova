@@ -19,7 +19,7 @@ impl ratelimit_service_server::RatelimitService for RatelimiterService {
         &self,
         request: tonic::Request<nova_ratelimit_v1::CreateBucketData>,
     ) -> Result<tonic::Response<nova_ratelimit_v1::CreateBucketData>, tonic::Status> {
-        // todo
+        // todo(n1c00o): Make create_bucket endpoint implementation
 
         Ok(tonic::Response::new(CreateBucketData {
             limit: 0,
@@ -36,7 +36,7 @@ impl ratelimit_service_server::RatelimitService for RatelimiterService {
         &self,
         request: tonic::Request<nova_ratelimit_v1::RatelimitRequest>,
     ) -> Result<tonic::Response<nova_ratelimit_v1::RatelimitResponse>, tonic::Status> {
-        // todo
+        // todo(n1c00o): Make get_ratelimit_status endpoint implementation
 
         Ok(tonic::Response::new(RatelimitResponse {
             status: ratelimit_response::Status::Ok as i32,
