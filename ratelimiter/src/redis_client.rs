@@ -1,6 +1,6 @@
 use std::fmt::Error;
 
-use redis;
+use redis::{self, ConnectionLike};
 
 pub struct RedisClient {
     _client: redis::cluster::ClusterClient,
@@ -29,5 +29,11 @@ impl RedisClient {
     /// Creates a RedisClient with redis://127.0.0.1/ as node
     fn default() -> Result<RedisClient, Error> {
         RedisClient::new(vec!["redis://127.0.0.1/"])
+    }
+
+    /// Checks if a bucket is in the Redis store
+    fn has_bucket(&self, hash: &str) -> Result<bool> {
+        let _: () = self.conn.set().unwrap();
+        // todo(n1c00o): continue implementation
     }
 }
