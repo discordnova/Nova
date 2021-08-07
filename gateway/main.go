@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"github.com/discordnova/nova/gateway/lib"
+	"github.com/discordnova/nova/common"
 	"github.com/discordnova/nova/gateway/lib/gateway"
 	"github.com/discordnova/nova/gateway/lib/gateway/compression"
 	"github.com/discordnova/nova/gateway/lib/gateway/transporters"
@@ -40,10 +40,10 @@ func validate(settings *gateway.GatewayConnectorOptions) {
 
 func main() {
 	flag.Parse()
-	lib.SetupLogger()
+	common.SetupLogger()
 
 	if monitoring != nil {
-		go lib.CreatePrometheus(*monitoring)
+		go common.CreatePrometheus(*monitoring)
 		log.Debug().Msg("prometheus server called")
 	}
 

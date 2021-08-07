@@ -5,9 +5,9 @@ go_library(
     name = "gateway_lib",
     srcs = ["main.go"],
     importpath = "github.com/discordnova/nova/gateway",
-    visibility = ["//visibility:private"],
+    visibility = ["//visibility:public"],
     deps = [
-        "//gateway/lib",
+        "//common",
         "//gateway/lib/gateway",
         "//gateway/lib/gateway/compression",
         "//gateway/lib/gateway/transporters",

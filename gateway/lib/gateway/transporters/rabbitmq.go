@@ -3,14 +3,14 @@ package transporters
 import (
 	"time"
 
+	"github.com/discordnova/nova/common/gateway"
 	"github.com/rs/zerolog/log"
 	"github.com/streadway/amqp"
-	"github.com/discordnova/nova/common/gateway"
 )
 
 type RabbitMqTransporter struct {
-	connection  *amqp.Connection
-	sendChannel *amqp.Channel
+	pullChannel chan []byte
+	pushChannel chan gateway.PushData
 }
 
 // NewRabbitMqTransporter creates a rabbitmq transporter using a given url
@@ -19,13 +19,13 @@ func NewRabbitMqTransporter(url string) (gateway.Transporter, error) {
 	conn, err := amqp.Dial(url)
 
 	if err != nil {
-		return &RabbitMqTransporter{}, err
+		return nil, err
 	}
 
 	send, err := conn.Channel()
 
 	if err != nil {
-		return &RabbitMqTransporter{}, err
+		return nil, err
 	}
 
 	err = send.ExchangeDeclare(
@@ -39,32 +39,38 @@ func NewRabbitMqTransporter(url string) (gateway.Transporter, error) {
 	)
 
 	if err != nil {
-		return &RabbitMqTransporter{}, err
+		return nil, err
 	}
 
-	return RabbitMqTransporter{
-		connection:  conn,
-		sendChannel: send,
+	pullChannel, pushChannel := make(chan []byte), make(chan gateway.PushData)
+
+	go func() {
+		for {
+			data := <-pushChannel
+			send.Publish(
+				"nova_gateway_dispatch",
+				data.Name,
+				false,
+				false,
+				amqp.Publishing{
+					Priority:  1,
+					Timestamp: time.Now(),
+					Type:      data.Name,
+					Body:      data.Data,
+				},
+			)
+		}
+	}()
+
+	return &RabbitMqTransporter{
+		pullChannel: pullChannel,
+		pushChannel: pushChannel,
 	}, nil
 }
 
-// PushDispatchEvent dispatches a general event to all the bot workers.
-func (transporter RabbitMqTransporter) PushDispatchEvent(t string, data []byte) error {
-	return transporter.sendChannel.Publish(
-		"nova_gateway_dispatch",
-		t,
-		false,
-		false,
-		amqp.Publishing{
-			Priority:  1,
-			Timestamp: time.Now(),
-			Type:      t,
-			Body:      data,
-		},
-	)
+func (t RabbitMqTransporter) PushChannel() chan gateway.PushData {
+	return t.pushChannel
 }
-
-// PushEventCache dispatches a cache specific events to all the cache workers.
-func (transporter RabbitMqTransporter) PushEventCache(t string, data []byte) error {
-	return nil
+func (t RabbitMqTransporter) PullChannel() chan []byte {
+	return t.pullChannel
 }

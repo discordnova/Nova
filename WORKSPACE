@@ -61,6 +61,10 @@ go_register_toolchains(version = "1.16.5")
 go_rules_dependencies()
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+load("//:deps.bzl", "go_dependencies")
+
+# gazelle:repository_macro deps.bzl%go_dependencies
+go_dependencies()
 
 gazelle_dependencies()
 
@@ -71,11 +75,6 @@ go_repository(
     sum = "h1:2dTRdpdFEEhJYQD8EMLB61nnrzSCTbG38PhqdhvOltg=",
     version = "v1.26.0",
 )
-
-load("//:deps.bzl", "go_dependencies")
-
-# gazelle:repository_macro deps.bzl%go_dependencies
-go_dependencies()
 
 load("@cargo_raze//:repositories.bzl", "cargo_raze_repositories")
 

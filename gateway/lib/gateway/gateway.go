@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/boz/go-throttle"
+	gatewayTypes "github.com/discordnova/nova/common/discord/types/payloads/gateway"
 	"github.com/discordnova/nova/common/discord/types/payloads/gateway/commands"
 	"github.com/discordnova/nova/common/discord/types/payloads/gateway/events"
 	"github.com/discordnova/nova/common/discord/types/structures"
 	"github.com/discordnova/nova/common/discord/types/types"
-	gatewayTypes "github.com/discordnova/nova/common/discord/types/payloads/gateway"
 	"github.com/discordnova/nova/common/gateway"
 	"github.com/gorilla/websocket"
 	"github.com/prometheus/client_golang/prometheus"
@@ -363,7 +363,10 @@ func (discord *GatewayConnector) dispatch(message *gatewayTypes.Payload) {
 		log.Err(err).Msg("failed to serialize the outgoing nova message")
 	}
 
-	err = discord.options.Transporter.PushDispatchEvent(newName, data)
+	discord.options.Transporter.PushChannel() <- gateway.PushData{
+		Data: data,
+		Name: newName,
+	}
 
 	if err != nil {
 		log.Err(err).Msg("failed to send the event to the nova event broker")

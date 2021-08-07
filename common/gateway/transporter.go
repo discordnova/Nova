@@ -1,7 +1,12 @@
 package gateway
 
-// Transporter is the base interface to push events to
+type PushData struct {
+	Data []byte
+	Name string
+}
+
+// Transporter is the base interface for the transportation layer of Nova
 type Transporter interface {
-	PushDispatchEvent(name string, data []byte) error
-	PushEventCache(name string, data []byte) error
+	PushChannel() chan PushData
+	PullChannel() chan []byte
 }

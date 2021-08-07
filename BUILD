@@ -11,5 +11,7 @@ pkg_tar(
         "//gateway:gateway_pkg",
         "//novactl:novactl_pkg",
         "//ratelimiter:ratelimiter_pkg",
+        "//novalet:novalet_pkg",
+        "//webhook:webhook_pkg"
     ],
 )

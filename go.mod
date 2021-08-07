@@ -1,11 +1,13 @@
-module github.com/discordnova/nova/gateway
+module github.com/discordnova/nova
 
-go 1.15
+go 1.16
 
 require (
 	github.com/boz/go-throttle v0.0.0-20160922054636-fdc4eab740c1
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/prometheus/client_golang v1.9.0
 	github.com/rs/zerolog v1.23.0
 	github.com/streadway/amqp v1.0.0
+	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
 )
