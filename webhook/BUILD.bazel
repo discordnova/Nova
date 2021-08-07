@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "webhook_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/discordnova/nova/webhook",
+    visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "webhook",
+    embed = [":webhook_lib"],
+    visibility = ["//visibility:public"],
+)
+
+pkg_tar(
+    name = "webhook_pkg",
+    srcs = [":webhook"],
+    mode = "0755",
+    visibility = ["//visibility:public"],
+)

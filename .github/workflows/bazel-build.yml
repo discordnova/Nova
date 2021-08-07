@@ -42,9 +42,10 @@ jobs:
       - name: Execute build script
         run: |
            sudo apt-get install build-essential -y
-           bazel build //...
+           bazel build //:package
+
       - name: Bazel artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: bazel-artifacts
-          path: bazel-bin/
+          name: Executables
+          path: bazel-bin/package.tar.Gz

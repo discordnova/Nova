@@ -1,9 +1,9 @@
 package main
 
 import (
-	_ "github.com/spf13/cobra"
+	"fmt"
 )
 
 func main() {
-
+	fmt.Println("Welcome to nova! The cli is being developed.")
 }

@@ -1,0 +1,13 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "compression",
+    srcs = ["json-zlib.go"],
+    importpath = "github.com/discordnova/nova/gateway/lib/gateway/compression",
+    visibility = ["//gateway:__subpackages__"],
+    deps = [
+        "//common/discord/types/payloads/gateway",
+        "//common/gateway",
+        "@com_github_rs_zerolog//log",
+    ],
+)

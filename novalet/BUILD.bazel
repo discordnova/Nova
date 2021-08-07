@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "novalet_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/discordnova/nova/novalet",
+    visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "novalet",
+    embed = [":novalet_lib"],
+    visibility = ["//visibility:public"],
+)
+
+pkg_tar(
+    name = "novalet_pkg",
+    srcs = [":novalet"],
+    mode = "0755",
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,13 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "gateway",
+    srcs = [
+        "compressor.go",
+        "event-names.go",
+        "transporter.go",
+    ],
+    importpath = "github.com/discordnova/nova/common/gateway",
+    visibility = ["//visibility:public"],
+    deps = ["//common/discord/types/payloads/gateway"],
+)

@@ -1,5 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+# Used to compile go files
 http_archive(
     name = "io_bazel_rules_go",
     sha256 = "8e968b5fcea1d2d64071872b12737bbb5514524ee5f0a4f54f5920266c261acb",
@@ -9,6 +10,7 @@ http_archive(
     ],
 )
 
+# Used to generate the go dependencies & build files
 http_archive(
     name = "bazel_gazelle",
     sha256 = "62ca106be173579c0a167deb23358fdfe71ffa1e4cfdddf5582af26520f1c66f",
@@ -18,6 +20,7 @@ http_archive(
     ],
 )
 
+# Used to compile Rust code
 http_archive(
     name = "rules_rust",
     sha256 = "accb5a89cbe63d55dcdae85938e56ff3aa56f21eb847ed826a28a83db8500ae6",
@@ -28,6 +31,7 @@ http_archive(
     ],
 )
 
+# Used to generate rust BUILD files
 http_archive(
     name = "cargo_raze",
     sha256 = "c664e258ea79e7e4ec2f2b57bca8b1c37f11c8d5748e02b8224810da969eb681",
@@ -35,6 +39,7 @@ http_archive(
     url = "https://github.com/google/cargo-raze/archive/v0.11.0.tar.gz",
 )
 
+# Used to generate the protobuf files for go
 http_archive(
     name = "com_google_protobuf",
     sha256 = "d0f5f605d0d656007ce6c8b5a82df3037e1d8fe8b121ed42e536f569dec16113",
@@ -63,8 +68,8 @@ go_repository(
     name = "org_golang_google_grpc",
     build_file_proto_mode = "disable",
     importpath = "google.golang.org/grpc",
-    sum = "h1:/9BgsAsa5nWe26HqOlvlgJnqBuktYOLCgjCPqsa56W0=",
-    version = "v1.38.0",
+    sum = "h1:2dTRdpdFEEhJYQD8EMLB61nnrzSCTbG38PhqdhvOltg=",
+    version = "v1.26.0",
 )
 
 load("//:deps.bzl", "go_dependencies")
@@ -84,6 +89,7 @@ load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
 rust_repositories()
 
-load("//rest-ratelimiter/cargo:crates.bzl", "raze_fetch_remote_crates")
+# load for the project
+load("//ratelimiter/cargo:crates.bzl", "raze_fetch_remote_crates")
 
 raze_fetch_remote_crates()

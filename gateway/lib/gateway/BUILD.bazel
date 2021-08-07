@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "gateway",
+    srcs = [
+        "gateway.go",
+        "options.go",
+    ],
+    importpath = "github.com/discordnova/nova/gateway/lib/gateway",
+    visibility = ["//gateway:__subpackages__"],
+    deps = [
+        "//common/discord/types/payloads/gateway",
+        "//common/discord/types/payloads/gateway/commands",
+        "//common/discord/types/payloads/gateway/events",
+        "//common/discord/types/structures",
+        "//common/discord/types/types",
+        "//common/gateway",
+        "@com_github_boz_go_throttle//:go-throttle",
+        "@com_github_gorilla_websocket//:websocket",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_prometheus_client_golang//prometheus/promauto",
+        "@com_github_rs_zerolog//log",
+    ],
+)

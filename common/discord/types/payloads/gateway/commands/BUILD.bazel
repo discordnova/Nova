@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "commands",
+    srcs = [
+        "heartbeat.go",
+        "identify.go",
+        "request-guild-members.go",
+        "resume.go",
+        "update-status.go",
+        "update-voice-state.go",
+    ],
+    importpath = "github.com/discordnova/nova/common/discord/types/payloads/gateway/commands",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//common/discord/types/structures",
+        "//common/discord/types/types",
+    ],
+)
