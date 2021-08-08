@@ -1,3 +1,4 @@
+mod bucket;
 mod redis_client;
 
 use std::net::SocketAddr;
@@ -25,7 +26,7 @@ impl ratelimit_service_server::RatelimitService for RatelimiterService {
             limit: 0,
             remaining: 0,
             request: Some(RatelimitRequest {
-                indentifiables: Vec::<String>::new(),
+                identifiers: Vec::<String>::new(),
                 route_name: String::from("todo"),
             }),
             reset: 0,
