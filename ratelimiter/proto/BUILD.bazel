@@ -4,7 +4,7 @@ load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
 
 proto_library(
     name = "nova_ratelimit_v1_proto",
-    srcs = ["nova.ratelimit.v1.proto"],
+    srcs = ["nova_ratelimit_v1.proto"],
     visibility = ["//visibility:public"],
 )
 
