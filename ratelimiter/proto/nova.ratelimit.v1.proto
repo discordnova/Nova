@@ -18,10 +18,10 @@ message RatelimitResponse {
 }
 
 // Requests the ratelimit status of a route request, it also takes the 
-// indentifiables of the request in question.
+// identifiers of the request in question.
 message RatelimitRequest {
     string          routeName       = 1;
-    repeated string indentifiables  = 2;
+    repeated string identifiers  = 2;
 }
 
 // Used when "updateAsked" is sed to true
