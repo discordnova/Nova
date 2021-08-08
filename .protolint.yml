@@ -1,0 +1,10 @@
+# https://github.com/yoheimuta/protolint
+# Protolint is a great tool to enforce the respect of gRPC-recommended style guide for protobuf declaration
+
+# Lint directives.
+lint:
+  # Linter rules.
+  # Run `protolint list` to see all available rules.
+  rules:
+    # Set the default to all linters.
+    all_default: false
