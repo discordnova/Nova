@@ -52,7 +52,7 @@ message RatelimitRequest {
 
 It then uses the calculated hash to check if a bucket with the hash already exists in our Redis store.
 
-If not, the service locks the bucket and disallows the creation of new bucket for a period of time. It also responds a `Status.STATUS_OK` and we set `update_asked` to `true` to ask for bucket information and being able to create one separately .
+If not, the service locks the bucket and disallows the creation of new bucket for a period of time. It also responds a `Status.STATUS_OK` and we set `update_asked` to `true` to ask for bucket information to be able to create one separately .
 
 Otherwise we need to check if there is enough remaining allowed requests *(`remaining` > 1)* for the bucket. If not, the ratelimiter simply responds with `Status.STATUS_RATELIMITED`.
 
