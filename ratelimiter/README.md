@@ -10,12 +10,12 @@
 ## Explanation
 
 Ratelimiter is a Rust implementation of a rate limiting service described by [`proto/nova_ratelimit_v1.proto`](proto/nova_ratelimit_v1.proto).
-It manages rate limits of the different services, by exposing a gRPC Server.
+It manages the rate limits of Nova, by exposing a gRPC Server.
 
-The service is divided into two parts:
+The service is composed of two parts:
 
 - a [binary](#binary) which implements the algorithm logic,
-- a [library](#library) which is built as a static library.
+- a [library](#library) which is a static library.
 
 ---
 
@@ -23,12 +23,12 @@ The service is divided into two parts:
 
 The Ratelimiter service binary is a simple Rust program which expose a gRPC Service defined by [`proto/nova_ratelimit_v1.proto`](proto/nova_ratelimit_v1.proto) on `[::0]:50051` (quick representation for `IPv4/0.0.0.0` or `IPv6/::`, on port `50051`) using [tonic](https://github.com/hyperium/tonic).
 
-The binary also communicates with a Redis Node to store buckets used in [the algorithm](#algorithm).
-It supports both `redis` and `rediss` protocol and we are working on a Redis Cluster support.
+The binary also communicates with a Redis Node to store buckets by [the algorithm](#algorithm).
+It supports both `redis` and `rediss` protocol and, we are working on a Redis Cluster support.
 
 ## Library
 
-> TODO: make a good documentation while making the lib
+> TODO: make good documentation while making the lib
 Static lib + [FFI interface](https://en.wikipedia.org/wiki/Foreign_function_interface) for nova-lite
 
 ---
@@ -37,7 +37,7 @@ Static lib + [FFI interface](https://en.wikipedia.org/wiki/Foreign_function_inte
 
 The algorithm used by the service is pretty simple.
 
-When the application receive a gRPC `nova.ratelimit.v1.RatelimitService/GetRatelimitStatus` call, the service compute a `SHA256` hash using the content of the call request *(see code below)*.
+On the reception of a `nova.rate limit.v1.RatelimitService/GetRatelimitStatus` call, the service computes a `SHA256` hash using the content of the call request *(see code below)*.
 
 > From [`proto/nova_ratelimit_v1.proto`](proto/nova_ratelimit_v1.proto)
 
@@ -50,15 +50,15 @@ message RatelimitRequest {
 }
 ```
 
-It then uses the calculated hash to check if a bucket with the hash already exists in our Redis store.
+It then uses the calculated hash to check if a bucket already exists in our Redis store with this hash.
 
-If not, the service locks the bucket and disallows the creation of new bucket for a period of time. It also responds a `Status.STATUS_OK` and we set `update_asked` to `true` to ask for bucket information to be able to create one separately .
+If not, the service locks the bucket and disallows new buckets creation for some time. It also responds with a `Status.STATUS_OK`, and we set `update_asked` to `true` to ask for bucket information to create one separately.
 
-Otherwise we need to check if there is enough remaining allowed requests *(`remaining` > 1)* for the bucket. If not, the ratelimiter simply responds with `Status.STATUS_RATELIMITED`.
+Otherwise, we need to check if enough are remaining allowed requests *(`remaining` > 1)* for the bucket. If not, the Ratelimiter responds with `Status.STATUS_RATELIMITED`.
 
-If there is enough we decrement `remaining` by 1 and check if there is enough remaining allowed request *(`remaining` > 1)* for the global rate limit. If not, the request ends with a `Status.STATUS_GLOBAL_RATELIMITED` status.
+If there is enough, we decrement `remaining` by one and check if enough is remaining allowed request *(`remaining` > 1)* for the global rate limit. If not, the request ends with a `Status.STATUS_GLOBAL_RATELIMITED` status.
 
-If the client isn't rate limited, we decrement again `remaining` by 1 and respond with `Status.STATUS_OK` and `update_asked` to `false`.
+If the client isn't rate-limited, we decrement again `remaining` by one and respond with `Status.STATUS_OK` and `update_asked` to `false`.
 
 ---
 
