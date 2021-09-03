@@ -23,15 +23,13 @@ cargo_build_script(
 rust_binary(
     name = "ratelimiter",
     srcs = ["src/main.rs"],
-    rustc_env = {
-        "OUT_DIR": "$(location :build_script)"
-    },
+    rustc_env = {    },
     deps = crates_from("Cargo.toml") + [":build_script"]
 )
 
 pkg_tar(
     name = "ratelimiter_pkg",
-    srcs = [":webhook"],
+    srcs = [":ratelimiter"],
     mode = "0755",
     visibility = ["//visibility:public"],
 )
