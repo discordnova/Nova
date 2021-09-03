@@ -36,7 +36,7 @@ http_archive(
     name = "cargo_raze",
     sha256 = "c664e258ea79e7e4ec2f2b57bca8b1c37f11c8d5748e02b8224810da969eb681",
     strip_prefix = "cargo-raze-0.11.0",
-    url = "https://github.com/google/cargo-raze/archive/v0.11.0.tar.gz",
+    url = "https://github.com/google/cargo-raze/archive/v0.12.0.tar.gz",
 )
 
 # Used to generate the protobuf files for go
@@ -88,10 +88,12 @@ load("@cargo_raze//:transitive_deps.bzl", "cargo_raze_transitive_deps")
 cargo_raze_transitive_deps()
 
 load("@rules_rust//rust:repositories.bzl", "rust_repositories")
-
-rust_repositories()
+rust_repositories(version = "nightly", iso_date = "2021-06-16", edition="2018")
 
 # load for the ratelimiter project crates
 load("//ratelimiter/cargo:crates.bzl", "raze_fetch_remote_crates")
+raze_fetch_remote_crates()
 
+# load for the webhook project crates
+load("//webhook/cargo:crates.bzl", "raze_fetch_remote_crates")
 raze_fetch_remote_crates()
