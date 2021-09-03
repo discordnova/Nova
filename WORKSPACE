@@ -34,7 +34,7 @@ http_archive(
 # Used to generate rust BUILD files
 http_archive(
     name = "cargo_raze",
-    sha256 = "c664e258ea79e7e4ec2f2b57bca8b1c37f11c8d5748e02b8224810da969eb681",
+    sha256 = "0a7986b1a8ec965ee7aa317ac61e82ea08568cfdf36b7ccc4dd3d1aff3b36e0b",
     strip_prefix = "cargo-raze-0.11.0",
     url = "https://github.com/google/cargo-raze/archive/v0.12.0.tar.gz",
 )
