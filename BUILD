@@ -10,7 +10,6 @@ pkg_tar(
     deps = [
         "//gateway:gateway_pkg",
         "//novactl:novactl_pkg",
-        "//novalet:novalet_pkg",
         "//ratelimiter:ratelimiter_pkg",
         "//webhook:webhook_pkg",
     ],

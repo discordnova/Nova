@@ -89,7 +89,7 @@ crate_universe(
         "libsodium-sys": crate.override(
             extra_build_script_env_vars = {
                 "PATH": "/usr/bin",
-                "NUM_JOBS": "2"
+                "NUM_JOBS": "2",
             }
         )
     }

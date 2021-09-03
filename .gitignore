@@ -2,4 +2,4 @@ bazel-*
 .bazelrc
 .vscode
 ratelimiter/target
-target
+target/
