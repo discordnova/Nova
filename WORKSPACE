@@ -35,7 +35,7 @@ http_archive(
 http_archive(
     name = "cargo_raze",
     sha256 = "0a7986b1a8ec965ee7aa317ac61e82ea08568cfdf36b7ccc4dd3d1aff3b36e0b",
-    strip_prefix = "cargo-raze-0.11.0",
+    strip_prefix = "cargo-raze-0.12.0",
     url = "https://github.com/google/cargo-raze/archive/v0.12.0.tar.gz",
 )
 
