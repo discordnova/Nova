@@ -15,7 +15,6 @@ cargo_build_script(
         "@com_google_protobuf//:protoc",
         "@com_google_protobuf//:protobuf_headers"
     ],
-    outs = glob(["**"]),
     build_script_env = {
         "PROTOC": "$(location @com_google_protobuf//:protoc)",
     }
