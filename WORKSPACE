@@ -23,20 +23,12 @@ http_archive(
 # Used to compile Rust code
 http_archive(
     name = "rules_rust",
-    sha256 = "accb5a89cbe63d55dcdae85938e56ff3aa56f21eb847ed826a28a83db8500ae6",
-    strip_prefix = "rules_rust-9aa49569b2b0dacecc51c05cee52708b7255bd98",
+    sha256 = "531bdd470728b61ce41cf7604dc4f9a115983e455d46ac1d0c1632f613ab9fc3",
+    strip_prefix = "rules_rust-d8238877c0e552639d3e057aadd6bfcf37592408",
     urls = [
-        # Main branch as of 2021-02-19
-        "https://github.com/bazelbuild/rules_rust/archive/9aa49569b2b0dacecc51c05cee52708b7255bd98.tar.gz",
+        # `main` branch as of 2021-08-23
+        "https://github.com/bazelbuild/rules_rust/archive/d8238877c0e552639d3e057aadd6bfcf37592408.tar.gz",
     ],
-)
-
-# Used to generate rust BUILD files
-http_archive(
-    name = "cargo_raze",
-    sha256 = "0a7986b1a8ec965ee7aa317ac61e82ea08568cfdf36b7ccc4dd3d1aff3b36e0b",
-    strip_prefix = "cargo-raze-0.12.0",
-    url = "https://github.com/google/cargo-raze/archive/v0.12.0.tar.gz",
 )
 
 # Used to generate the protobuf files for go
@@ -52,13 +44,10 @@ http_archive(
 
 # golang configuration
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
 protobuf_deps()
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-
 go_register_toolchains(version = "1.16.5")
-
 go_rules_dependencies()
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
@@ -66,7 +55,6 @@ load("//:deps.bzl", "go_dependencies")
 
 # gazelle:repository_macro deps.bzl%go_dependencies
 go_dependencies()
-
 gazelle_dependencies()
 
 # needed to build the proto packages
@@ -78,22 +66,34 @@ go_repository(
     version = "v1.26.0",
 )
 
-# rust environment
-load("@cargo_raze//:repositories.bzl", "cargo_raze_repositories")
-
-cargo_raze_repositories()
-
-load("@cargo_raze//:transitive_deps.bzl", "cargo_raze_transitive_deps")
-
-cargo_raze_transitive_deps()
 
 load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 rust_repositories(version = "nightly", iso_date = "2021-06-16", edition="2018")
 
-# load for the ratelimiter project crates
-load("//ratelimiter/cargo:crates.bzl", "raze_fetch_remote_crates")
-raze_fetch_remote_crates()
+load("//third_party/rules_rust:crate_universe_defaults.bzl", "DEFAULT_URL_TEMPLATE", "DEFAULT_SHA256_CHECKSUMS")
+load("@rules_rust//crate_universe:defs.bzl", "crate", "crate_universe")
 
-# load for the webhook project crates
-load("//webhook/cargo:crates.bzl", "raze_fetch_remote_crates")
-raze_fetch_remote_crates()
+crate_universe(
+    name = "crates",
+    cargo_toml_files = [
+        "//ratelimiter:Cargo.toml",
+        "//webhook:Cargo.toml",
+    ],
+    resolver_download_url_template = DEFAULT_URL_TEMPLATE,
+    resolver_sha256s = DEFAULT_SHA256_CHECKSUMS,
+
+    overrides = {
+        "tonic-build": crate.override(
+            features_to_remove = ["rustfmt"]
+        ),
+        "libsodium-sys": crate.override(
+            extra_build_script_env_vars = {
+                "PATH": "/usr/bin",
+                "NUM_JOBS": "2"
+            }
+        )
+    }
+)
+
+load("@crates//:defs.bzl", "pinned_rust_install")
+pinned_rust_install()

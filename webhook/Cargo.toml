@@ -8,26 +8,11 @@ hyper = { version = "0.14", features = ["full"] }
 tokio = { version = "1", features = ["full"] }
 log = { version = "0.4", features = ["std"] }
 config = "0.11"
-serde = "1.0.8"
-serde_derive = "^1.0.8"
+serde = { version = "1.0.8", features = ["derive"] }
 libsodium-sys = "0.2.7"
 base64 = "0.13.0"
+pretty_env_logger = "0.4"
 
 [[bin]]
 name = "webhook"
 path = "src/main.rs"
-
-[raze.crates.proc-macro2.'1.0.29']
-additional_flags = [
-    "--cfg=use_proc_macro",
-    "--cfg=wrap_proc_macro",
-]
-
-[package.metadata.raze]
-workspace_path = "//webhook/cargo"
-genmode = "Remote"
-default_gen_buildrs = true
-package_aliases_dir = "cargo"
-
-[raze]
-default_gen_buildrs = true

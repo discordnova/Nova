@@ -12,14 +12,5 @@ tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 name = "rest-ratelimiter"
 path = "src/main.rs"
 
-[dev-dependencies]
-tonic-build = "0.5"
-
 [build-dependencies]
 tonic-build = "0.5"
-
-[package.metadata.raze]
-workspace_path = "//ratelimiter/cargo"
-genmode = "Remote"
-default_gen_buildrs = true
-package_aliases_dir = "cargo"

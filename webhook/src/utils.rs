@@ -6,7 +6,9 @@ use serde::Deserialize;
 
 /// Executes the required configuration steps for the program,
 /// uncluding build information, Sentry and logging.
-pub fn setup_program (name: &str) {}
+pub fn setup_program (_name: &str) {
+    pretty_env_logger::init();
+}
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Server {
