@@ -1,24 +1,12 @@
 use std::env;
 
 use config::{Config, ConfigError, Environment, File};
-use log::{info, trace};
+use log::{info};
 use serde::Deserialize;
 
 /// Executes the required configuration steps for the program,
 /// uncluding build information, Sentry and logging.
-pub fn setup_program (name: &str) {
-    // todo: this may be replaced by a more complete logger
-
-    let build_info_get = build_info();
-
-    trace!("Starting {} version {} v{} built with {} at {}",
-        name,
-        build_info_get.crate_info.name,
-        build_info_get.crate_info.version,
-        build_info_get.compiler,
-        build_info_get.timestamp
-    );
-}
+pub fn setup_program (name: &str) {}
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Server {
