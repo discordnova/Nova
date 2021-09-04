@@ -6,15 +6,16 @@ use hyper::service::Service;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use crate::utils::Settings;
 use log::info;
+
+use super::utils::Settings;
 
 static NOT_FOUND: &str = "
 <h1>Nova Webhook Gateway</h1>
 <p>Invalid request</p>
 ";
 
-fn validate_signature (b64_public_key: &str, data: &Bytes, b64_signature: &str) -> bool {
+pub fn validate_signature (b64_public_key: &str, data: &Bytes, b64_signature: &str) -> bool {
     // First, we need to check if the signature & private key is valid base64.
     let signature_result =  base64::decode(b64_signature);
     let public_key_result = base64::decode(b64_public_key);
@@ -40,29 +41,6 @@ fn validate_signature (b64_public_key: &str, data: &Bytes, b64_signature: &str) 
         }
     }
     false
-}
-
-#[cfg(test)]
-mod tests {
-    use hyper::body::Bytes;
-
-    use super::validate_signature;
-
-    #[test]
-    fn validate_signature_test() {
-        let signature = "VD7DVH1X+d2x7ExcNlA+vyiP/aPaPVEHZMmknCq7V2kO+XTGPRdHcb3SSB3hBmlm9Xq77BKj7Bcbn24jc4NwAg==";
-        let public_key = "7v4MJEc3N8sgNSMuO065HCBvChRoQWjzUD99gxYFjW8=";
-        let content = "message de test incroyable";
-        assert_eq!(validate_signature(public_key, &Bytes::from(content), signature), true);
-    }
-
-    #[test]
-    fn validate_signature_reverse_test() {
-        let signature = "zHtgMcx6iANuKbPFvG3c+vj6W84Mqb/2FWx4UnPXLJkwbEuh2u4EV/m1PEh4wv1zdjmatgTFPI4OephgE+nxAA==";
-        let public_key = "wCnuoYQ3KSyHxirsNOfRvU44/mEm8/fERt5jddxmYEQ=";
-        let content = "ceci est un test qui ne fonctionnera pas!";
-        assert_eq!(validate_signature(public_key, &Bytes::from(content), signature), false);
-    }
 }
 
 fn get_signature<'b>(headers: &'b HeaderMap) -> Option<(&'b str, &'b str)> {
@@ -135,5 +113,45 @@ impl<T> Service<T> for MakeSvc {
 
     fn call(&mut self, _: T) -> Self::Future {
         future::ready(Ok(HandlerService { config: self.settings.clone() }))
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use hyper::body::Bytes;
+    use crate::handle::validate_signature;
+
+    #[test]
+    fn validate_signature_test() {
+        let signature = "VD7DVH1X+d2x7ExcNlA+vyiP/aPaPVEHZMmknCq7V2kO+XTGPRdHcb3SSB3hBmlm9Xq77BKj7Bcbn24jc4NwAg==";
+        let public_key = "7v4MJEc3N8sgNSMuO065HCBvChRoQWjzUD99gxYFjW8=";
+        let content = "message de test incroyable";
+        assert_eq!(
+            validate_signature(public_key, &Bytes::from(content), signature),
+            true
+        );
+    }
+
+    #[test]
+    fn validate_signature_reverse_test() {
+        let signature = "VD7DVH1X+d2x7ExcNlA+vyiP/aPaPVEHZMmknCq7V2kO+XTGPRdHcb3SSB3hBmlm9Xq77BKj7Bcbn24jc4NwAg==";
+        let public_key = "wCnuoYQ3KSyHxirsNOfRvU44/mEm8/fERt5jddxmYEQ=";
+        let content = "ceci est un test qui ne fonctionnera pas!";
+        assert_eq!(
+            validate_signature(public_key, &Bytes::from(content), signature),
+            false
+        );
+    }
+
+    #[test]
+    fn invalid_base64() {
+        let signature = "zzz";
+        let public_key = "zzz";
+        let content = "ceci est un test qui ne fonctionnera pas!";
+        assert_eq!(
+            validate_signature(public_key, &Bytes::from(content), signature),
+            false
+        );
     }
 }

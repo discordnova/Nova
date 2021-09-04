@@ -1,7 +1,7 @@
 use std::env;
 
 use config::{Config, ConfigError, Environment, File};
-use log::{info};
+use log::info;
 use serde::Deserialize;
 
 /// Executes the required configuration steps for the program,

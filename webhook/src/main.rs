@@ -1,18 +1,19 @@
 use std::net::ToSocketAddrs;
+
 use hyper::Server;
 use log::info;
 
-use crate::handle::MakeSvc;
 extern crate log;
+pub mod handle;
+pub mod utils;
 
-mod handle;
-mod utils;
-
+use utils::{setup_program, Settings};
+use handle::MakeSvc;
 
 #[tokio::main]
 async fn main() {
-    utils::setup_program("webhook");
-    let config = utils::Settings::new().unwrap();
+    setup_program("webhook");
+    let config = Settings::new().unwrap();
     
     let addr = format!("{}:{}", config.server.address, config.server.port)
         .to_socket_addrs()

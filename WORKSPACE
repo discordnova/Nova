@@ -1,6 +1,5 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-# Used to compile go files
 http_archive(
     name = "io_bazel_rules_go",
     sha256 = "8e968b5fcea1d2d64071872b12737bbb5514524ee5f0a4f54f5920266c261acb",
@@ -44,10 +43,13 @@ http_archive(
 
 # golang configuration
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
 protobuf_deps()
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+
 go_register_toolchains(version = "1.16.5")
+
 go_rules_dependencies()
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
@@ -55,22 +57,26 @@ load("//:deps.bzl", "go_dependencies")
 
 # gazelle:repository_macro deps.bzl%go_dependencies
 go_dependencies()
+
 gazelle_dependencies()
 
-# needed to build the proto packages
 go_repository(
     name = "org_golang_google_grpc",
     build_file_proto_mode = "disable",
     importpath = "google.golang.org/grpc",
-    sum = "h1:2dTRdpdFEEhJYQD8EMLB61nnrzSCTbG38PhqdhvOltg=",
-    version = "v1.26.0",
+    sum = "h1:AGJ0Ih4mHjSeibYkFGh1dD9KJ/eOtZ93I6hoHhukQ5Q=",
+    version = "v1.40.0",
 )
 
-
 load("@rules_rust//rust:repositories.bzl", "rust_repositories")
-rust_repositories(version = "nightly", iso_date = "2021-06-16", edition="2018")
 
-load("//third_party/rules_rust:crate_universe_defaults.bzl", "DEFAULT_URL_TEMPLATE", "DEFAULT_SHA256_CHECKSUMS")
+rust_repositories(
+    edition = "2018",
+    iso_date = "2021-06-16",
+    version = "nightly",
+)
+
+load("//third_party/rules_rust:crate_universe_defaults.bzl", "DEFAULT_SHA256_CHECKSUMS", "DEFAULT_URL_TEMPLATE")
 load("@rules_rust//crate_universe:defs.bzl", "crate", "crate_universe")
 
 crate_universe(
@@ -79,21 +85,21 @@ crate_universe(
         "//ratelimiter:Cargo.toml",
         "//webhook:Cargo.toml",
     ],
-    resolver_download_url_template = DEFAULT_URL_TEMPLATE,
-    resolver_sha256s = DEFAULT_SHA256_CHECKSUMS,
-
     overrides = {
         "tonic-build": crate.override(
-            features_to_remove = ["rustfmt"]
+            features_to_remove = ["rustfmt"],
         ),
         "libsodium-sys": crate.override(
             extra_build_script_env_vars = {
                 "PATH": "/usr/sbin:/usr/bin:/sbin:/bin",
                 "NUM_JOBS": "2",
-            }
-        )
-    }
+            },
+        ),
+    },
+    resolver_download_url_template = DEFAULT_URL_TEMPLATE,
+    resolver_sha256s = DEFAULT_SHA256_CHECKSUMS,
 )
 
 load("@crates//:defs.bzl", "pinned_rust_install")
+
 pinned_rust_install()

@@ -13,4 +13,6 @@ require (
 	github.com/spf13/cobra v0.0.3
 	github.com/streadway/amqp v1.0.0
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
+	google.golang.org/grpc v1.40.0
+	google.golang.org/protobuf v1.27.1
 )

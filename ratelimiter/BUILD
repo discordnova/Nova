@@ -8,23 +8,23 @@ exports_files(["Cargo.toml"])
 cargo_build_script(
     name = "build_script",
     srcs = ["build.rs"],
-    deps = build_crates_from("Cargo.toml"),
+    build_script_env = {
+        "PROTOC": "$(location @com_google_protobuf//:protoc)",
+    },
     data = [
         "//ratelimiter/proto:nova.ratelimit.v1.proto",
     ] + [
         "@com_google_protobuf//:protoc",
-        "@com_google_protobuf//:protobuf_headers"
+        "@com_google_protobuf//:protobuf_headers",
     ],
-    build_script_env = {
-        "PROTOC": "$(location @com_google_protobuf//:protoc)",
-    }
+    deps = build_crates_from("Cargo.toml"),
 )
 
 rust_binary(
     name = "ratelimiter",
     srcs = ["src/main.rs"],
-    rustc_env = {    },
-    deps = crates_from("Cargo.toml") + [":build_script"]
+    rustc_env = {},
+    deps = crates_from("Cargo.toml") + [":build_script"],
 )
 
 pkg_tar(
