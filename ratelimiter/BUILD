@@ -10,6 +10,7 @@ cargo_build_script(
     srcs = ["build.rs"],
     build_script_env = {
         "PROTOC": "$(location @com_google_protobuf//:protoc)",
+        "PROTO": "$(location //ratelimiter/proto:nova.ratelimit.v1.proto)"
     },
     data = [
         "//ratelimiter/proto:nova.ratelimit.v1.proto",

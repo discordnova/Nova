@@ -30,6 +30,7 @@ http_archive(
     ],
 )
 
+
 # Used to generate the protobuf files for go
 http_archive(
     name = "com_google_protobuf",
@@ -91,9 +92,8 @@ crate_universe(
         ),
         "libsodium-sys": crate.override(
             extra_build_script_env_vars = {
-                "PATH": "/usr/sbin:/usr/bin:/sbin:/bin",
-                "NUM_JOBS": "2",
-            },
+                "NUM_JOBS": "2"
+            }
         ),
     },
     resolver_download_url_template = DEFAULT_URL_TEMPLATE,
