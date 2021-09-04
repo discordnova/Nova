@@ -1,12 +1,15 @@
-use std::future;
-use hyper::{HeaderMap, body::{Bytes, to_bytes}};
-use libsodium_sys::crypto_sign_ed25519_verify_detached;
-use hyper::{Body, Method, Request, Response, StatusCode};
 use hyper::service::Service;
+use hyper::{
+    body::{to_bytes, Bytes},
+    HeaderMap,
+};
+use hyper::{Body, Method, Request, Response, StatusCode};
+use libsodium_sys::crypto_sign_ed25519_verify_detached;
+use log::info;
+use std::future;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use log::info;
 
 use super::utils::Settings;
 
@@ -15,9 +18,9 @@ static NOT_FOUND: &str = "
 <p>Invalid request</p>
 ";
 
-pub fn validate_signature (b64_public_key: &str, data: &Bytes, b64_signature: &str) -> bool {
+pub fn validate_signature(b64_public_key: &str, data: &Bytes, b64_signature: &str) -> bool {
     // First, we need to check if the signature & private key is valid base64.
-    let signature_result =  base64::decode(b64_signature);
+    let signature_result = base64::decode(b64_signature);
     let public_key_result = base64::decode(b64_public_key);
 
     if signature_result.is_ok() && public_key_result.is_ok() {
@@ -35,9 +38,10 @@ pub fn validate_signature (b64_public_key: &str, data: &Bytes, b64_signature: &s
             // If the signature is valid, sodium will return 0
             return crypto_sign_ed25519_verify_detached(
                 signature_pointer.as_ptr(),
-                data_pointer, data_len,
-                private_key_pointer.as_ptr()
-            ) == 0
+                data_pointer,
+                data_len,
+                private_key_pointer.as_ptr(),
+            ) == 0;
         }
     }
     false
@@ -50,7 +54,7 @@ fn get_signature<'b>(headers: &'b HeaderMap) -> Option<(&'b str, &'b str)> {
     if signature.is_some() && timestamp.is_some() {
         return Some((
             signature.unwrap().to_str().unwrap(),
-            timestamp.unwrap().to_str().unwrap()
+            timestamp.unwrap().to_str().unwrap(),
         ));
     }
     None
@@ -72,7 +76,7 @@ impl Service<Request<Body>> for HandlerService {
     fn call(&mut self, req: Request<Body>) -> Self::Future {
         if req.method() == Method::POST {
             let public_key = self.config.discord.public_key.clone();
-            return Box::pin (async move {
+            return Box::pin(async move {
                 let headers = req.headers().clone();
                 let sig_headers = get_signature(&headers);
                 if sig_headers.is_some() {
@@ -80,26 +84,25 @@ impl Service<Request<Body>> for HandlerService {
                     let data = to_bytes(req.into_body()).await.unwrap();
                     info!("data: {}", public_key);
                     if validate_signature(public_key.as_str(), &data, signature) {
-                        return Ok(Response::new("signature verified!".into()))
+                        return Ok(Response::new("signature verified!".into()));
                     }
-                    return Ok(Response::new("signature verification failed.".into()))
+                    return Ok(Response::new("signature verification failed.".into()));
                 }
-                return Ok(Response::new("no signature specified.".into()))
-            })
+                return Ok(Response::new("no signature specified.".into()));
+            });
         } else {
             return Box::pin(async {
                 let mut response = Response::new(NOT_FOUND.into());
                 let status = response.status_mut();
                 *status = StatusCode::BAD_REQUEST;
                 Ok(response)
-            })
+            });
         }
     }
 }
 
-
 pub struct MakeSvc {
-    pub settings: Settings
+    pub settings: Settings,
 }
 
 impl<T> Service<T> for MakeSvc {
@@ -112,25 +115,27 @@ impl<T> Service<T> for MakeSvc {
     }
 
     fn call(&mut self, _: T) -> Self::Future {
-        future::ready(Ok(HandlerService { config: self.settings.clone() }))
+        future::ready(Ok(HandlerService {
+            config: self.settings.clone(),
+        }))
     }
 }
 
-
 #[cfg(test)]
 mod test {
-    use hyper::body::Bytes;
     use crate::handle::validate_signature;
+    use hyper::body::Bytes;
 
     #[test]
     fn validate_signature_test() {
         let signature = "VD7DVH1X+d2x7ExcNlA+vyiP/aPaPVEHZMmknCq7V2kO+XTGPRdHcb3SSB3hBmlm9Xq77BKj7Bcbn24jc4NwAg==";
         let public_key = "7v4MJEc3N8sgNSMuO065HCBvChRoQWjzUD99gxYFjW8=";
         let content = "message de test incroyable";
-        assert_eq!(
-            validate_signature(public_key, &Bytes::from(content), signature),
-            true
-        );
+        assert!(validate_signature(
+            public_key,
+            &Bytes::from(content),
+            signature
+        ))
     }
 
     #[test]
@@ -138,10 +143,11 @@ mod test {
         let signature = "VD7DVH1X+d2x7ExcNlA+vyiP/aPaPVEHZMmknCq7V2kO+XTGPRdHcb3SSB3hBmlm9Xq77BKj7Bcbn24jc4NwAg==";
         let public_key = "wCnuoYQ3KSyHxirsNOfRvU44/mEm8/fERt5jddxmYEQ=";
         let content = "ceci est un test qui ne fonctionnera pas!";
-        assert_eq!(
-            validate_signature(public_key, &Bytes::from(content), signature),
-            false
-        );
+        assert!(!validate_signature(
+            public_key,
+            &Bytes::from(content),
+            signature
+        ))
     }
 
     #[test]
@@ -149,9 +155,10 @@ mod test {
         let signature = "zzz";
         let public_key = "zzz";
         let content = "ceci est un test qui ne fonctionnera pas!";
-        assert_eq!(
-            validate_signature(public_key, &Bytes::from(content), signature),
-            false
-        );
+        assert!(!validate_signature(
+            public_key,
+            &Bytes::from(content),
+            signature
+        ))
     }
 }
