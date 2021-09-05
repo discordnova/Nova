@@ -1,7 +1,6 @@
 load("@rules_rust//rust:rust.bzl", "rust_binary")
 load("@rules_rust//cargo:cargo_build_script.bzl", "cargo_build_script")
 load("@crates//:defs.bzl", "build_crates_from", "crates_from")
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 exports_files(["Cargo.toml"])
 
@@ -26,11 +25,5 @@ rust_binary(
     srcs = ["src/main.rs"],
     rustc_env = {},
     deps = crates_from("Cargo.toml") + [":build_script"],
-)
-
-pkg_tar(
-    name = "ratelimiter_pkg",
-    srcs = [":ratelimiter"],
-    mode = "0755",
     visibility = ["//visibility:public"],
 )

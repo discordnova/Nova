@@ -1,16 +1,38 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+load("@rules_pkg//:pkg.bzl", "pkg_zip", "pkg_tar")
 
 # gazelle:prefix github.com/discordnova/nova
 gazelle(name = "gazelle")
 
+filegroup(
+    name = "package_bin",
+    srcs = [
+        "//novactl",
+    ] + select({
+        "@bazel_tools//src/conditions:windows": [],
+        "//conditions:default": ["//webhook", "//gateway", "//ratelimiter"],
+    }),
+)
+
 pkg_tar(
-    name = "package",
+    name = "package_tar",
     extension = "tar.gz",
-    deps = [
-        "//gateway:gateway_pkg",
-        "//novactl:novactl_pkg",
-        "//ratelimiter:ratelimiter_pkg",
-        "//webhook:webhook_pkg",
+    srcs = [
+        ":package_bin"
+    ],
+)
+
+pkg_zip(
+    name = "package_zip",
+    srcs = [
+        ":package_bin"
+    ],
+)
+
+filegroup(
+    name = "package",
+    srcs = [
+        ":package_zip",
+        ":package_tar",
     ],
 )
