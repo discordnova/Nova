@@ -46,4 +46,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: all-${{ matrix.os }}
-          path: bazel-bin/package*
+          path: bazel-bin*/package*
