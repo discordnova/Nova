@@ -25,31 +25,18 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # MIT from expression "MIT"
+    "notice",  # MIT from expression "MIT OR Apache-2.0"
 ])
 
 # Generated Targets
 
-# Unsupported target "autobahn-client" with type "example" omitted
-
-# Unsupported target "autobahn-server" with type "example" omitted
-
-# Unsupported target "client" with type "example" omitted
-
-# Unsupported target "echo-server" with type "example" omitted
-
-# Unsupported target "interval-server" with type "example" omitted
-
-# Unsupported target "server" with type "example" omitted
+# Unsupported target "benches" with type "bench" omitted
 
 rust_library(
-    name = "tokio_tungstenite",
+    name = "bumpalo",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "connect",
         "default",
-        "rustls",
-        "stream",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -62,18 +49,32 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.15.0",
+    version = "3.7.0",
     # buildifier: leave-alone
     deps = [
-        "@raze__futures_util__0_3_17//:futures_util",
-        "@raze__log__0_4_14//:log",
-        "@raze__pin_project__1_0_8//:pin_project",
-        "@raze__rustls__0_19_1//:rustls",
-        "@raze__tokio__1_11_0//:tokio",
-        "@raze__tungstenite__0_14_0//:tungstenite",
     ],
 )
 
-# Unsupported target "communication" with type "test" omitted
+# Unsupported target "alloc_fill" with type "test" omitted
 
-# Unsupported target "handshakes" with type "test" omitted
+# Unsupported target "alloc_try_with" with type "test" omitted
+
+# Unsupported target "alloc_with" with type "test" omitted
+
+# Unsupported target "allocator_api" with type "test" omitted
+
+# Unsupported target "quickchecks" with type "test" omitted
+
+# Unsupported target "readme_up_to_date" with type "test" omitted
+
+# Unsupported target "string" with type "test" omitted
+
+# Unsupported target "tests" with type "test" omitted
+
+# Unsupported target "try_alloc" with type "test" omitted
+
+# Unsupported target "try_alloc_try_with" with type "test" omitted
+
+# Unsupported target "try_alloc_with" with type "test" omitted
+
+# Unsupported target "vec" with type "test" omitted

@@ -25,31 +25,32 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # MIT from expression "MIT"
+    "notice",  # Apache-2.0 from expression "Apache-2.0 OR (ISC OR MIT)"
 ])
 
 # Generated Targets
 
-# Unsupported target "autobahn-client" with type "example" omitted
+# Unsupported target "benchmarks" with type "bench" omitted
 
-# Unsupported target "autobahn-server" with type "example" omitted
+# Unsupported target "bench" with type "example" omitted
 
-# Unsupported target "client" with type "example" omitted
+# Unsupported target "bogo_shim" with type "example" omitted
 
-# Unsupported target "echo-server" with type "example" omitted
+# Unsupported target "limitedclient" with type "example" omitted
 
-# Unsupported target "interval-server" with type "example" omitted
+# Unsupported target "simple_0rtt_client" with type "example" omitted
 
-# Unsupported target "server" with type "example" omitted
+# Unsupported target "simpleclient" with type "example" omitted
+
+# Unsupported target "trytls_shim" with type "example" omitted
 
 rust_library(
-    name = "tokio_tungstenite",
+    name = "rustls",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "connect",
         "default",
-        "rustls",
-        "stream",
+        "log",
+        "logging",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -62,18 +63,17 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.15.0",
+    version = "0.19.1",
     # buildifier: leave-alone
     deps = [
-        "@raze__futures_util__0_3_17//:futures_util",
+        "@raze__base64__0_13_0//:base64",
         "@raze__log__0_4_14//:log",
-        "@raze__pin_project__1_0_8//:pin_project",
-        "@raze__rustls__0_19_1//:rustls",
-        "@raze__tokio__1_11_0//:tokio",
-        "@raze__tungstenite__0_14_0//:tungstenite",
+        "@raze__ring__0_16_20//:ring",
+        "@raze__sct__0_6_1//:sct",
+        "@raze__webpki__0_21_4//:webpki",
     ],
 )
 
-# Unsupported target "communication" with type "test" omitted
+# Unsupported target "api" with type "test" omitted
 
-# Unsupported target "handshakes" with type "test" omitted
+# Unsupported target "benchmarks" with type "test" omitted

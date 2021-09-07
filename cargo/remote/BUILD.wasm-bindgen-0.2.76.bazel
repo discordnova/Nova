@@ -37,47 +37,18 @@ load(
 )
 
 cargo_build_script(
-    name = "winapi_build_script",
+    name = "wasm_bindgen_build_script",
     srcs = glob(["**/*.rs"]),
     build_script_env = {
     },
     crate_features = [
-        "cfg",
-        "consoleapi",
-        "errhandlingapi",
-        "evntrace",
-        "fileapi",
-        "handleapi",
-        "in6addr",
-        "inaddr",
-        "ioapiset",
-        "minwinbase",
-        "minwindef",
-        "mstcpip",
-        "mswsock",
-        "namedpipeapi",
-        "ntdef",
-        "ntsecapi",
-        "ntstatus",
-        "processenv",
+        "default",
+        "spans",
         "std",
-        "synchapi",
-        "threadpoollegacyapiset",
-        "winbase",
-        "wincon",
-        "windef",
-        "winerror",
-        "winioctl",
-        "winnt",
-        "winsock2",
-        "ws2def",
-        "ws2ipdef",
-        "ws2tcpip",
-        "wtypesbase",
     ],
     crate_root = "build.rs",
     data = glob(["**"]),
-    edition = "2015",
+    edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -85,53 +56,37 @@ cargo_build_script(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.9",
+    version = "0.2.76",
     visibility = ["//visibility:private"],
     deps = [
-    ],
+    ] + selects.with_or({
+        # cfg(target_arch = "wasm32")
+        (
+            "@rules_rust//rust/platform:wasm32-unknown-unknown",
+            "@rules_rust//rust/platform:wasm32-wasi",
+        ): [
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 rust_library(
-    name = "winapi",
+    name = "wasm_bindgen",
     srcs = glob(["**/*.rs"]),
+    aliases = {
+    },
     crate_features = [
-        "cfg",
-        "consoleapi",
-        "errhandlingapi",
-        "evntrace",
-        "fileapi",
-        "handleapi",
-        "in6addr",
-        "inaddr",
-        "ioapiset",
-        "minwinbase",
-        "minwindef",
-        "mstcpip",
-        "mswsock",
-        "namedpipeapi",
-        "ntdef",
-        "ntsecapi",
-        "ntstatus",
-        "processenv",
+        "default",
+        "spans",
         "std",
-        "synchapi",
-        "threadpoollegacyapiset",
-        "winbase",
-        "wincon",
-        "windef",
-        "winerror",
-        "winioctl",
-        "winnt",
-        "winsock2",
-        "ws2def",
-        "ws2ipdef",
-        "ws2tcpip",
-        "wtypesbase",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
     data = [],
-    edition = "2015",
+    edition = "2018",
+    proc_macro_deps = [
+        "@raze__wasm_bindgen_macro__0_2_76//:wasm_bindgen_macro",
+    ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -139,9 +94,30 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.9",
+    version = "0.2.76",
     # buildifier: leave-alone
     deps = [
-        ":winapi_build_script",
-    ],
+        ":wasm_bindgen_build_script",
+        "@raze__cfg_if__1_0_0//:cfg_if",
+    ] + selects.with_or({
+        # cfg(target_arch = "wasm32")
+        (
+            "@rules_rust//rust/platform:wasm32-unknown-unknown",
+            "@rules_rust//rust/platform:wasm32-wasi",
+        ): [
+        ],
+        "//conditions:default": [],
+    }),
 )
+
+# Unsupported target "headless" with type "test" omitted
+
+# Unsupported target "must_use" with type "test" omitted
+
+# Unsupported target "non_wasm" with type "test" omitted
+
+# Unsupported target "std-crate-no-std-dep" with type "test" omitted
+
+# Unsupported target "unwrap_throw" with type "test" omitted
+
+# Unsupported target "wasm" with type "test" omitted
