@@ -89,7 +89,7 @@ impl Service<Request<Body>> for HandlerService {
 
                             if t == 1 {
                                 info!("success!");
-                                
+
                                 return Ok(Response::builder().header("Content-Type", "application/json").body(serde_json::to_string(&Ping {
                                     t: 1
                                 }).unwrap().into()).unwrap());
@@ -141,16 +141,16 @@ mod test {
 
     #[test]
     fn validate_signature_test() {
-        let signature = "VD7DVH1X+d2x7ExcNlA+vyiP/aPaPVEHZMmknCq7V2kO+XTGPRdHcb3SSB3hBmlm9Xq77BKj7Bcbn24jc4NwAg==";
-        let public_key = "7v4MJEc3N8sgNSMuO065HCBvChRoQWjzUD99gxYFjW8=";
+        let signature = "543ec3547d57f9ddb1ec4c5c36503ebf288ffda3da3d510764c9a49c2abb57690ef974c63d174771bdd2481de1066966f57abbec12a3ec171b9f6e2373837002";
+        let public_key = "eefe0c24473737cb2035232e3b4eb91c206f0a14684168f3503f7d8316058d6f";
         let content = "message de test incroyable".as_bytes().to_vec();
         assert!(validate_signature(public_key, &content, signature))
     }
 
     #[test]
     fn validate_signature_reverse_test() {
-        let signature = "VD7DVH1X+d2x7ExcNlA+vyiP/aPaPVEHZMmknCq7V2kO+XTGPRdHcb3SSB3hBmlm9Xq77BKj7Bcbn24jc4NwAg==";
-        let public_key = "wCnuoYQ3KSyHxirsNOfRvU44/mEm8/fERt5jddxmYEQ=";
+        let signature = "543ec3547d57f9ddb1ec4c5c36503ebf288ffda3da3d510764c9a49c2abb57690ef974c63d174771bdd2481de1066966f57abbec12a3ec171b9f6e2373837002";
+        let public_key = "c029eea18437292c87c62aec34e7d1bd4e38fe6126f3f7c446de6375dc666044";
         let content = "ceci est un test qui ne fonctionnera pas!"
             .as_bytes()
             .to_vec();
@@ -158,7 +158,7 @@ mod test {
     }
 
     #[test]
-    fn invalid_base64() {
+    fn invalid_hex() {
         let signature = "zzz";
         let public_key = "zzz";
         let content = "ceci est un test qui ne fonctionnera pas!"

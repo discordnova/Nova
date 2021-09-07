@@ -1,5 +1,7 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@rules_pkg//:pkg.bzl", "pkg_zip", "pkg_tar")
+load("@io_bazel_rules_docker//container:container.bzl", "container_bundle")
+load("@io_bazel_rules_docker//contrib:push-all.bzl", "container_push")
 
 # gazelle:prefix github.com/discordnova/nova
 gazelle(name = "gazelle")
@@ -12,6 +14,20 @@ filegroup(
         "@bazel_tools//src/conditions:windows": [],
         "//conditions:default": ["//webhook", "//gateway", "//ratelimiter"],
     }),
+)
+
+container_bundle(
+  name = "bundle",
+
+  images = {
+    "ghcr.io/discordnova/nova/novactl:latest": "//novactl:image",
+  }
+)
+
+container_push(
+  name = "publish",
+  bundle = ":bundle",
+  format = "OCI"
 )
 
 pkg_tar(

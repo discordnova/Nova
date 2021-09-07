@@ -12,8 +12,8 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: di
 # EXPERIMENTAL -- MAY CHANGE AT ANY TIME: A mapping of package names to a set of normal dependencies for the Rust targets of that package.
 _DEPENDENCIES = {
     "webhook": {
-        "base64": "@raze__base64__0_13_0//:base64",
         "config": "@raze__config__0_11_0//:config",
+        "hex": "@raze__hex__0_4_3//:hex",
         "hyper": "@raze__hyper__0_14_12//:hyper",
         "libsodium-sys": "@raze__libsodium_sys__0_2_7//:libsodium_sys",
         "log": "@raze__log__0_4_14//:log",
@@ -576,6 +576,16 @@ def raze_fetch_remote_crates():
         sha256 = "62b467343b94ba476dcb2500d242dadbb39557df889310ac77c5d99100aaac33",
         strip_prefix = "hermit-abi-0.1.19",
         build_file = Label("//cargo/remote:BUILD.hermit-abi-0.1.19.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "raze__hex__0_4_3",
+        url = "https://crates.io/api/v1/crates/hex/0.4.3/download",
+        type = "tar.gz",
+        sha256 = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70",
+        strip_prefix = "hex-0.4.3",
+        build_file = Label("//cargo/remote:BUILD.hex-0.4.3.bazel"),
     )
 
     maybe(

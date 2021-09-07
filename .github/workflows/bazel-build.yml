@@ -36,6 +36,10 @@ jobs:
         with:
           path: "~/.cache/bazel"
           key: bazel-${{ matrix.os }}
+      - name: Execute Bazel tests
+        shell: bash
+        run: |
+          bazel test ...:all
       # Runs a set of commands using the runners shell
       - name: Execute build script
         shell: bash
@@ -46,16 +50,20 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: all-${{ matrix.os }}
-          path: bazel-bin*/package_*
+          path: |
+            bazel-bin*/package_*
+            bazel-bin*/package_zip.zip
+            bazel-bin*/package_tar.tar.gz
 
-      - name: Bazel artifacts zip
-        uses: actions/upload-artifact@v2
+                  - name: Setup docker
+      - uses: docker-practice/actions-setup-docker@master
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
         with:
-          name: all-${{ matrix.os }}
-          path: bazel-bin*/package_zip.zip
-
-      - name: Bazel artifacts tar
-        uses: actions/upload-artifact@v2
-        with:
-          name: all-${{ matrix.os }}
-          path: bazel-bin*/package_tar.tar.gz
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish docker images
+        shell: bash
+        run: |
+           bazel run //:publish
