@@ -5,7 +5,7 @@ edition = "2018"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-tokio-tungstenite = { version = "*", features = ["rustls-tls"] }
+tokio-tungstenite = { version = "*" }
 url = "2.2.2"
 futures-util = "0.3.17"
 log = { version = "0.4", features = ["std"] }

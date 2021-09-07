@@ -1,5 +1,6 @@
 use client::traits::message_handler::MessageHandler;
 extern crate serde_json;
+extern crate serde_repr;
 
 mod client;
 

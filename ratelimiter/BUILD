@@ -1,6 +1,6 @@
 load("@rules_rust//rust:rust.bzl", "rust_binary")
 load("@rules_rust//cargo:cargo_build_script.bzl", "cargo_build_script")
-load("@crates//:defs.bzl", "build_crates_from", "crates_from")
+load("//cargo:crates.bzl", "all_crate_deps", "crate_deps")
 
 exports_files(["Cargo.toml"])
 
@@ -17,13 +17,12 @@ cargo_build_script(
         "@com_google_protobuf//:protoc",
         "@com_google_protobuf//:protobuf_headers",
     ],
-    deps = build_crates_from("Cargo.toml"),
+    deps = all_crate_deps() + crate_deps(["tonic-build"]),
 )
 
 rust_binary(
     name = "ratelimiter",
     srcs = ["src/main.rs"],
-    rustc_env = {},
-    deps = crates_from("Cargo.toml") + [":build_script"],
+    deps = all_crate_deps() + [":build_script"],
     visibility = ["//visibility:public"],
 )

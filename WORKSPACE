@@ -30,7 +30,6 @@ http_archive(
     ],
 )
 
-
 # Used to generate the protobuf files for go
 http_archive(
     name = "com_google_protobuf",
@@ -44,11 +43,11 @@ http_archive(
 
 http_archive(
     name = "rules_pkg",
+    sha256 = "a89e203d3cf264e564fcb96b6e06dd70bc0557356eb48400ce4b5d97c2c3720d",
     urls = [
         "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.5.1/rules_pkg-0.5.1.tar.gz",
         "https://github.com/bazelbuild/rules_pkg/releases/download/0.5.1/rules_pkg-0.5.1.tar.gz",
     ],
-    sha256 = "a89e203d3cf264e564fcb96b6e06dd70bc0557356eb48400ce4b5d97c2c3720d",
 )
 
 # golang configuration
@@ -74,8 +73,8 @@ go_repository(
     name = "org_golang_google_grpc",
     build_file_proto_mode = "disable",
     importpath = "google.golang.org/grpc",
-    sum = "h1:AGJ0Ih4mHjSeibYkFGh1dD9KJ/eOtZ93I6hoHhukQ5Q=",
-    version = "v1.40.0",
+    sum = "h1:2dTRdpdFEEhJYQD8EMLB61nnrzSCTbG38PhqdhvOltg=",
+    version = "v1.26.0",
 )
 
 load("@rules_rust//rust:repositories.bzl", "rust_repositories")
@@ -86,33 +85,9 @@ rust_repositories(
     version = "nightly",
 )
 
-load("//third_party/rules_rust:crate_universe_defaults.bzl", "DEFAULT_SHA256_CHECKSUMS", "DEFAULT_URL_TEMPLATE")
-load("@rules_rust//crate_universe:defs.bzl", "crate", "crate_universe")
-
-crate_universe(
-    name = "crates",
-    cargo_toml_files = [
-        "//ratelimiter:Cargo.toml",
-        "//webhook:Cargo.toml",
-    ],
-    overrides = {
-        "tonic-build": crate.override(
-            features_to_remove = ["rustfmt"],
-        ),
-        "libsodium-sys": crate.override(
-            extra_build_script_env_vars = {
-                "NUM_JOBS": "2",
-                "PATH": "/usr/sbin:/usr/bin:/sbin:/bin"
-            }
-        )
-    },
-    resolver_download_url_template = DEFAULT_URL_TEMPLATE,
-    resolver_sha256s = DEFAULT_SHA256_CHECKSUMS,
-)
-
-load("@crates//:defs.bzl", "pinned_rust_install")
-
-pinned_rust_install()
-
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+
 rules_pkg_dependencies()
+
+load("//cargo:crates.bzl", "raze_fetch_remote_crates")
+raze_fetch_remote_crates()

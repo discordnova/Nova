@@ -1,12 +1,12 @@
-load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_library")
-load("@crates//:defs.bzl", "crates_from")
+load("@rules_rust//rust:rust.bzl", "rust_binary")
+load("//cargo:crates.bzl", "all_crate_deps", "crate_deps")
 
 exports_files(["Cargo.toml"])
 
 rust_binary(
     name = "gateway",
     srcs = glob(["src/**/*.rs"]),
-    rustc_env = {},
-    deps = crates_from("Cargo.toml"),
+    proc_macro_deps = crate_deps(["serde_repr"]),
+    deps = all_crate_deps(),
     visibility = ["//visibility:public"],
 )

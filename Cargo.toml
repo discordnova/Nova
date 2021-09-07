@@ -2,5 +2,22 @@
 
 members = [
     "webhook",
-    "ratelimiter"
+    "ratelimiter",
+    "gateway"
 ]
+
+[package]
+name = "nova"
+version = "0.1.0"
+edition = "2018"
+
+[[bin]]
+name = "nova"
+path = "src/main.rs"
+
+[package.metadata.raze]
+workspace_path = "//cargo"
+genmode = "Remote"
+default_gen_buildrs = true
+package_aliases_dir = "cargo"
+experimental_api = true

@@ -1,0 +1,77 @@
+"""
+@generated
+cargo-raze crate build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+
+# buildifier: disable=load
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+# buildifier: disable=load
+load(
+    "@rules_rust//rust:rust.bzl",
+    "rust_binary",
+    "rust_library",
+    "rust_test",
+)
+
+package(default_visibility = [
+    # Public for visibility by "@raze__crate__version//" targets.
+    #
+    # Prefer access through "//cargo", which limits external
+    # visibility to explicit Cargo.toml dependencies.
+    "//visibility:public",
+])
+
+licenses([
+    "notice",  # MIT from expression "MIT"
+])
+
+# Generated Targets
+
+# Unsupported target "autobahn-client" with type "example" omitted
+
+# Unsupported target "autobahn-server" with type "example" omitted
+
+# Unsupported target "client" with type "example" omitted
+
+# Unsupported target "echo-server" with type "example" omitted
+
+# Unsupported target "interval-server" with type "example" omitted
+
+# Unsupported target "server" with type "example" omitted
+
+rust_library(
+    name = "tokio_tungstenite",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "connect",
+        "default",
+        "stream",
+    ],
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    data = [],
+    edition = "2018",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.15.0",
+    # buildifier: leave-alone
+    deps = [
+        "@raze__futures_util__0_3_17//:futures_util",
+        "@raze__log__0_4_14//:log",
+        "@raze__pin_project__1_0_8//:pin_project",
+        "@raze__tokio__1_11_0//:tokio",
+        "@raze__tungstenite__0_14_0//:tungstenite",
+    ],
+)
+
+# Unsupported target "communication" with type "test" omitted
+
+# Unsupported target "handshakes" with type "test" omitted

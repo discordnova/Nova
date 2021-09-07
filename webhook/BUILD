@@ -1,17 +1,17 @@
-load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_library", "rust_test")
-load("@crates//:defs.bzl", "crates_from")
+load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_test")
+load("//cargo:crates.bzl", "all_crate_deps", "crate_deps")
 
 exports_files(["Cargo.toml"])
 
 rust_binary(
     name = "webhook",
     srcs = glob(["src/**"]),
-    deps = crates_from("Cargo.toml"),
+    deps = all_crate_deps(),
     visibility = ["//visibility:public"],
 )
 
 rust_test(
     name = "webhook_test",
     crate = ":webhook",
-    deps = crates_from("Cargo.toml"),
+    deps = all_crate_deps(),
 )
