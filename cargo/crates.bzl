@@ -19,6 +19,7 @@ _DEPENDENCIES = {
         "log": "@raze__log__0_4_14//:log",
         "pretty_env_logger": "@raze__pretty_env_logger__0_4_0//:pretty_env_logger",
         "serde": "@raze__serde__1_0_130//:serde",
+        "serde_json": "@raze__serde_json__1_0_67//:serde_json",
         "tokio": "@raze__tokio__1_11_0//:tokio",
     },
     "ratelimiter": {

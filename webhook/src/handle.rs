@@ -1,27 +1,22 @@
 use hyper::service::Service;
-use hyper::{
-    body::{to_bytes, Bytes},
-    HeaderMap,
-};
+use hyper::{body::to_bytes, HeaderMap};
 use hyper::{Body, Method, Request, Response, StatusCode};
 use libsodium_sys::crypto_sign_ed25519_verify_detached;
 use log::info;
+use serde_json::Value;
 use std::future;
 use std::future::Future;
 use std::pin::Pin;
+use std::str::from_utf8;
 use std::task::{Context, Poll};
+use serde::{Deserialize, Serialize};
 
 use super::utils::Settings;
 
-static NOT_FOUND: &str = "
-<h1>Nova Webhook Gateway</h1>
-<p>Invalid request</p>
-";
-
-pub fn validate_signature(b64_public_key: &str, data: &Bytes, b64_signature: &str) -> bool {
+pub fn validate_signature(b64_public_key: &str, data: &Vec<u8>, b64_signature: &str) -> bool {
     // First, we need to check if the signature & private key is valid base64.
-    let signature_result = base64::decode(b64_signature);
-    let public_key_result = base64::decode(b64_public_key);
+    let signature_result = hex::decode(b64_signature);
+    let public_key_result = hex::decode(b64_public_key);
 
     if signature_result.is_ok() && public_key_result.is_ok() {
         // Since we now have the signatures in u8 vectors. We will initialize all the
@@ -47,7 +42,7 @@ pub fn validate_signature(b64_public_key: &str, data: &Bytes, b64_signature: &st
     false
 }
 
-fn get_signature<'b>(headers: &'b HeaderMap) -> Option<(&'b str, &'b str)> {
+fn get_signature(headers: &HeaderMap) -> Option<(&str, &str)> {
     let signature = headers.get("X-Signature-Ed25519");
     let timestamp = headers.get("X-Signature-Timestamp");
 
@@ -64,6 +59,12 @@ pub struct HandlerService {
     pub config: Settings,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Ping {
+    #[serde(rename = "type")]
+    t: i32
+}
+
 impl Service<Request<Body>> for HandlerService {
     type Response = Response<Body>;
     type Error = hyper::Error;
@@ -78,24 +79,37 @@ impl Service<Request<Body>> for HandlerService {
             let public_key = self.config.discord.public_key.clone();
             return Box::pin(async move {
                 let headers = req.headers().clone();
-                let sig_headers = get_signature(&headers);
-                if sig_headers.is_some() {
-                    let (signature, _timestamp) = sig_headers.unwrap();
-                    let data = to_bytes(req.into_body()).await.unwrap();
-                    info!("data: {}", public_key);
-                    if validate_signature(public_key.as_str(), &data, signature) {
-                        return Ok(Response::new("signature verified!".into()));
+                if let Some((signature, timestamp)) = get_signature(&headers) {
+                    if let Ok(data) = to_bytes(req.into_body()).await {
+                        let contatenated_data = [timestamp.as_bytes().to_vec(), data.to_vec()].concat();
+
+                        if validate_signature(public_key.as_str(), &contatenated_data, signature) {
+                            let data: Value = serde_json::from_str(from_utf8(&data).unwrap()).unwrap();
+                            let t = data.get("type").unwrap().as_i64().unwrap();
+
+                            if t == 1 {
+                                info!("success!");
+                                
+                                return Ok(Response::builder().header("Content-Type", "application/json").body(serde_json::to_string(&Ping {
+                                    t: 1
+                                }).unwrap().into()).unwrap());
+                                
+                            } else {
+                                Ok(Response::builder().status(StatusCode::UNAUTHORIZED).body("invalid operation".into()).unwrap())
+                            }
+                        } else {
+                            Ok(Response::builder().status(StatusCode::UNAUTHORIZED).body("signature verification failed".into()).unwrap())
+                        }
+                    } else {
+                        Ok(Response::builder().status(StatusCode::UNAUTHORIZED).body("failed to read body".into()).unwrap())
                     }
-                    return Ok(Response::new("signature verification failed.".into()));
+                } else {
+                    Ok(Response::builder().status(StatusCode::UNAUTHORIZED).body("no signature specified".into()).unwrap())
                 }
-                return Ok(Response::new("no signature specified.".into()));
             });
         } else {
             return Box::pin(async {
-                let mut response = Response::new(NOT_FOUND.into());
-                let status = response.status_mut();
-                *status = StatusCode::BAD_REQUEST;
-                Ok(response)
+                Ok(Response::builder().status(StatusCode::UNAUTHORIZED).body("bad method".into()).unwrap())
             });
         }
     }
@@ -124,41 +138,32 @@ impl<T> Service<T> for MakeSvc {
 #[cfg(test)]
 mod test {
     use crate::handle::validate_signature;
-    use hyper::body::Bytes;
 
     #[test]
     fn validate_signature_test() {
         let signature = "VD7DVH1X+d2x7ExcNlA+vyiP/aPaPVEHZMmknCq7V2kO+XTGPRdHcb3SSB3hBmlm9Xq77BKj7Bcbn24jc4NwAg==";
         let public_key = "7v4MJEc3N8sgNSMuO065HCBvChRoQWjzUD99gxYFjW8=";
-        let content = "message de test incroyable";
-        assert!(validate_signature(
-            public_key,
-            &Bytes::from(content),
-            signature
-        ))
+        let content = "message de test incroyable".as_bytes().to_vec();
+        assert!(validate_signature(public_key, &content, signature))
     }
 
     #[test]
     fn validate_signature_reverse_test() {
         let signature = "VD7DVH1X+d2x7ExcNlA+vyiP/aPaPVEHZMmknCq7V2kO+XTGPRdHcb3SSB3hBmlm9Xq77BKj7Bcbn24jc4NwAg==";
         let public_key = "wCnuoYQ3KSyHxirsNOfRvU44/mEm8/fERt5jddxmYEQ=";
-        let content = "ceci est un test qui ne fonctionnera pas!";
-        assert!(!validate_signature(
-            public_key,
-            &Bytes::from(content),
-            signature
-        ))
+        let content = "ceci est un test qui ne fonctionnera pas!"
+            .as_bytes()
+            .to_vec();
+        assert!(!validate_signature(public_key, &content, signature))
     }
 
     #[test]
     fn invalid_base64() {
         let signature = "zzz";
         let public_key = "zzz";
-        let content = "ceci est un test qui ne fonctionnera pas!";
-        assert!(!validate_signature(
-            public_key,
-            &Bytes::from(content),
-            signature
-        ))
+        let content = "ceci est un test qui ne fonctionnera pas!"
+            .as_bytes()
+            .to_vec();
+        assert!(!validate_signature(public_key, &content, signature))
     }
 }
