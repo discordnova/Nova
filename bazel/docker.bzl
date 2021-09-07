@@ -26,9 +26,9 @@ def load_docker():
     _go_image_repos()
     _rust_image_repos()
     container_pull(
-        name = "io_docker_index_library_alpine",
-        digest = "sha256:69704ef328d05a9f806b6b8502915e6a0a4faa4d72018dc42343f511490daf8a",
+        name = "io_docker_index_library_debian_stable_slim",
+        digest = "sha256:7bb9de2067f4e4e3e2377070e180a05d33a0bc4289c66b9e71504063cf18da15",
         registry = "index.docker.io",
-        repository = "library/alpine",
-        tag = "lastest",
+        repository = "library/debian",
+        tag = "stable-slim",
     )

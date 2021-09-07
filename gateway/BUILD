@@ -18,5 +18,5 @@ rust_image(
     proc_macro_deps = crate_deps(["serde_repr"]),
     deps = all_crate_deps(),
     visibility = ["//visibility:public"],
-    base = "@io_docker_index_library_alpine//image",
+    base = "@io_docker_index_library_debian_stable_slim//image",
 )
