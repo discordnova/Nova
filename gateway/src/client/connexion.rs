@@ -6,7 +6,7 @@ use super::{
 };
 use flate2::write::ZlibDecoder;
 use futures_util::{SinkExt, StreamExt};
-use log::{debug, error, info, warn};
+use log::{debug, error, info, trace, warn};
 use std::{str::from_utf8, time::Duration};
 use tokio::{net::TcpStream, select, time::Instant};
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async, tungstenite::{self, Message, handshake::client::Request}};
@@ -170,12 +170,14 @@ impl Connexion {
         match message.op {
             OpCodes::Dispatch => {
                 let t = message.t.unwrap();
-                info!("dispatch message received: {:?}", t);
+                trace!("dispatch message received: {:?}", t);
                 let topic = format!("nova.gateway.{}", t);
-                self.nats.as_ref().unwrap().publish(
+                if let Err(e) = self.nats.as_ref().unwrap().publish(
                     &topic,
                     &serde_json::to_vec(&message.d).unwrap(),
-                ).await.unwrap();
+                ).await {
+                    error!("failed to publish message {}", e);
+                }
             },
             OpCodes::PresenceUpdate => todo!(),
             OpCodes::VoiceStateUpdate => todo!(),

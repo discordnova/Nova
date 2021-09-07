@@ -25,19 +25,16 @@ package(default_visibility = [
 ])
 
 licenses([
-    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+    "notice",  # Apache-2.0 from expression "Apache-2.0 OR (Apache-2.0 OR MIT)"
 ])
 
 # Generated Targets
 
-# Unsupported target "bench" with type "bench" omitted
-
 rust_library(
-    name = "byteorder",
+    name = "wasi",
     srcs = glob(["**/*.rs"]),
     crate_features = [
         "default",
-        "i128",
         "std",
     ],
     crate_root = "src/lib.rs",
@@ -51,7 +48,7 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.3",
+    version = "0.9.0+wasi-snapshot-preview1",
     # buildifier: leave-alone
     deps = [
     ],

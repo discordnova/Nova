@@ -25,7 +25,7 @@ package(default_visibility = [
 ])
 
 licenses([
-    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+    "notice",  # Apache-2.0 from expression "Apache-2.0 OR MIT"
 ])
 
 # Generated Targets
@@ -33,12 +33,11 @@ licenses([
 # Unsupported target "bench" with type "bench" omitted
 
 rust_library(
-    name = "byteorder",
+    name = "fastrand",
     srcs = glob(["**/*.rs"]),
+    aliases = {
+    },
     crate_features = [
-        "default",
-        "i128",
-        "std",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -51,8 +50,19 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.3",
+    version = "1.5.0",
     # buildifier: leave-alone
     deps = [
-    ],
+    ] + selects.with_or({
+        # cfg(target_arch = "wasm32")
+        (
+            "@rules_rust//rust/platform:wasm32-unknown-unknown",
+            "@rules_rust//rust/platform:wasm32-wasi",
+        ): [
+            "@raze__instant__0_1_10//:instant",
+        ],
+        "//conditions:default": [],
+    }),
 )
+
+# Unsupported target "smoke" with type "test" omitted

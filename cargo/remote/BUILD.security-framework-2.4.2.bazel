@@ -25,20 +25,23 @@ package(default_visibility = [
 ])
 
 licenses([
-    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+    "notice",  # MIT from expression "MIT OR Apache-2.0"
 ])
 
 # Generated Targets
 
-# Unsupported target "bench" with type "bench" omitted
+# Unsupported target "client" with type "example" omitted
+
+# Unsupported target "find_internet_password" with type "example" omitted
+
+# Unsupported target "set_internet_password" with type "example" omitted
 
 rust_library(
-    name = "byteorder",
+    name = "security_framework",
     srcs = glob(["**/*.rs"]),
     crate_features = [
+        "OSX_10_9",
         "default",
-        "i128",
-        "std",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -51,8 +54,13 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.3",
+    version = "2.4.2",
     # buildifier: leave-alone
     deps = [
+        "@raze__bitflags__1_3_2//:bitflags",
+        "@raze__core_foundation__0_9_1//:core_foundation",
+        "@raze__core_foundation_sys__0_8_2//:core_foundation_sys",
+        "@raze__libc__0_2_101//:libc",
+        "@raze__security_framework_sys__2_4_2//:security_framework_sys",
     ],
 )

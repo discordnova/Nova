@@ -25,20 +25,23 @@ package(default_visibility = [
 ])
 
 licenses([
-    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+    "notice",  # Apache-2.0 from expression "Apache-2.0 OR MIT"
 ])
 
 # Generated Targets
 
-# Unsupported target "bench" with type "bench" omitted
-
 rust_library(
-    name = "byteorder",
+    name = "futures_lite",
     srcs = glob(["**/*.rs"]),
     crate_features = [
+        "alloc",
         "default",
-        "i128",
+        "fastrand",
+        "futures-io",
+        "memchr",
+        "parking",
         "std",
+        "waker-fn",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -51,8 +54,15 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.3",
+    version = "1.12.0",
     # buildifier: leave-alone
     deps = [
+        "@raze__fastrand__1_5_0//:fastrand",
+        "@raze__futures_core__0_3_17//:futures_core",
+        "@raze__futures_io__0_3_17//:futures_io",
+        "@raze__memchr__2_4_1//:memchr",
+        "@raze__parking__2_0_0//:parking",
+        "@raze__pin_project_lite__0_2_7//:pin_project_lite",
+        "@raze__waker_fn__1_1_0//:waker_fn",
     ],
 )

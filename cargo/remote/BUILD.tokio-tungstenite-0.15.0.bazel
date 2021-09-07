@@ -49,7 +49,11 @@ rust_library(
         "connect",
         "default",
         "rustls",
+        "rustls-tls",
         "stream",
+        "tokio-rustls",
+        "webpki",
+        "webpki-roots",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -70,7 +74,10 @@ rust_library(
         "@raze__pin_project__1_0_8//:pin_project",
         "@raze__rustls__0_19_1//:rustls",
         "@raze__tokio__1_11_0//:tokio",
+        "@raze__tokio_rustls__0_22_0//:tokio_rustls",
         "@raze__tungstenite__0_14_0//:tungstenite",
+        "@raze__webpki__0_21_4//:webpki",
+        "@raze__webpki_roots__0_21_1//:webpki_roots",
     ],
 )
 

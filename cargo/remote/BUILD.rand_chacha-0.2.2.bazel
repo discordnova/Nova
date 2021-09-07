@@ -25,19 +25,15 @@ package(default_visibility = [
 ])
 
 licenses([
-    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+    "notice",  # MIT from expression "MIT OR Apache-2.0"
 ])
 
 # Generated Targets
 
-# Unsupported target "bench" with type "bench" omitted
-
 rust_library(
-    name = "byteorder",
+    name = "rand_chacha",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
-        "i128",
         "std",
     ],
     crate_root = "src/lib.rs",
@@ -51,8 +47,10 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.3",
+    version = "0.2.2",
     # buildifier: leave-alone
     deps = [
+        "@raze__ppv_lite86__0_2_10//:ppv_lite86",
+        "@raze__rand_core__0_5_1//:rand_core",
     ],
 )

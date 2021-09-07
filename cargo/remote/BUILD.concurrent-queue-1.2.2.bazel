@@ -25,20 +25,15 @@ package(default_visibility = [
 ])
 
 licenses([
-    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+    "notice",  # Apache-2.0 from expression "Apache-2.0 OR MIT"
 ])
 
 # Generated Targets
 
-# Unsupported target "bench" with type "bench" omitted
-
 rust_library(
-    name = "byteorder",
+    name = "concurrent_queue",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
-        "i128",
-        "std",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -51,8 +46,15 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.3",
+    version = "1.2.2",
     # buildifier: leave-alone
     deps = [
+        "@raze__cache_padded__1_1_1//:cache_padded",
     ],
 )
+
+# Unsupported target "bounded" with type "test" omitted
+
+# Unsupported target "single" with type "test" omitted
+
+# Unsupported target "unbounded" with type "test" omitted

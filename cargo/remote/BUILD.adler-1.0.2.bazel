@@ -25,7 +25,7 @@ package(default_visibility = [
 ])
 
 licenses([
-    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+    "notice",  # MIT from expression "0BSD OR (MIT OR Apache-2.0)"
 ])
 
 # Generated Targets
@@ -33,17 +33,14 @@ licenses([
 # Unsupported target "bench" with type "bench" omitted
 
 rust_library(
-    name = "byteorder",
+    name = "adler",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
-        "i128",
-        "std",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
     data = [],
-    edition = "2018",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -51,7 +48,7 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.3",
+    version = "1.0.2",
     # buildifier: leave-alone
     deps = [
     ],

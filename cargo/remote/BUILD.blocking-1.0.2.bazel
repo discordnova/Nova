@@ -25,20 +25,17 @@ package(default_visibility = [
 ])
 
 licenses([
-    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+    "notice",  # Apache-2.0 from expression "Apache-2.0 OR MIT"
 ])
 
 # Generated Targets
 
-# Unsupported target "bench" with type "bench" omitted
+# Unsupported target "ls" with type "example" omitted
 
 rust_library(
-    name = "byteorder",
+    name = "blocking",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
-        "i128",
-        "std",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -51,8 +48,16 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.3",
+    version = "1.0.2",
     # buildifier: leave-alone
     deps = [
+        "@raze__async_channel__1_6_1//:async_channel",
+        "@raze__async_task__4_0_3//:async_task",
+        "@raze__atomic_waker__1_0_0//:atomic_waker",
+        "@raze__fastrand__1_5_0//:fastrand",
+        "@raze__futures_lite__1_12_0//:futures_lite",
+        "@raze__once_cell__1_8_0//:once_cell",
     ],
 )
+
+# Unsupported target "unblock" with type "test" omitted

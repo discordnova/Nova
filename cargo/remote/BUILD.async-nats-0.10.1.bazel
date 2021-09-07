@@ -25,20 +25,17 @@ package(default_visibility = [
 ])
 
 licenses([
-    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+    "notice",  # Apache-2.0 from expression "Apache-2.0"
 ])
 
 # Generated Targets
 
-# Unsupported target "bench" with type "bench" omitted
+# Unsupported target "async_nats_bench" with type "example" omitted
 
 rust_library(
-    name = "byteorder",
+    name = "async_nats",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
-        "i128",
-        "std",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -51,8 +48,10 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.3",
+    version = "0.10.1",
     # buildifier: leave-alone
     deps = [
+        "@raze__blocking__1_0_2//:blocking",
+        "@raze__nats__0_10_1//:nats",
     ],
 )

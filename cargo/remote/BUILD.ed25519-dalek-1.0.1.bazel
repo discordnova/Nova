@@ -25,20 +25,18 @@ package(default_visibility = [
 ])
 
 licenses([
-    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+    "notice",  # BSD-3-Clause from expression "BSD-3-Clause"
 ])
 
 # Generated Targets
 
-# Unsupported target "bench" with type "bench" omitted
+# Unsupported target "ed25519_benchmarks" with type "bench" omitted
 
 rust_library(
-    name = "byteorder",
+    name = "ed25519_dalek",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
-        "i128",
-        "std",
+        "u64_backend",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -51,8 +49,14 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.3",
+    version = "1.0.1",
     # buildifier: leave-alone
     deps = [
+        "@raze__curve25519_dalek__3_2_0//:curve25519_dalek",
+        "@raze__ed25519__1_2_0//:ed25519",
+        "@raze__sha2__0_9_6//:sha2",
+        "@raze__zeroize__1_4_1//:zeroize",
     ],
 )
+
+# Unsupported target "ed25519" with type "test" omitted

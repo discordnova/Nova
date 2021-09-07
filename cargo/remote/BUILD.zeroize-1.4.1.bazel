@@ -25,25 +25,24 @@ package(default_visibility = [
 ])
 
 licenses([
-    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+    "notice",  # Apache-2.0 from expression "Apache-2.0 OR MIT"
 ])
 
 # Generated Targets
 
-# Unsupported target "bench" with type "bench" omitted
-
 rust_library(
-    name = "byteorder",
+    name = "zeroize",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
-        "i128",
-        "std",
+        "zeroize_derive",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
     data = [],
     edition = "2018",
+    proc_macro_deps = [
+        "@raze__zeroize_derive__1_1_0//:zeroize_derive",
+    ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -51,8 +50,10 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.3",
+    version = "1.4.1",
     # buildifier: leave-alone
     deps = [
     ],
 )
+
+# Unsupported target "zeroize_derive" with type "test" omitted

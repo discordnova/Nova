@@ -48,6 +48,10 @@ rust_library(
     name = "tungstenite",
     srcs = glob(["**/*.rs"]),
     crate_features = [
+        "rustls",
+        "rustls-native-certs",
+        "rustls-tls",
+        "webpki",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -70,10 +74,13 @@ rust_library(
         "@raze__httparse__1_5_1//:httparse",
         "@raze__log__0_4_14//:log",
         "@raze__rand__0_8_4//:rand",
+        "@raze__rustls__0_19_1//:rustls",
+        "@raze__rustls_native_certs__0_5_0//:rustls_native_certs",
         "@raze__sha_1__0_9_8//:sha_1",
         "@raze__thiserror__1_0_29//:thiserror",
         "@raze__url__2_2_2//:url",
         "@raze__utf_8__0_7_6//:utf_8",
+        "@raze__webpki__0_21_4//:webpki",
     ],
 )
 

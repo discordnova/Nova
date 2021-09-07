@@ -34,6 +34,11 @@ compile_data_attr = "glob([\"*/**\"])"
 skipped_deps = ["once_cell-1.8.0"]
 additional_deps = ["@raze__once_cell__1_8_0//:once_cell"]
 
+[package.metadata.raze.crates.flate2.'*']
+compile_data_attr = "glob([\"*/**\"])"
+skipped_deps = ["miniz_oxide-0.4.4"]
+additional_deps = ["@raze__miniz_oxide__0_4_4//:miniz_oxide"]
+
 
 [package.metadata.raze.crates.webpki.'*']
 compile_data_attr = "glob([\"*/**\"])"
