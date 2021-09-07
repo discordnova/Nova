@@ -40,8 +40,8 @@ cargo_build_script(
     name = "libsodium_sys_build_script",
     srcs = glob(["**/*.rs"]),
     build_script_env = {
+        "NUM_JOBS": "2",
         "PATH": "/usr/sbin:/usr/bin:/sbin:/bin",
-        "NUM_JOBS": "2"
     },
     crate_features = [
     ],

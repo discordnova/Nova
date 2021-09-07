@@ -40,6 +40,7 @@ _DEPENDENCIES = {
         "url": "@raze__url__2_2_2//:url",
     },
     "": {
+        "libc": "@raze__libc__0_2_101//:libc",
     },
 }
 

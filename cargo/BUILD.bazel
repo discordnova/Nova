@@ -11,7 +11,15 @@ licenses([
     "notice",  # See individual crates for specific licenses
 ])
 
-# No targets defined
+# Aliased targets
+alias(
+    name = "libc",
+    actual = "@raze__libc__0_2_101//:libc",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
 
 # Export file for Stardoc support
 exports_files(

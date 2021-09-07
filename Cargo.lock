@@ -571,6 +571,9 @@ dependencies = [
 [[package]]
 name = "nova"
 version = "0.1.0"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "ntapi"

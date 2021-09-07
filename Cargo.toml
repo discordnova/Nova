@@ -15,9 +15,19 @@ edition = "2018"
 name = "nova"
 path = "src/main.rs"
 
+[dependencies]
+libc = "0.2.101"
+
 [package.metadata.raze]
 workspace_path = "//cargo"
 genmode = "Remote"
 default_gen_buildrs = true
 package_aliases_dir = "cargo"
 experimental_api = true
+
+[package.metadata.raze.crates.cpufeatures.'*']
+skipped_deps = ["libc-0.2.101"]
+additional_deps = ["@raze__libc__0_2_101//:libc"]
+
+[package.metadata.raze.crates.libsodium-sys.'*']
+buildrs_additional_environment_variables = { PATH = "/usr/sbin:/usr/bin:/sbin:/bin", "NUM_JOBS" = "2" }
