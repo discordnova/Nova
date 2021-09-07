@@ -1,6 +1,7 @@
 load("@rules_rust//rust:rust.bzl", "rust_binary")
 load("@rules_rust//cargo:cargo_build_script.bzl", "cargo_build_script")
 load("//cargo:crates.bzl", "all_crate_deps", "crate_deps")
+load("@io_bazel_rules_docker//rust:image.bzl", "rust_image")
 
 exports_files(["Cargo.toml"])
 
@@ -22,6 +23,13 @@ cargo_build_script(
 
 rust_binary(
     name = "ratelimiter",
+    srcs = ["src/main.rs"],
+    deps = all_crate_deps() + [":build_script"],
+    visibility = ["//visibility:public"],
+)
+
+rust_image(
+    name = "image",
     srcs = ["src/main.rs"],
     deps = all_crate_deps() + [":build_script"],
     visibility = ["//visibility:public"],

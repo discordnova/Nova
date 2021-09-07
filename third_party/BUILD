@@ -1,1 +1,0 @@
-exports_files(["create_universe_defaults.bzl"])

@@ -21,6 +21,9 @@ container_bundle(
 
   images = {
     "ghcr.io/discordnova/nova/novactl:latest": "//novactl:image",
+    "ghcr.io/discordnova/nova/gateway:latest": "//gateway:image",
+    "ghcr.io/discordnova/nova/ratelimiter:latest": "//ratelimiter:image",
+    "ghcr.io/discordnova/nova/webhook:latest": "//webhook:image",
   }
 )
 
