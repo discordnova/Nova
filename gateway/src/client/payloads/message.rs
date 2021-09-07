@@ -19,6 +19,14 @@ pub enum OpCodes {
     HeartbeatACK = 11,
 }
 
+#[derive(Serialize, Deserialize)]
+pub enum Dispatch {
+    #[serde(rename = "READY")]
+    Ready,
+    #[serde(rename = "RESUMED")]
+    Resumed,
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct MessageBase {
     pub t: Option<String>,

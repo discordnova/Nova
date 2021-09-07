@@ -5,7 +5,7 @@ edition = "2018"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-tokio-tungstenite = { version = "*", features = ["rustls"] }
+tokio-tungstenite = { version = "*", features = ["rustls-tls"] }
 url = "2.2.2"
 futures-util = "0.3.17"
 log = { version = "0.4", features = ["std"] }
@@ -16,3 +16,5 @@ tokio-stream = "0.1.7"
 async-stream = "0.3.2"
 futures-core = "0.3.17"
 serde_repr = "0.1"
+flate2 = "1.0"
+async-nats = "0.10.1"

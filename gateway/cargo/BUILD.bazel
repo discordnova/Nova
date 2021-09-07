@@ -13,8 +13,26 @@ licenses([
 
 # Aliased targets
 alias(
+    name = "async_nats",
+    actual = "@raze__async_nats__0_10_1//:async_nats",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "async_stream",
     actual = "@raze__async_stream__0_3_2//:async_stream",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "flate2",
+    actual = "@raze__flate2__1_0_21//:flate2",
     tags = [
         "cargo-raze",
         "manual",
