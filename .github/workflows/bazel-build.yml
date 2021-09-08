@@ -25,6 +25,8 @@ jobs:
         if: matrix.os == 'windows-latest'
       - uses: lukka/run-vcpkg@v7
         if: matrix.os == 'windows-latest'
+        with:
+          setupOnly: true
       - run: |
           $VCPKG_ROOT/vcpkg install libsodium
         shell: bash
