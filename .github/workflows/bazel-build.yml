@@ -29,6 +29,7 @@ jobs:
           setupOnly: true
           vcpkgGitCommitId: "bcf551b980380fe7f84fa302ad7ef3c184f9bf4f"
       - run: |
+          $VCPKG_ROOT/vcpkg integrate install
           $VCPKG_ROOT/vcpkg install libsodium
         shell: bash
         if: matrix.os == 'windows-latest'
