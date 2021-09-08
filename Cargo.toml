@@ -45,3 +45,6 @@ compile_data_attr = "glob([\"*/**\"])"
 
 [package.metadata.raze.crates.libsodium-sys.'*']
 buildrs_additional_environment_variables = { PATH = "/usr/sbin:/usr/bin:/sbin:/bin", "NUM_JOBS" = "2" }
+compile_data_attr = "glob([\"*/**\"])"
+gen_buildrs = false
+additional_build_file = ["bazel/patch/libsodium_buildrs.rs"]

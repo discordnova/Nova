@@ -4,6 +4,7 @@ load("@io_bazel_rules_docker//toolchains/docker:toolchain.bzl", "toolchain_confi
 load("@io_bazel_rules_docker//repositories:repositories.bzl", "repositories")
 load("@io_bazel_rules_docker//repositories:deps.bzl", "deps")
 load("@io_bazel_rules_docker//container:container.bzl", "container_pull")
+
 load(
     "@io_bazel_rules_docker//go:image.bzl",
     _go_image_repos = "repositories",
@@ -27,8 +28,14 @@ def load_docker():
     _rust_image_repos()
     container_pull(
         name = "io_docker_index_library_debian_stable_slim",
-        digest = "sha256:7bb9de2067f4e4e3e2377070e180a05d33a0bc4289c66b9e71504063cf18da15",
-        registry = "index.docker.io",
-        repository = "library/debian",
-        tag = "stable-slim",
+        digest = "sha256:2c4bb6b7236db0a55ec54ba8845e4031f5db2be957ac61867872bf42e56c4deb",
+        registry = "gcr.io",
+        repository = "distroless/cc-debian10",
+        tag = "latest",
+    )
+    container_pull(
+        name = "ubuntu1604",
+        registry = "l.gcr.io",
+        repository = "google/ubuntu1604",
+        tag = "latest",
     )

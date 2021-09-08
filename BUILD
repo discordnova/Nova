@@ -10,10 +10,10 @@ filegroup(
     name = "package_bin",
     srcs = [
         "//novactl",
-    ] + select({
-        "@bazel_tools//src/conditions:windows": [],
-        "//conditions:default": ["//webhook", "//gateway", "//ratelimiter"],
-    }),
+        "//webhook",
+        "//gateway",
+        "//ratelimiter"
+    ]
 )
 
 container_bundle(

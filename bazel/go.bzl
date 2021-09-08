@@ -1,7 +1,7 @@
 """
 Utilities used by the workspace to load the golang toolchain
 """
-load("//:deps.bzl", "go_dependencies")
+load("//bazel:deps.bzl", "go_dependencies")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
@@ -14,8 +14,6 @@ def load_golang_toolchains():
     go_rules_dependencies()
 
     # Used to generate the go dependencies & build files
-    
-    # gazelle:repository_macro deps.bzl%go_dependencies
     go_dependencies()
     gazelle_dependencies()
 

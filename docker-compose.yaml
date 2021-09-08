@@ -8,3 +8,8 @@ services:
         - "8222:8222"
         - "4222:4222"
       hostname: nats-server
+  registry:
+    restart: always
+    image: registry:2
+    ports:
+      - 5000:5000

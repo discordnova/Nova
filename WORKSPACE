@@ -19,6 +19,7 @@ http_archive(
         "https://github.com/bazelbuild/rules_pkg/releases/download/0.5.1/rules_pkg-0.5.1.tar.gz",
     ],
 )
+
 http_archive(
     name = "rules_rust",
     sha256 = "531bdd470728b61ce41cf7604dc4f9a115983e455d46ac1d0c1632f613ab9fc3",
@@ -52,19 +53,24 @@ http_archive(
     sha256 = "1f4e59843b61981a96835dc4ac377ad4da9f8c334ebe5e0bb3f58f80c09735f4",
     strip_prefix = "rules_docker-0.19.0",
     urls = [
-        "https://github.com/bazelbuild/rules_docker/releases/download/v0.19.0/rules_docker-v0.19.0.tar.gz"
+        "https://github.com/bazelbuild/rules_docker/releases/download/v0.19.0/rules_docker-v0.19.0.tar.gz",
     ],
 )
 
 load("//bazel:utils.bzl", "get_toolchain_utils_protocolbuffers", "get_toolchain_utils_rules_pkg")
+
 get_toolchain_utils_protocolbuffers()
+
 get_toolchain_utils_rules_pkg()
 
 load("//bazel:rust.bzl", "load_rust_toolchains")
+
 load_rust_toolchains()
 
 load("//bazel:go.bzl", "load_golang_toolchains")
+
 load_golang_toolchains()
 
 load("//bazel:docker.bzl", "load_docker")
+
 load_docker()
