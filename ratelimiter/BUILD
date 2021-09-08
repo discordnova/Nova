@@ -3,14 +3,13 @@ load("@rules_rust//cargo:cargo_build_script.bzl", "cargo_build_script")
 load("//cargo:crates.bzl", "all_crate_deps", "crate_deps")
 load("@io_bazel_rules_docker//rust:image.bzl", "rust_image")
 
-exports_files(["Cargo.toml"])
+test_suite(name = "tests")
 
 cargo_build_script(
     name = "build_script",
     srcs = ["build.rs"],
     build_script_env = {
         "PROTOC": "$(location @com_google_protobuf//:protoc)",
-        "PROTO": "$(location //ratelimiter/proto:nova.ratelimit.v1.proto)"
     },
     data = [
         "//ratelimiter/proto:nova.ratelimit.v1.proto",

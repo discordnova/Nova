@@ -5,7 +5,7 @@ load("@io_bazel_rules_docker//rust:image.bzl", "rust_image")
 load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", "download_pkgs")
 load("@io_bazel_rules_docker//docker/package_managers:install_pkgs.bzl", "install_pkgs")
 
-exports_files(["Cargo.toml"])
+test_suite(name = "tests")
 
 rust_binary(
     name = "gateway",

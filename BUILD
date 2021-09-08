@@ -27,6 +27,16 @@ container_bundle(
   }
 )
 
+test_suite(
+    name = "tests",
+    tests = [
+        "//novactl:tests",
+        "//webhook:tests",
+        "//gateway:tests",
+        "//ratelimiter:tests"
+    ],
+)
+
 container_push(
   name = "publish",
   bundle = ":bundle",
