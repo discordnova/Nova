@@ -14,9 +14,7 @@ rust_binary(
 
 rust_image(
     name = "image",
-    srcs = glob(["src/**/*.rs"]),
-    proc_macro_deps = crate_deps(["serde_repr"]),
-    deps = all_crate_deps(),
+    binary = ":gateway",
     visibility = ["//visibility:public"],
     base = "//bazel:base",
 )
