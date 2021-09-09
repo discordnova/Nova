@@ -32,4 +32,5 @@ rust_image(
     srcs = ["src/main.rs"],
     deps = all_crate_deps() + [":build_script"],
     visibility = ["//visibility:public"],
+    base = "//bazel:base",
 )

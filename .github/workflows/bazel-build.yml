@@ -21,19 +21,15 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+
       - uses: ilammy/msvc-dev-cmd@v1
         if: matrix.os == 'windows-latest'
-      - uses: lukka/run-vcpkg@v7
-        if: matrix.os == 'windows-latest'
-        with:
-          setupOnly: true
-          vcpkgGitCommitId: "bcf551b980380fe7f84fa302ad7ef3c184f9bf4f"
-      - run: |
-          $VCPKG_ROOT/vcpkg integrate install
-          $VCPKG_ROOT/vcpkg install libsodium
-        shell: bash
-        if: matrix.os == 'windows-latest'
 
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+      
       - uses: docker-practice/actions-setup-docker@master
         if: matrix.os == 'ubuntu-latest'
       - uses: docker/login-action@v1
@@ -79,5 +75,5 @@ jobs:
       - name: Publish docker images
         shell: bash
         run: |
-           bazel run //:publish
+           bazel run --define docker_repo=ghcr.io --define docker_tag=${{ steps.extract_branch.outputs.branch }} //:publish
         if: matrix.os == 'ubuntu-latest'

@@ -10,7 +10,7 @@ def load_rust_toolchains():
     """
     rust_repositories(
         edition = "2018",
-        iso_date = "2021-06-16",
+        iso_date = "2021-09-09",
         version = "nightly",
     )
 

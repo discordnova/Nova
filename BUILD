@@ -20,10 +20,10 @@ container_bundle(
   name = "bundle",
 
   images = {
-    "ghcr.io/discordnova/nova/novactl:latest": "//novactl:image",
-    "ghcr.io/discordnova/nova/gateway:latest": "//gateway:image",
-    "ghcr.io/discordnova/nova/ratelimiter:latest": "//ratelimiter:image",
-    "ghcr.io/discordnova/nova/webhook:latest": "//webhook:image",
+    "$(docker_repo)/discordnova/nova/novactl:$(docker_tag)": "//novactl:image",
+    "$(docker_repo)/discordnova/nova/gateway:$(docker_tag)": "//gateway:image",
+    "$(docker_repo)/discordnova/nova/ratelimiter:$(docker_tag)": "//ratelimiter:image",
+    "$(docker_repo)/discordnova/nova/webhook:$(docker_tag)": "//webhook:image",
   }
 )
 

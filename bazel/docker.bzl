@@ -4,6 +4,9 @@ load("@io_bazel_rules_docker//toolchains/docker:toolchain.bzl", "toolchain_confi
 load("@io_bazel_rules_docker//repositories:repositories.bzl", "repositories")
 load("@io_bazel_rules_docker//repositories:deps.bzl", "deps")
 load("@io_bazel_rules_docker//container:container.bzl", "container_pull")
+load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", "download_pkgs")
+load("@io_bazel_rules_docker//docker/package_managers:install_pkgs.bzl", "install_pkgs")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 
 load(
     "@io_bazel_rules_docker//go:image.bzl",
@@ -14,6 +17,23 @@ load(
     _rust_image_repos = "repositories",
 )
 
+def images():
+    download_pkgs(
+        name = "download_base_pkgs",
+        image_tar = "@debian//image",
+        packages = ["libgcc-10-dev", "libc6"]
+    )
+    install_pkgs(
+        name = "base_pkgs",
+        image_tar = "@debian//image",
+        installables_tar = ":download_base_pkgs.tar",
+        output_image_name = "distroless_base_with_libgcc"
+    )
+    container_image(
+        name = "base",
+        base = ":base_pkgs.tar",
+        visibility = ["//visibility:public"],
+    )
 
 def load_docker():
     """
@@ -27,15 +47,14 @@ def load_docker():
     _go_image_repos()
     _rust_image_repos()
     container_pull(
-        name = "io_docker_index_library_debian_stable_slim",
-        digest = "sha256:2c4bb6b7236db0a55ec54ba8845e4031f5db2be957ac61867872bf42e56c4deb",
+        name = "distroless_debian10",
         registry = "gcr.io",
-        repository = "distroless/cc-debian10",
+        repository = "distroless/base-debian10",
         tag = "latest",
     )
     container_pull(
-        name = "ubuntu1604",
-        registry = "l.gcr.io",
-        repository = "google/ubuntu1604",
-        tag = "latest",
+        name = "debian",
+        registry = "docker.io",
+        repository = "library/debian",
+        tag = "stable",
     )

@@ -22,4 +22,5 @@ rust_image(
     srcs = glob(["src/**"]),
     deps = all_crate_deps(),
     visibility = ["//visibility:public"],
+    base = "//bazel:base",
 )
