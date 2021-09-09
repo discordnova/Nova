@@ -31,8 +31,26 @@ alias(
 )
 
 alias(
+    name = "enumflags2",
+    actual = "@raze__enumflags2__0_7_1//:enumflags2",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "flate2",
     actual = "@raze__flate2__1_0_21//:flate2",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "futures",
+    actual = "@raze__futures__0_3_17//:futures",
     tags = [
         "cargo-raze",
         "manual",
@@ -105,6 +123,15 @@ alias(
 alias(
     name = "tokio",
     actual = "@raze__tokio__1_11_0//:tokio",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "tokio_scoped",
+    actual = "@raze__tokio_scoped__0_1_0//:tokio_scoped",
     tags = [
         "cargo-raze",
         "manual",

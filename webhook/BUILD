@@ -7,20 +7,18 @@ test_suite(name = "tests")
 rust_binary(
     name = "webhook",
     srcs = glob(["src/**"]),
-    deps = all_crate_deps(),
+    deps = all_crate_deps() + ["//common/rust:common"],
     visibility = ["//visibility:public"],
 )
 
 rust_test(
     name = "webhook_test",
-    crate = ":webhook",
-    deps = all_crate_deps(),
+    crate = ":webhook"
 )
 
 rust_image(
     name = "image",
-    srcs = glob(["src/**"]),
-    deps = all_crate_deps(),
+    binary = ":webhook",
     visibility = ["//visibility:public"],
     base = "//bazel:base",
 )

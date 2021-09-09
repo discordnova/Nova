@@ -22,6 +22,7 @@ pub struct IdentifyProprerties {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Identify {
     pub token: String,
-    pub intents: i64,
+    pub intents: u16,
     pub properties: IdentifyProprerties,
+    pub shard: Option<[i64; 2]>,
 }

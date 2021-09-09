@@ -10,8 +10,7 @@ use std::pin::Pin;
 use std::str::from_utf8;
 use std::task::{Context, Poll};
 use serde::{Deserialize, Serialize};
-
-use super::utils::Settings;
+use crate::config::Config;
 
 pub fn validate_signature(b64_public_key: &str, data: &Vec<u8>, b64_signature: &str) -> bool {
     // First, we need to check if the signature & private key is valid base64.
@@ -56,7 +55,7 @@ fn get_signature(headers: &HeaderMap) -> Option<(&str, &str)> {
 }
 
 pub struct HandlerService {
-    pub config: Settings,
+    pub config: Config,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -116,7 +115,7 @@ impl Service<Request<Body>> for HandlerService {
 }
 
 pub struct MakeSvc {
-    pub settings: Settings,
+    pub settings: Config,
 }
 
 impl<T> Service<T> for MakeSvc {

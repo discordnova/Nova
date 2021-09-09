@@ -1,0 +1,13 @@
+[package]
+name = "common"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+pretty_env_logger = "0.4"
+log = { version = "0.4", features = ["std"] }
+serde = { version = "1.0.8", features = ["derive"] }
+config = "0.11"
+hyper = { version = "0.14", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
+prometheus = "0.12.0"

@@ -1,0 +1,8 @@
+version: "3.3"
+
+services:
+  gateway:
+    image: "ghcr.io/discordnova/nova/gateway@sha256:3432794af8d6f910b06bf8502bc92e5ecca3d6f4c0ec302ca77df03c6a94b014"
+    environment:
+      - DISCORD_TOKEN="<your discord token>"
+      - RUST_LOG=info

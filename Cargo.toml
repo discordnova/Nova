@@ -3,7 +3,8 @@
 members = [
     "webhook",
     "ratelimiter",
-    "gateway"
+    "gateway",
+    "common/rust"
 ]
 
 [package]

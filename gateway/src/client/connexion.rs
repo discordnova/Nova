@@ -4,12 +4,13 @@ use super::{
     state::{Stage, State},
     utils::get_gateway_url,
 };
-use flate2::write::ZlibDecoder;
 use futures_util::{SinkExt, StreamExt};
-use log::{debug, error, info, trace, warn};
+use log::{error, info, trace, warn};
 use std::{str::from_utf8, time::Duration};
 use tokio::{net::TcpStream, select, time::Instant};
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async, tungstenite::{self, Message, handshake::client::Request}};
+use crate::client::structs::ClientConfig;
+use tokio::sync::mpsc;
 
 #[derive(Debug)]
 pub enum CloseReason {
@@ -18,55 +19,35 @@ pub enum CloseReason {
     ErrorEncountered(&'static str),
     ConnexionError(tungstenite::Error),
 }
-
-pub struct Config {
-    pub token: String,
-    pub compress: bool,
-}
-
 pub enum HandleResult {
     Success,
     Error(CloseReason),
 }
 
-/// This struct represents a single connexion to the gateway,
-/// it does not have any retry logic or reconnexion mechanism,
-/// everything is handled in the Shard struct.
-/// The purpose of this struct is to handle the encoding,
-/// compression and other gateway-transport related stuff.
-/// All the messages are send through another struct implementing
-/// the MessageHandler trait.
 pub struct Connexion {
     state: State,
-    config: Config,
-    zlib: ZlibDecoder<Vec<u8>>,
+    config: ClientConfig,
     connexion: Option<WebSocketStream<MaybeTlsStream<TcpStream>>>,
-    nats: Option<async_nats::Connection>,
+    terminate: Option<mpsc::Sender<CloseReason>>,
 }
 
 impl Connexion {
-    /// Creates a new instance of a discord websocket connexion using the options
-    /// this is used internally by the shard struct to initialize a single
-    /// websocket connexion. This instance is not initialized by default.
-    /// a websocket connexion like this can be re-used multiple times
-    /// to allow reconnexion mechanisms.
-    pub async fn new(config: Config) -> Self {
+    pub fn new(config: ClientConfig) -> Self {
         Connexion {
             state: State::default(),
             connexion: None,
             config,
-            zlib: ZlibDecoder::<Vec<u8>>::new(vec![]),
-            nats: None,
+            terminate: None
         }
     }
 
     /// Terminate the connexion and the "start" method related to it.
-    async fn _terminate_websocket(&mut self, message: CloseReason) {
+    async fn _terminate_websocket(&mut self, message: &CloseReason) {
         if let Some(connexion) = &mut self.connexion {
             if let Err(err) = connexion.close(None).await {
                 error!("failed to close socket {}", err);
             } else {
-                info!("closed the socket: {:?}", message)
+                info!("closed the socket: {:?}", message);
             }
         } else {
             warn!("a termination request was sent without a connexion openned")
@@ -82,7 +63,6 @@ impl Connexion {
             // we reset the state before starting the connection
             self.state = State::default();
             let request = Request::builder()
-                .header("User-Agant", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36")
                 .uri(get_gateway_url(false, "json", 9))
                 .body(())
                 .unwrap();
@@ -93,26 +73,34 @@ impl Connexion {
                 return CloseReason::ConnexionError(err);
             }
             self.connexion = Some(connexion_result.unwrap().0);
-            self.nats = Some(async_nats::connect("localhost:4222").await.unwrap());
+
+            let (tx, mut rx) = mpsc::channel::<CloseReason>(1);
+            self.terminate = Some(tx);
+
             // this is the loop that will maintain the whole connexion
             loop {
                 if let Some(connexion) = &mut self.connexion {
                     // if we do not have a hello message received yet, then we do not use the heartbeat interval
                     // and we just wait for messages to arrive
                     if self.state.stage == Stage::Unknown {
-                        let msg = connexion.next().await;
-                        if let HandleResult::Error(reason) = self._handle_message(&msg).await {
-                            return reason;
+                        select! {
+                            msg = connexion.next() => self._handle_message(&msg).await,
+                            Some(reason) = rx.recv() => {
+                                // gateway termination requested
+                                self._terminate_websocket(&reason);
+                                return reason
+                            }
                         }
                     } else {
                         let timer = self.state.interval.as_mut().unwrap().tick();
                         select! {
-                            msg = connexion.next() => {
-                                if let HandleResult::Error(reason) = self._handle_message(&msg).await {
-                                    return reason
-                                }
-                            },
-                            _ = timer => self._do_heartbeat().await
+                            msg = connexion.next() => self._handle_message(&msg).await,
+                            _ = timer => self._do_heartbeat().await,
+                            Some(reason) = rx.recv() => {
+                                // gateway termination requested
+                                self._terminate_websocket(&reason);
+                                return reason
+                            }
                         }
                     }
                 } else {
@@ -125,36 +113,34 @@ impl Connexion {
     async fn _handle_message(
         &mut self,
         data: &Option<Result<Message, tokio_tungstenite::tungstenite::Error>>,
-    ) -> HandleResult {
+    ) {
         if let Some(message) = data {
             match message {
                 Ok(message) => match message {
                     Message::Text(text) => {
                         self._handle_discord_message(&text).await;
-                        HandleResult::Success
                     }
                     Message::Binary(message) => {
                         self._handle_discord_message(from_utf8(message).unwrap())
                             .await;
-                        HandleResult::Success
                     }
-                    Message::Close(_) => {
-                        error!("discord connexion closed");
-                        HandleResult::Error(CloseReason::ConnexionEnded)
+                    Message::Close(code) => {
+                        error!("discord connexion closed: {:?}", code);
+                        self.terminate.as_ref().unwrap().send(CloseReason::ConnexionEnded).await.unwrap();
                     }
 
-                    _ => HandleResult::Error(CloseReason::ErrorEncountered(
+                    _ => self.terminate.as_ref().unwrap().send(CloseReason::ErrorEncountered(
                         "unsupported message type encountered",
-                    )),
+                    )).await.unwrap(),
                 },
-                Err(_error) => HandleResult::Error(CloseReason::ErrorEncountered(
+                Err(_error) => self.terminate.as_ref().unwrap().send(CloseReason::ErrorEncountered(
                     "error while reading a message",
-                )),
+                )).await.unwrap(),
             }
         } else {
-            HandleResult::Error(CloseReason::ErrorEncountered(
+            self.terminate.as_ref().unwrap().send(CloseReason::ErrorEncountered(
                 "error while reading a message",
-            ))
+            )).await.unwrap()
         }
     }
 
@@ -171,18 +157,19 @@ impl Connexion {
             OpCodes::Dispatch => {
                 let t = message.t.unwrap();
                 trace!("dispatch message received: {:?}", t);
-                let topic = format!("nova.gateway.{}", t);
-                if let Err(e) = self.nats.as_ref().unwrap().publish(
-                    &topic,
-                    &serde_json::to_vec(&message.d).unwrap(),
-                ).await {
-                    error!("failed to publish message {}", e);
-                }
             },
-            OpCodes::PresenceUpdate => todo!(),
-            OpCodes::VoiceStateUpdate => todo!(),
-            OpCodes::Reconnect => todo!(),
-            OpCodes::InvalidSession => todo!(),
+            OpCodes::PresenceUpdate => {
+                println!("presence update message received: {:?}", message.d);
+            },
+            OpCodes::VoiceStateUpdate => {
+                println!("voice update");
+            }
+            OpCodes::Reconnect => {
+                println!("reconnect {:?}", message.d);
+            },
+            OpCodes::InvalidSession => {
+                println!("invalid session: {:?}", message.d);
+            },
             OpCodes::Hello => {
                 if let Ok(hello) = serde_json::from_value::<Hello>(message.d) {
                     info!("server sent hello {:?}", hello);
@@ -192,32 +179,24 @@ impl Connexion {
                         Duration::from_millis(hello.heartbeat_interval),
                     ));
                     self.state.stage = Stage::Initialized;
+                    let mut shard: Option<[i64; 2]> = None;
+                    if let Some(sharding) = &self.config.shard {
+                        shard = Some([sharding.current_shard.clone(), sharding.total_shards.clone()]);
+                        info!("shard information: {:?}", shard);
+                    }
                     self._send(&MessageBase {
                         t: None,
                         op: OpCodes::Identify,
                         s: None,
                         d: serde_json::to_value(&Identify{
                             token: self.config.token.clone(),
-                            intents: 1 << 0 |
-                                1 << 1 |
-                                1 << 2 |
-                                1 << 3 |
-                                1 << 4 |
-                                1 << 5 |
-                                1 << 6 |
-                                1 << 7 |
-                                1 << 8 |
-                                1 << 9 | 
-                                1 << 10 |
-                                1 << 11 |
-                                1 << 12 |
-                                1 << 13 |
-                                1 << 14,
+                            intents: self.config.intents.clone().bits(),
                             properties: IdentifyProprerties {
                                 os: "Linux".into(),
                                 browser: "Nova".into(),
                                 device: "Linux".into(),
-                            }
+                            },
+                            shard: shard,
                         }).unwrap(),
                     }).await;
                     // do login
@@ -237,10 +216,9 @@ impl Connexion {
 
     async fn _do_heartbeat(&mut self) {
         if !self.state.last_heartbeat_acknowledged {
-            self._terminate_websocket(CloseReason::ErrorEncountered(
+            self.terminate.as_ref().unwrap().send(CloseReason::ErrorEncountered(
                 "the server did not acknowledged the last heartbeat",
-            ))
-            .await;
+            )).await.unwrap();
             return;
         }
         self.state.last_heartbeat_acknowledged = false;
@@ -261,16 +239,16 @@ impl Connexion {
             if let Ok(json) = serde_json::to_vec(data) {
                 if let Err(error) = connexion.send(Message::Binary(json)).await {
                     error!("failed to write to socket: {}", error);
-                    self._terminate_websocket(CloseReason::ErrorEncountered(
+                    self.terminate.as_ref().unwrap().send(CloseReason::ErrorEncountered(
                         "failed to write to the socket",
                     ))
-                    .await;
+                    .await.unwrap();
                 }
             } else {
-                self._terminate_websocket(CloseReason::ErrorEncountered(
+                self.terminate.as_ref().unwrap().send(CloseReason::ErrorEncountered(
                     "failed to serialize the message",
                 ))
-                .await;
+                .await.unwrap();
             }
         }
     }
