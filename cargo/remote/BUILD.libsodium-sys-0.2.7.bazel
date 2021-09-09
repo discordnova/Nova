@@ -29,74 +29,8 @@ licenses([
 ])
 
 # Generated Targets
-# buildifier: disable=out-of-order-load
-# buildifier: disable=load-on-top
-load(
-    "@rules_rust//cargo:cargo_build_script.bzl",
-    "cargo_build_script",
-)
 
-cargo_build_script(
-    name = "libsodium_sys_build_script",
-    srcs = glob(["**/*.rs"]),
-    build_script_env = {
-        "NUM_JOBS": "2",
-        "PATH": "/usr/sbin:/usr/bin:/sbin:/bin",
-    },
-    crate_features = [
-    ],
-    crate_root = "build.rs",
-    data = glob(["**"]),
-    edition = "2015",
-    links = "sodium",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    version = "0.2.7",
-    visibility = ["//visibility:private"],
-    deps = [
-        "@raze__pkg_config__0_3_19//:pkg_config",
-        "@raze__walkdir__2_3_2//:walkdir",
-    ] + selects.with_or({
-        # cfg(not(target_env = "msvc"))
-        (
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-apple-ios",
-            "@rules_rust//rust/platform:aarch64-linux-android",
-            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
-            "@rules_rust//rust/platform:arm-unknown-linux-gnueabi",
-            "@rules_rust//rust/platform:i686-apple-darwin",
-            "@rules_rust//rust/platform:i686-linux-android",
-            "@rules_rust//rust/platform:i686-unknown-freebsd",
-            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-            "@rules_rust//rust/platform:powerpc-unknown-linux-gnu",
-            "@rules_rust//rust/platform:s390x-unknown-linux-gnu",
-            "@rules_rust//rust/platform:wasm32-unknown-unknown",
-            "@rules_rust//rust/platform:wasm32-wasi",
-            "@rules_rust//rust/platform:x86_64-apple-darwin",
-            "@rules_rust//rust/platform:x86_64-apple-ios",
-            "@rules_rust//rust/platform:x86_64-linux-android",
-            "@rules_rust//rust/platform:x86_64-unknown-freebsd",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
-        ): [
-            "@raze__cc__1_0_70//:cc",
-        ],
-        "//conditions:default": [],
-    }) + selects.with_or({
-        # cfg(target_env = "msvc")
-        (
-            "@rules_rust//rust/platform:i686-pc-windows-msvc",
-            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
-        ): [
-            "@raze__libc__0_2_101//:libc",
-        ],
-        "//conditions:default": [],
-    }),
-)
+# Unsupported target "build-script-build" with type "custom-build" omitted
 
 rust_library(
     name = "libsodium_sys",
@@ -158,3 +92,74 @@ rust_library(
 )
 
 # Unsupported target "test" with type "test" omitted
+
+# Additional content from bazel/patch/BUILD_script_patch
+# buildifier: disable=load
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+# Generated Targets
+# buildifier: disable=out-of-order-load
+# buildifier: disable=load-on-top
+load(
+    "@rules_rust//cargo:cargo_build_script.bzl",
+    "cargo_build_script",
+)
+
+cargo_build_script(
+    name = "libsodium_sys_build_script",
+    srcs = ["@nova//bazel/patch:libsodium_sys_build_script_script_.rs"],
+    build_script_env = {
+        "NUM_JOBS": "2",
+        "PATH": "/usr/sbin:/usr/bin:/sbin:/bin",
+    },
+    data = glob(["**"]),
+    edition = "2015",
+    links = "sodium",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.2.7",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@raze__pkg_config__0_3_19//:pkg_config",
+        "@raze__walkdir__2_3_2//:walkdir",
+    ] + selects.with_or({
+        # cfg(not(target_env = "msvc"))
+        (
+            "@rules_rust//rust/platform:aarch64-apple-darwin",
+            "@rules_rust//rust/platform:aarch64-apple-ios",
+            "@rules_rust//rust/platform:aarch64-linux-android",
+            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:arm-unknown-linux-gnueabi",
+            "@rules_rust//rust/platform:i686-apple-darwin",
+            "@rules_rust//rust/platform:i686-linux-android",
+            "@rules_rust//rust/platform:i686-unknown-freebsd",
+            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
+            "@rules_rust//rust/platform:powerpc-unknown-linux-gnu",
+            "@rules_rust//rust/platform:s390x-unknown-linux-gnu",
+            "@rules_rust//rust/platform:wasm32-unknown-unknown",
+            "@rules_rust//rust/platform:wasm32-wasi",
+            "@rules_rust//rust/platform:x86_64-apple-darwin",
+            "@rules_rust//rust/platform:x86_64-apple-ios",
+            "@rules_rust//rust/platform:x86_64-linux-android",
+            "@rules_rust//rust/platform:x86_64-unknown-freebsd",
+            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+        ): [
+            "@raze__cc__1_0_70//:cc",
+        ],
+        "//conditions:default": [],
+    }) + selects.with_or({
+        # cfg(target_env = "msvc")
+        (
+            "@rules_rust//rust/platform:i686-pc-windows-msvc",
+            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+        ): [
+            "@raze__libc__0_2_101//:libc",
+        ],
+        "//conditions:default": [],
+    }),
+)
