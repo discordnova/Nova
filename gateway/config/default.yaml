@@ -6,8 +6,8 @@ gateway:
   clustering:
     cluster_size: 1 # The total number of clusters
     cluster_id: 0 # Current cluster id
-    shard_count: 10 # 10 shards by cluster
+    shard_count: 1 # 10 shards by cluster
   discord:
     token: "token"
     large_threshold: 100
-    intents: 0
+    intents: 16384

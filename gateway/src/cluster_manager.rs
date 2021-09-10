@@ -38,9 +38,10 @@ impl ClusterManager {
                 }),
             }));
         }
-        let tasks = self.gateway_connexions.into_iter().map(|item| Box::pin(item.start()));
-        select_all(tasks).await;
-
-        info!("one shard crashed, we need a restart");
+        let tasks = self.gateway_connexions.into_iter().map(|item| {
+            Box::pin(item.start())
+        });
+        let task = select_all(tasks).await;
+        info!("one shard crashed, we need a restart {:?}", task.0);
     }
 }
