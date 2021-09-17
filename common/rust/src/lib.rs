@@ -4,3 +4,4 @@ pub mod config;
 pub mod monitoring;
 pub mod nats;
 pub mod payloads;
+pub mod error;

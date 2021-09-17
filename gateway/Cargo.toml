@@ -22,3 +22,4 @@ enumflags2 = { version ="0.7.1", features = ["serde"] }
 common = { path = "../common/rust" }
 tokio-scoped = "0.1.0"
 futures = "0.3.17"
+async-trait = "0.1.51"

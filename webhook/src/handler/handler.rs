@@ -88,7 +88,10 @@ impl Service<Request<Body>> for HandlerService {
                         },
                         _ => {
                             let payload = serde_json::to_string(&common::payloads::CachePayload {
-                                tracing: (),
+                                tracing: common::payloads::Tracing {
+                                    node_id: "".to_string(),
+                                    span: None,
+                                },
                                 data: value,
                             }).unwrap();
 

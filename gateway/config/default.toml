@@ -1,0 +1,7 @@
+[monitoring]
+enabled = false
+
+[nats]
+host = "localhost"
+
+[gateway]

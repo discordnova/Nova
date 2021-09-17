@@ -2,7 +2,7 @@ use futures::SinkExt;
 use log::error;
 use serde_json::Value;
 
-use crate::client::payloads::message::{MessageBase, OpCodes};
+use crate::client::payloads::gateway::{FullMessage, OpCodes};
 
 use super::Shard;
 
@@ -13,14 +13,15 @@ impl Shard {
     pub async fn presence_update(&mut self) -> Result<(), ()> {
         if let Some(connection) = &mut self.connection {
             connection
-                .send(MessageBase {
-                    t: None,
-                    s: None,
+                .send(FullMessage {
+                    dispatch_type: None,
+                    sequence: None,
                     op: OpCodes::PresenceUpdate,
                     // todo: proper payload for this
-                    d: Value::Null,
+                    data: Value::Null,
                 })
-                .await?;
+                .await
+                .unwrap();
         } else {
             error!("the connection is not open")
         }
@@ -31,14 +32,15 @@ impl Shard {
     pub async fn voice_state_update(&mut self) -> Result<(), ()> {
         if let Some(connection) = &mut self.connection {
             connection
-                .send(MessageBase {
-                    t: None,
-                    s: None,
+                .send(FullMessage {
+                    dispatch_type: None,
+                    sequence: None,
                     op: OpCodes::VoiceStateUpdate,
                     // todo: proper payload for this
-                    d: Value::Null,
+                    data: Value::Null,
                 })
-                .await?;
+                .await
+                .unwrap();
         } else {
             error!("the connection is not open")
         }
@@ -49,14 +51,15 @@ impl Shard {
     pub async fn request_guild_members(&mut self) -> Result<(), ()> {
         if let Some(connection) = &mut self.connection {
             connection
-                .send(MessageBase {
-                    t: None,
-                    s: None,
+                .send(FullMessage {
+                    dispatch_type: None,
+                    sequence: None,
                     op: OpCodes::RequestGuildMembers,
                     // todo: proper payload for this
-                    d: Value::Null,
+                    data: Value::Null,
                 })
-                .await?;
+                .await
+                .unwrap();
         } else {
             error!("the connection is not open")
         }

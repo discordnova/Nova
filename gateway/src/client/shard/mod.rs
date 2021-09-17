@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use self::state::SessionState;
 
 use super::connection::Connection;

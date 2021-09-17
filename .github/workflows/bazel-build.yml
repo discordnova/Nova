@@ -61,7 +61,7 @@ jobs:
       - name: Execute build script
         shell: bash
         run: |
-           bazel build //:package
+           bazel build //:packages
 
       - name: Bazel artifacts
         uses: actions/upload-artifact@v2
@@ -75,5 +75,5 @@ jobs:
       - name: Publish docker images
         shell: bash
         run: |
-           bazel run --define docker_repo=ghcr.io --define docker_tag=${{ steps.extract_branch.outputs.branch }} //:publish
+           bazel run --define docker_repo=ghcr.io --define docker_tag=${{ steps.extract_branch.outputs.branch }} //:container_publish
         if: matrix.os == 'ubuntu-latest'
