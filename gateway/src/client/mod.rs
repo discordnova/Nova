@@ -1,5 +1,3 @@
-mod utils;
-mod state;
+pub mod connection;
 pub mod payloads;
-pub mod connexion;
-pub mod structs;
+pub mod shard;

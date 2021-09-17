@@ -4,6 +4,7 @@ members = [
     "webhook",
     "ratelimiter",
     "gateway",
+    "cache",
     "common/rust"
 ]
 

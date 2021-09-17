@@ -1,10 +1,10 @@
-use std::net::ToSocketAddrs;
-mod handle;
+use std::{net::ToSocketAddrs, sync::Arc};
+mod handler;
 mod config;
+use crate::handler::make_service::MakeSvc;
 
 use hyper::Server;
-use log::info;
-use handle::MakeSvc;
+use log::{info, error};
 use common::config::Settings;
 use crate::config::Config;
 
@@ -22,13 +22,13 @@ async fn main() {
         "Starting server on {}:{}",
         settings.config.server.address, settings.config.server.port
     );
-    let nats = Box::new(nats::connect("localhost").unwrap());
+
     let server = Server::bind(&addr).serve(MakeSvc {
         settings: settings.config.clone(),
-        nats
+        nats: Arc::new(settings.nats.into()),
     });
 
     if let Err(e) = server.await {
-        eprintln!("server error: {}", e);
+        error!("server error: {}", e);
     }
 }

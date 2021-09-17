@@ -67,15 +67,6 @@ alias(
 )
 
 alias(
-    name = "pretty_env_logger",
-    actual = "@raze__pretty_env_logger__0_4_0//:pretty_env_logger",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
     name = "serde",
     actual = "@raze__serde__1_0_130//:serde",
     tags = [

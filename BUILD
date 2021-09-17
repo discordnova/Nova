@@ -7,24 +7,32 @@ load("@io_bazel_rules_docker//contrib:push-all.bzl", "container_push")
 gazelle(name = "gazelle")
 
 filegroup(
-    name = "package_bin",
+    name = "binaries",
     srcs = [
         "//novactl",
         "//webhook",
         "//gateway",
-        "//ratelimiter"
+        "//ratelimiter",
+        "//cache"
     ]
 )
 
 container_bundle(
-  name = "bundle",
+  name = "container_images",
 
   images = {
     "$(docker_repo)/discordnova/nova/novactl:$(docker_tag)": "//novactl:image",
     "$(docker_repo)/discordnova/nova/gateway:$(docker_tag)": "//gateway:image",
     "$(docker_repo)/discordnova/nova/ratelimiter:$(docker_tag)": "//ratelimiter:image",
     "$(docker_repo)/discordnova/nova/webhook:$(docker_tag)": "//webhook:image",
+    "$(docker_repo)/discordnova/nova/cache:$(docker_tag)": "//cache:image",
   }
+)
+
+container_push(
+  name = "container_publish",
+  bundle = ":container_images",
+  format = "OCI"
 )
 
 test_suite(
@@ -37,31 +45,25 @@ test_suite(
     ],
 )
 
-container_push(
-  name = "publish",
-  bundle = ":bundle",
-  format = "OCI"
-)
-
 pkg_tar(
-    name = "package_tar",
+    name = "packages_tar",
     extension = "tar.gz",
     srcs = [
-        ":package_bin"
+        ":binaries"
     ],
 )
 
 pkg_zip(
-    name = "package_zip",
+    name = "packages_zip",
     srcs = [
-        ":package_bin"
+        ":binaries"
     ],
 )
 
 filegroup(
-    name = "package",
+    name = "packages",
     srcs = [
-        ":package_zip",
-        ":package_tar",
+        ":packages_zip",
+        ":packages_tar",
     ],
 )

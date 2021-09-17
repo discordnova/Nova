@@ -2,3 +2,5 @@
 /// It contains utilities such as monitoring, logging and more.
 pub mod config;
 pub mod monitoring;
+pub mod nats;
+pub mod payloads;

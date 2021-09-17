@@ -11,6 +11,7 @@ pub struct Settings<T> {
     #[serde(skip_deserializing)]
     pub config: T,
     pub monitoring: crate::monitoring::MonitoringConfiguration,
+    pub nats: crate::nats::NatsConfiguration,
 }
 
 impl<T> Settings<T> where T: Deserialize<'static> + std::default::Default + Clone {
@@ -25,14 +26,12 @@ impl<T> Settings<T> where T: Deserialize<'static> + std::default::Default + Clon
         default.merge(File::with_name("config/local").required(false))?;
 
         // we can configure each component using environment variables
-        default.merge(Environment::with_prefix(&format!("NOVA_{}", service_name)))?;
+        default.merge(Environment::with_prefix("NOVA").separator("_"))?;
         let mut config: Settings<T> = default.clone().try_into().unwrap();
 
         //  try to load the config
         config.config = default.get::<T>(&service_name).unwrap();
-
-        // setup the logger
-        pretty_env_logger::init_custom_env(&format!("NOVA_{}_LOG", service_name));
+        pretty_env_logger::init();
 
         // start the monitoring system if needed
         crate::monitoring::start_monitoring(&config.monitoring);
