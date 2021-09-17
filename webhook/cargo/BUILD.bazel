@@ -58,6 +58,15 @@ alias(
 )
 
 alias(
+    name = "nats",
+    actual = "@raze__nats__0_15_2//:nats",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "pretty_env_logger",
     actual = "@raze__pretty_env_logger__0_4_0//:pretty_env_logger",
     tags = [

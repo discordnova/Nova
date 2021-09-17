@@ -14,6 +14,7 @@ hex = "0.4.3"
 pretty_env_logger = "0.4"
 serde_json = { version = "1.0" }
 common = { path = "../common/rust" }
+nats = "0.15.2"
 
 [[bin]]
 name = "webhook"

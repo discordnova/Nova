@@ -25,20 +25,27 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # MIT from expression "MIT OR Apache-2.0"
+    "notice",  # Apache-2.0 from expression "Apache-2.0"
 ])
 
 # Generated Targets
 
-# Unsupported target "mod" with type "bench" omitted
+# Unsupported target "nats_bench" with type "bench" omitted
+
+# Unsupported target "async_nats_bench" with type "example" omitted
+
+# Unsupported target "nats-box" with type "example" omitted
+
+# Unsupported target "nats_bench" with type "example" omitted
+
+# Unsupported target "serde-json" with type "example" omitted
 
 rust_library(
-    name = "getrandom",
+    name = "nats",
     srcs = glob(["**/*.rs"]),
     aliases = {
     },
     crate_features = [
-        "std",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -51,26 +58,30 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.2.3",
+    version = "0.15.2",
     # buildifier: leave-alone
     deps = [
-        "@raze__cfg_if__1_0_0//:cfg_if",
+        "@raze__base64__0_13_0//:base64",
+        "@raze__base64_url__1_4_10//:base64_url",
+        "@raze__blocking__1_0_2//:blocking",
+        "@raze__chrono__0_4_19//:chrono",
+        "@raze__crossbeam_channel__0_5_1//:crossbeam_channel",
+        "@raze__fastrand__1_5_0//:fastrand",
+        "@raze__itoa__0_4_8//:itoa",
+        "@raze__json__0_12_4//:json",
+        "@raze__log__0_4_14//:log",
+        "@raze__memchr__2_4_1//:memchr",
+        "@raze__nkeys__0_1_0//:nkeys",
+        "@raze__nuid__0_3_0//:nuid",
+        "@raze__once_cell__1_8_0//:once_cell",
+        "@raze__parking_lot__0_11_2//:parking_lot",
+        "@raze__regex__1_5_4//:regex",
+        "@raze__rustls__0_19_1//:rustls",
+        "@raze__rustls_native_certs__0_5_0//:rustls_native_certs",
+        "@raze__serde__1_0_130//:serde",
+        "@raze__serde_json__1_0_67//:serde_json",
+        "@raze__webpki__0_21_4//:webpki",
     ] + selects.with_or({
-        # cfg(all(target_arch = "wasm32", target_os = "unknown"))
-        (
-            "@rules_rust//rust/platform:wasm32-unknown-unknown",
-        ): [
-        ],
-        "//conditions:default": [],
-    }) + selects.with_or({
-        # cfg(target_os = "wasi")
-        (
-            "@rules_rust//rust/platform:wasm32-wasi",
-        ): [
-            "@raze__wasi__0_10_0_wasi_snapshot_preview1//:wasi",
-        ],
-        "//conditions:default": [],
-    }) + selects.with_or({
         # cfg(unix)
         (
             "@rules_rust//rust/platform:aarch64-apple-darwin",
@@ -93,11 +104,28 @@ rust_library(
             "@raze__libc__0_2_101//:libc",
         ],
         "//conditions:default": [],
+    }) + selects.with_or({
+        # cfg(windows)
+        (
+            "@rules_rust//rust/platform:i686-pc-windows-msvc",
+            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+        ): [
+            "@raze__winapi__0_3_9//:winapi",
+        ],
+        "//conditions:default": [],
     }),
 )
 
-# Unsupported target "custom" with type "test" omitted
+# Unsupported target "auth_nkey" with type "test" omitted
 
-# Unsupported target "normal" with type "test" omitted
+# Unsupported target "auth_tls" with type "test" omitted
 
-# Unsupported target "rdrand" with type "test" omitted
+# Unsupported target "auth_user_pass" with type "test" omitted
+
+# Unsupported target "connect" with type "test" omitted
+
+# Unsupported target "drop" with type "test" omitted
+
+# Unsupported target "jetstream" with type "test" omitted
+
+# Unsupported target "reconnection" with type "test" omitted

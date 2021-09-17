@@ -10,5 +10,5 @@ webhook:
     port: 8000
   discord:
     client_id: 738817757650485300
-    public_key: "475bed67e20fb1e2d9b9007607f08d7b25b5a0aa936ef2d4ddaf7d592c993860"
+    public_key: "2dc5873bb9e603dbf70e6abc217768b9d7dfacef9e74ddaefcca6a9aed41f30d"
 

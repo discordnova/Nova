@@ -11,6 +11,7 @@ use std::str::from_utf8;
 use std::task::{Context, Poll};
 use serde::{Deserialize, Serialize};
 use crate::config::Config;
+use nats::{Connection, connect};
 
 pub fn validate_signature(b64_public_key: &str, data: &Vec<u8>, b64_signature: &str) -> bool {
     // First, we need to check if the signature & private key is valid base64.
@@ -56,6 +57,7 @@ fn get_signature(headers: &HeaderMap) -> Option<(&str, &str)> {
 
 pub struct HandlerService {
     pub config: Config,
+    pub nats: Box<Connection>
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -76,6 +78,7 @@ impl Service<Request<Body>> for HandlerService {
     fn call(&mut self, req: Request<Body>) -> Self::Future {
         if req.method() == Method::POST {
             let public_key = self.config.discord.public_key.clone();
+            let nats = self.nats.clone();
             return Box::pin(async move {
                 let headers = req.headers().clone();
                 if let Some((signature, timestamp)) = get_signature(&headers) {
@@ -83,18 +86,19 @@ impl Service<Request<Body>> for HandlerService {
                         let contatenated_data = [timestamp.as_bytes().to_vec(), data.to_vec()].concat();
 
                         if validate_signature(public_key.as_str(), &contatenated_data, signature) {
-                            let data: Value = serde_json::from_str(from_utf8(&data).unwrap()).unwrap();
-                            let t = data.get("type").unwrap().as_i64().unwrap();
+                            let d: Value = serde_json::from_str(from_utf8(&data).unwrap()).unwrap();
+                            let t = d.get("type").unwrap().as_i64().unwrap();
 
                             if t == 1 {
-                                info!("success!");
-
                                 return Ok(Response::builder().header("Content-Type", "application/json").body(serde_json::to_string(&Ping {
                                     t: 1
                                 }).unwrap().into()).unwrap());
-                                
                             } else {
-                                Ok(Response::builder().status(StatusCode::UNAUTHORIZED).body("invalid operation".into()).unwrap())
+                                info!("Handled event");
+                                nats.publish(&format!("nova.dispatch.interaction_raw"), data).unwrap();
+                                return Ok(Response::builder().header("Content-Type", "application/json").body(serde_json::to_string(&Ping {
+                                    t: 5
+                                }).unwrap().into()).unwrap());
                             }
                         } else {
                             Ok(Response::builder().status(StatusCode::UNAUTHORIZED).body("signature verification failed".into()).unwrap())
@@ -116,6 +120,7 @@ impl Service<Request<Body>> for HandlerService {
 
 pub struct MakeSvc {
     pub settings: Config,
+    pub nats: Box<Connection>,
 }
 
 impl<T> Service<T> for MakeSvc {
@@ -130,6 +135,7 @@ impl<T> Service<T> for MakeSvc {
     fn call(&mut self, _: T) -> Self::Future {
         future::ready(Ok(HandlerService {
             config: self.settings.clone(),
+            nats: self.nats.clone(),
         }))
     }
 }

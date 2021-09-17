@@ -22,8 +22,10 @@ async fn main() {
         "Starting server on {}:{}",
         settings.config.server.address, settings.config.server.port
     );
+    let nats = Box::new(nats::connect("localhost").unwrap());
     let server = Server::bind(&addr).serve(MakeSvc {
         settings: settings.config.clone(),
+        nats
     });
 
     if let Err(e) = server.await {
