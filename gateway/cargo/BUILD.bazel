@@ -31,6 +31,15 @@ alias(
 )
 
 alias(
+    name = "async_trait",
+    actual = "@raze__async_trait__0_1_51//:async_trait",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "enumflags2",
     actual = "@raze__enumflags2__0_7_1//:enumflags2",
     tags = [
@@ -78,6 +87,33 @@ alias(
 alias(
     name = "log",
     actual = "@raze__log__0_4_14//:log",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "num",
+    actual = "@raze__num__0_4_0//:num",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "num_derive",
+    actual = "@raze__num_derive__0_3_3//:num_derive",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "num_traits",
+    actual = "@raze__num_traits__0_2_14//:num_traits",
     tags = [
         "cargo-raze",
         "manual",
