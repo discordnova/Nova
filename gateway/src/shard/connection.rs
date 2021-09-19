@@ -33,10 +33,7 @@ impl Shard {
             if reconnects < self.config.max_reconnects {
                 let time = min(
                     self.config.reconnect_delay_maximum,
-                    max(
-                        ((reconnects as f32) * self.config.reconnect_delay_growth_factor) as usize,
-                        self.config.reconnect_delay_minimum,
-                    ),
+                    self.config.reconnect_delay_minimum * (((reconnects - 1) as f32) * self.config.reconnect_delay_growth_factor) as usize,
                 );
                 info!(
                     "The shard got disconnected, waiting for reconnect ({}ms)",
@@ -99,7 +96,7 @@ impl Shard {
             // we need to reconnect to the gateway
             Message::Reconnect(msg) => {
                 self._util_set_seq(msg.sequence);
-                info!("gateway disconnect requested");
+                info!("Gateway disconnect requested");
                 self._disconnect().await;
             }
             Message::InvalidSession(msg) => {
@@ -107,21 +104,21 @@ impl Shard {
                 info!("invalid session");
                 let data = msg.data;
                 if !data {
-                    info!("session removed");
+                    info!("Session removed");
                     // reset the session data
                     self.state = None;
                     if let Err(e) = self._identify().await {
-                        error!("error while sending identify: {:?}", e);
+                        error!("Error while sending identify: {:?}", e);
                     }
                 }
             }
             Message::HeartbeatACK(msg) => {
                 self._util_set_seq(msg.sequence);
-                info!("heartbeat ack received");
+                info!("Heartbeat ack received");
             }
             Message::Hello(msg) => {
                 self._util_set_seq(msg.sequence);
-                info!("server hello received");
+                info!("Server hello received");
                 if let Err(e) = self._identify().await {
                     error!("error while sending identify: {:?}", e);
                 }
@@ -132,7 +129,7 @@ impl Shard {
     async fn _dispatch(&mut self, dispatch: &BaseMessage<Dispatch>) {
         match &dispatch.data {
             Dispatch::Ready(ready) => {
-                info!("received gateway dispatch hello");
+                info!("Received gateway dispatch ready");
                 info!(
                     "Logged in as {}",
                     ready.user.get("username").unwrap().to_string()
@@ -142,10 +139,9 @@ impl Shard {
                     session_id: ready.session_id.clone(),
                 });
             }
-            Dispatch::Resumed(_) => {
-                info!("session resumed");
+            Dispatch::Other(data) => {
+                
             }
-            Dispatch::Other(data) => {}
         }
     }
 }

@@ -1,38 +1,48 @@
+use futures::io::Read;
 use log::info;
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, Serialize};
 
 use serde_json::Value;
 
-use super::{events::ready::Ready, opcodes::OpCodes};
+use super::gateway::BaseMessage;
 
-/// Represents an unknown event not handled by the gateway itself
-#[derive(Clone, Debug, PartialEq, Deserialize)]
-pub struct UnknownDispatch {
-    pub t: String,
-    pub d: Value,
-    pub s: i64,
-    pub op: OpCodes,
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct Ready {
+    #[serde(rename = "v")]
+    pub version: u64,
+    pub user: Value,
+    pub guilds: Vec<Value>,
+    pub session_id: String,
+    pub shard: Option<[i64;2]>,
+    pub application: Value,
 }
 
 #[derive(Clone, Debug, PartialEq, Deserialize)]
 #[serde(tag = "t", content = "d")]
-#[serde(remote = "Dispatch")]
-pub enum Dispatch {
+pub enum FakeDispatch {
     #[serde(rename = "READY")]
     Ready(Ready),
-    #[serde(rename = "RESUMED")]
-    Resumed(()),
+    Other(Value),
+}
 
-    #[serde(skip_deserializing)]
-    Other(UnknownDispatch),
+#[derive(Clone, Debug, PartialEq)]
+pub enum Dispatch {
+    Ready(Ready),
+    Other(BaseMessage<Value>)
 }
 
 impl<'de> Deserialize<'de> for Dispatch {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: Deserializer<'de>
+    fn deserialize<D>(d: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
     {
-        info!("hey");
-        let s = UnknownDispatch::deserialize(deserializer)?;
-        Ok(Self::Other(s))
+        // todo: error handling
+        let value = Value::deserialize(d)?;
+
+        if value.get("t").unwrap() == "READY" {
+            Ok(Dispatch::Ready(Ready::deserialize(value.get("d").unwrap()).unwrap()))
+        } else {
+            Ok(Dispatch::Other(BaseMessage::deserialize(value).unwrap()))
+        }
     }
 }

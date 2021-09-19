@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde::de::Error;
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 #[serde(bound(deserialize = "T: Deserialize<'de> + std::fmt::Debug"))]
 pub struct BaseMessage<T> {
     pub t: Option<String>,
@@ -31,22 +31,13 @@ impl<'de> serde::Deserialize<'de> for Message {
         if let Some(op) = num::FromPrimitive::from_u64(val) {
             match op {
                 OpCodes::Dispatch => {
-                    match Dispatch::deserialize(&value) {
+                    // todo: remove unwrap
+                    let t = Some(value.get("t").unwrap().to_string());
+                    let sequence = value.get("s").unwrap().as_u64();
+
+                    // we need to find a better solution than clone
+                    match serde_json::from_value(value) {
                         Ok(data) => {
-
-                            let mut t = None;
-                            if let Some(t_value) = &value.get("t") {
-                                // this is safe since we know this is a string
-                                t = Some(t_value.to_string());
-                            }
-                            let mut sequence = None;
-
-                            if let Some(sequence_value) = value.get("s") {
-                                if let Some(sequence_uint) = sequence_value.as_u64() {
-                                    sequence = Some(sequence_uint);
-                                }
-                            }
-
                             Ok(Message::Dispatch(BaseMessage {
                                 op,
                                 t,
@@ -85,7 +76,7 @@ impl<'de> serde::Deserialize<'de> for Message {
                 _ => panic!("Cannot convert"),
             }
         } else {
-            todo!();
+            Err(Error::custom("unknown opcode"))
         }
     }
 }

@@ -1,7 +1,7 @@
 use std::env;
 
 use futures::SinkExt;
-use log::{debug, error};
+use log::{debug, error, info};
 use serde::Serialize;
 use serde_json::Value;
 use std::fmt::Debug;
@@ -15,7 +15,7 @@ impl Shard {
 
     /// sends a message through the websocket
     pub async fn _send<T: Serialize + Debug>(&mut self, message: BaseMessage<T>) -> Result<(), GatewayError> {
-        debug!("senging message {:?}", message);
+        debug!("Senging message {:?}", message);
         if let Some(connection) = &mut self.connection {
             if let Err(e) = connection.conn.send(message).await {
                 error!("failed to send message {:?}", e);
@@ -29,7 +29,8 @@ impl Shard {
     }
 
     pub async fn _identify(&mut self) -> Result<(), GatewayError> {
-        if let Some(state) = self.state.clone()  {
+        if let Some(state) = self.state.clone() {
+            info!("Using session");
             self._send(BaseMessage{
                 t: None,
                 sequence: None,
@@ -41,6 +42,7 @@ impl Shard {
                 },
             }).await
         } else {
+            info!("Sending login");
             self._send(BaseMessage{
                 t: None,
                 sequence: None,
