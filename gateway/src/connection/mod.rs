@@ -1,8 +1,8 @@
-use super::{error_utils::GatewayError, utils::get_gateway_url};
 use tokio::net::TcpStream;
-use tokio_tungstenite::{
-    connect_async, tungstenite::handshake::client::Request, MaybeTlsStream, WebSocketStream,
-};
+use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async, tungstenite::http::Request};
+
+use crate::{error::GatewayError, utils::get_gateway_url};
+
 mod stream;
 mod utils;
 

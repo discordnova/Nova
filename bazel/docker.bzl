@@ -3,10 +3,9 @@
 load("@io_bazel_rules_docker//toolchains/docker:toolchain.bzl", "toolchain_configure")
 load("@io_bazel_rules_docker//repositories:repositories.bzl", "repositories")
 load("@io_bazel_rules_docker//repositories:deps.bzl", "deps")
-load("@io_bazel_rules_docker//container:container.bzl", "container_pull")
+load("@io_bazel_rules_docker//container:container.bzl", "container_pull", "container_image")
 load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", "download_pkgs")
 load("@io_bazel_rules_docker//docker/package_managers:install_pkgs.bzl", "install_pkgs")
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 
 load(
     "@io_bazel_rules_docker//go:image.bzl",

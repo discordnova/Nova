@@ -5,3 +5,8 @@ enabled = false
 host = "localhost"
 
 [gateway]
+max_reconnects = 5
+reconnect_delay_growth_factor = 1.25
+reconnect_delay_minimum = 5000
+reconnect_delay_maximum = 60000
+intents = 32767

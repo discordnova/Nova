@@ -1,5 +1,6 @@
+use crate::{error::GatewayError, payloads::gateway::BaseMessage};
+
 use super::Connection;
-use crate::client::{error_utils::GatewayError};
 use futures::{FutureExt, Sink, SinkExt, Stream, StreamExt};
 use log::info;
 use serde::Serialize;
@@ -9,8 +10,9 @@ use std::{
 };
 use tokio_tungstenite::tungstenite::Message;
 
+/// Implementation of the Stream trait for the Connection
 impl Stream for Connection {
-    type Item = Result<crate::client::payloads::gateway::Message, GatewayError>;
+    type Item = Result<crate::payloads::gateway::Message, GatewayError>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         // first, when a poll is called, we check if the connection is still open
@@ -30,7 +32,7 @@ impl Stream for Connection {
                                         Err(e) => Poll::Ready(Some(Err(e))),
                                     },
                                     // unknown behaviour?
-                                    Poll::Pending => unimplemented!(),
+                                    Poll::Pending => unreachable!(),
                                 }
                             }
                             Err(e) => Poll::Ready(Some(Err(GatewayError::from(e)))),
@@ -38,7 +40,7 @@ impl Stream for Connection {
                         // if no message is available, we return none, it's the end of the stream
                         None => {
                             info!("tokio_tungstenite stream finished successfully");
-                            Box::pin(conn.close(None)).poll_unpin(cx);
+                            let _ = Box::pin(conn.close(None)).poll_unpin(cx);
                             self.connection = None;
                             Poll::Ready(None)
                         }
@@ -53,21 +55,22 @@ impl Stream for Connection {
     }
 }
 
-impl<T: Serialize> Sink<crate::client::payloads::gateway::FullMessage<T>> for Connection {
-    type Error = GatewayError;
+/// Implementation of the Sink trait for the Connection
+impl<T: Serialize> Sink<BaseMessage<T>> for Connection {
+    type Error = tokio_tungstenite::tungstenite::Error;
 
     #[allow(dead_code)]
-    fn poll_ready(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        if let Some(_) = &self.connection {
+    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        if let Some(conn) = &mut self.connection {
             // a connection exists, we can send data
-            Poll::Ready(Ok(()))
+            conn.poll_ready_unpin(cx)
         } else {
             Poll::Pending
         }
     }
 
     #[allow(dead_code)]
-    fn start_send(mut self: Pin<&mut Self>, item: crate::client::payloads::gateway::FullMessage<T>) -> Result<(), Self::Error> {
+    fn start_send(mut self: Pin<&mut Self>, item: BaseMessage<T>) -> Result<(), Self::Error> {
         if let Some(conn) = &mut self.connection {
             let message = serde_json::to_string(&item);
             conn.start_send_unpin(Message::Text(message.unwrap()))
@@ -77,12 +80,20 @@ impl<T: Serialize> Sink<crate::client::payloads::gateway::FullMessage<T>> for Co
     }
 
     #[allow(dead_code)]
-    fn poll_flush(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        Poll::Ready(Ok(()))
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        if let Some(conn) = &mut self.connection {
+            conn.poll_flush_unpin(cx)
+        } else {
+            Poll::Pending
+        }
     }
 
     #[allow(dead_code)]
-    fn poll_close(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        Poll::Ready(Ok(()))
+    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        if let Some(conn) = &mut self.connection {
+            conn.poll_close_unpin(cx)
+        } else {
+            Poll::Pending
+        }
     }
 }

@@ -1,6 +1,7 @@
 use std::time::Instant;
 
 /// This struct represents the state of a session
+#[derive(Clone, Debug)]
 pub struct SessionState {
     pub sequence: u64,
     pub session_id: String,
