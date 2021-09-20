@@ -50,7 +50,7 @@ impl Stream for Connection {
                 Poll::Pending => Poll::Pending,
             }
         } else {
-            Poll::Pending
+            Poll::Ready(None)
         }
     }
 }

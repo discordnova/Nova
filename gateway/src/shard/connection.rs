@@ -188,9 +188,7 @@ impl Shard {
                     session_id: ready.session_id.clone(),
                 });
             }
-            Dispatch::Other(data) => {
-                
-            }
+            Dispatch::Other(data) => {            }
         }
     }
 }
