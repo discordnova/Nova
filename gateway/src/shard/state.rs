@@ -1,4 +1,4 @@
-use std::time::Instant;
+use tokio::time::{Instant, Interval};
 
 /// This struct represents the state of a session
 #[derive(Clone, Debug)]
@@ -17,19 +17,19 @@ impl Default for SessionState {
 }
 
 /// This struct represents the state of a connection
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct ConnectionState {
     pub last_heartbeat_acknowledged: bool,
     pub last_heartbeat_time: Instant,
+    pub interval: Option<Interval>,
     
 }
-impl Default for ConnectionState {
-    fn default() -> Self {
+impl ConnectionState {
+    pub fn new() -> Self {
         Self {
             last_heartbeat_acknowledged: true,
             last_heartbeat_time: Instant::now(),
+            interval: None,
         }
     }
 }
-
-impl ConnectionState {}

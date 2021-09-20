@@ -1,22 +1,14 @@
-use std::{
-    cmp::{max, min},
-    convert::TryInto,
-    time::Duration,
-};
+use std::{cmp::min, convert::TryInto, time::Duration};
 
-use crate::{
-    connection::Connection,
-    payloads::{
+use crate::{connection::Connection, error::GatewayError, payloads::{
         dispatch::Dispatch,
         gateway::{BaseMessage, Message},
-    },
-    shard::state::SessionState,
-};
+    }, shard::state::SessionState};
 
 use super::{state::ConnectionState, ConnectionWithState, Shard};
 use futures::StreamExt;
 use log::{error, info};
-use tokio::{select, time::sleep};
+use tokio::{select, time::{Instant, sleep}};
 
 impl Shard {
     pub async fn start(self: &mut Self) {
@@ -54,28 +46,73 @@ impl Shard {
         connection.start().await.unwrap();
         self.connection = Some(ConnectionWithState {
             conn: connection,
-            state: ConnectionState::default(),
+            state: ConnectionState::new(),
         });
+
         loop {
             if let Some(connection) = &mut self.connection {
-                select!(
-                    payload = connection.conn.next() => {
-                        match payload {
-                            Some(data) => match data {
-                                Ok(message) => self._handle(&message).await,
-                                Err(error) => {
-                                    error!("An error occured while being connected to Discord: {:?}", error);
+                if let Some(timer) = &mut connection.state.interval {
+                    select!(
+                        payload = connection.conn.next() => {
+                            match payload {
+                                Some(data) => match data {
+                                    Ok(message) => self._handle(&message).await,
+                                    Err(error) => {
+                                        error!("An error occured while being connected to Discord: {:?}", error);
+                                        return;
+                                    },
+                                },
+                                None => {
+                                    info!("Connection terminated");
                                     return;
                                 },
-                            },
-                            None => {
-                                info!("Connection terminated");
+                            }
+                        },
+                        _ = timer.tick() => match self._do_heartbeat().await {
+                            Ok(_) => {},
+                            Err(e) => {
+                                info!("error occured: {:?}", e);
                                 return;
                             },
                         }
-                    }
-                )
+                    )
+                } else {
+                    select!(
+                        payload = connection.conn.next() => {
+                            match payload {
+                                Some(data) => match data {
+                                    Ok(message) => self._handle(&message).await,
+                                    Err(error) => {
+                                        error!("An error occured while being connected to Discord: {:?}", error);
+                                        return;
+                                    },
+                                },
+                                None => {
+                                    info!("Connection terminated");
+                                    return;
+                                },
+                            }
+                        }
+                    )
+                }
+                
             }
+        }
+    }
+
+    async fn _do_heartbeat(&mut self) -> Result<(), GatewayError> {
+        info!("heartbeat sent");
+        if let Some(conn) = &mut self.connection {
+            if !conn.state.last_heartbeat_acknowledged {
+                error!("we missed a hertbeat");
+                Err(GatewayError::from("a hertbeat was dropped, we need to restart the connection".to_string()))
+            } else {
+                conn.state.last_heartbeat_acknowledged = false;
+                conn.state.last_heartbeat_time = Instant::now();
+                self._send_heartbeat().await
+            }
+        } else {
+            unreachable!()
         }
     }
 
@@ -113,12 +150,24 @@ impl Shard {
                 }
             }
             Message::HeartbeatACK(msg) => {
-                self._util_set_seq(msg.sequence);
                 info!("Heartbeat ack received");
+                self._util_set_seq(msg.sequence);
+                if let Some(conn) = &mut self.connection {
+                    conn.state.last_heartbeat_acknowledged = true;
+                    let latency = Instant::now() - conn.state.last_heartbeat_time;
+                    info!("Latency updated {}ms", latency.as_millis());
+                }
             }
             Message::Hello(msg) => {
-                self._util_set_seq(msg.sequence);
                 info!("Server hello received");
+                self._util_set_seq(msg.sequence);
+                if let Some(conn) = &mut self.connection {
+                    conn.state.interval = Some(tokio::time::interval_at(
+                        Instant::now() + Duration::from_millis(msg.data.heartbeat_interval),
+                        Duration::from_millis(msg.data.heartbeat_interval),
+                    ));
+                }
+                
                 if let Err(e) = self._identify().await {
                     error!("error while sending identify: {:?}", e);
                 }
