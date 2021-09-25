@@ -16,7 +16,7 @@ import (
 var (
 	InitializeCommand = &cobra.Command{
 		Use:   "init",
-		Short: "Initialize a newnova based project",
+		Short: "Initialize a new nova based project",
 		Run:   initNovaRepo,
 	}
 )

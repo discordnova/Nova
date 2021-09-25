@@ -1,0 +1,9 @@
+load("@rules_rust//rust:defs.bzl", "rust_library")
+load("//cargo:crates.bzl", "all_crate_deps")
+
+rust_library(
+    name = "common",
+    srcs = glob(["src/**"]),
+    visibility = ["//visibility:public"],
+    deps = all_crate_deps(),
+)

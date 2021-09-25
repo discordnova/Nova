@@ -1,9 +1,0 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
-
-go_library(
-    name = "gateway",
-    srcs = ["gateway-payload.go"],
-    importpath = "github.com/discordnova/nova/common/discord/types/payloads/gateway",
-    visibility = ["//visibility:public"],
-    deps = ["//common/discord/types/types"],
-)

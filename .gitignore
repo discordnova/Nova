@@ -2,3 +2,4 @@ bazel-*
 .vscode
 ratelimiter/target
 target/
+**/local*

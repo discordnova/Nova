@@ -1,15 +1,15 @@
 load("@rules_rust//rust:rust.bzl", "rust_binary")
 load("@rules_rust//cargo:cargo_build_script.bzl", "cargo_build_script")
-load("@crates//:defs.bzl", "build_crates_from", "crates_from")
+load("//cargo:crates.bzl", "all_crate_deps", "crate_deps")
+load("@io_bazel_rules_docker//rust:image.bzl", "rust_image")
 
-exports_files(["Cargo.toml"])
+test_suite(name = "tests")
 
 cargo_build_script(
     name = "build_script",
     srcs = ["build.rs"],
     build_script_env = {
         "PROTOC": "$(location @com_google_protobuf//:protoc)",
-        "PROTO": "$(location //ratelimiter/proto:nova.ratelimit.v1.proto)"
     },
     data = [
         "//ratelimiter/proto:nova.ratelimit.v1.proto",
@@ -17,13 +17,20 @@ cargo_build_script(
         "@com_google_protobuf//:protoc",
         "@com_google_protobuf//:protobuf_headers",
     ],
-    deps = build_crates_from("Cargo.toml"),
+    deps = all_crate_deps() + crate_deps(["tonic-build"]),
 )
 
 rust_binary(
     name = "ratelimiter",
     srcs = ["src/main.rs"],
-    rustc_env = {},
-    deps = crates_from("Cargo.toml") + [":build_script"],
+    deps = all_crate_deps() + [":build_script"],
     visibility = ["//visibility:public"],
+)
+
+rust_image(
+    name = "image",
+    srcs = ["src/main.rs"],
+    deps = all_crate_deps() + [":build_script"],
+    visibility = ["//visibility:public"],
+    base = "//bazel:base",
 )
