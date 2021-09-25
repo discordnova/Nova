@@ -17,7 +17,9 @@ impl Shard {
 
         while reconnects < self.config.max_reconnects {
             info!("Starting connection for shard");
-            self._shard_task().await;
+            if let Err(e) = self._shard_task().await {
+                error!("Gateway status: {:?}", e);
+            }
             // when the shard got disconnected, the shard task ends
             reconnects += 1;
 
@@ -40,7 +42,7 @@ impl Shard {
         );
     }
 
-    async fn _shard_task(&mut self) {
+    async fn _shard_task(&mut self) -> Result<(), GatewayError> {
         // create the new connection
         let mut connection = Connection::new();
         connection.start().await.unwrap();
@@ -58,21 +60,18 @@ impl Shard {
                                 Some(data) => match data {
                                     Ok(message) => self._handle(&message).await,
                                     Err(error) => {
-                                        error!("An error occured while being connected to Discord: {:?}", error);
-                                        return;
+                                        return Err(GatewayError::from(format!("An error occured while being connected to Discord: {:?}", error).to_string()));
                                     },
                                 },
                                 None => {
-                                    info!("Connection terminated");
-                                    return;
+                                    return Err(GatewayError::from("Connection terminated".to_string()));
                                 },
                             }
                         },
                         _ = timer.tick() => match self._do_heartbeat().await {
                             Ok(_) => {},
-                            Err(e) => {
-                                info!("error occured: {:?}", e);
-                                return;
+                            Err(error) => {
+                                return Err(GatewayError::from(format!("An error occured while being connected to Discord: {:?}", error).to_string()));
                             },
                         }
                     )
@@ -83,13 +82,11 @@ impl Shard {
                                 Some(data) => match data {
                                     Ok(message) => self._handle(&message).await,
                                     Err(error) => {
-                                        error!("An error occured while being connected to Discord: {:?}", error);
-                                        return;
+                                        return Err(GatewayError::from(format!("An error occured while being connected to Discord: {:?}", error).to_string()));
                                     },
                                 },
                                 None => {
-                                    info!("Connection terminated");
-                                    return;
+                                    return Err(GatewayError::from("Connection terminated".to_string()));
                                 },
                             }
                         }

@@ -68,9 +68,9 @@ jobs:
         with:
           name: all-${{ matrix.os }}
           path: |
-            bazel-bin*/packages_*
-            bazel-bin*/packages_zip.zip
-            bazel-bin*/packages_tar.tar.gz
+            bazel-bin*/package_*
+            bazel-bin*/package_zip.zip
+            bazel-bin*/package_tar.tar.gz
 
       - name: Publish docker images
         shell: bash

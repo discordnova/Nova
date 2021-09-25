@@ -13,7 +13,15 @@
 
     // Add the IDs of extensions you want installed when the container is created.
     "extensions": [
-        ""
+        "matklad.rust-analyzer",
+        "bazelbuild.vscode-bazel",
+        "vadimcn.vscode-lldb",
+        "ms-azuretools.vscode-docker",
+        "golang.go",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "zxh404.vscode-proto3",
+        "phgn.vscode-starlark",
+        "redhat.vscode-yaml"
     ],
 
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
