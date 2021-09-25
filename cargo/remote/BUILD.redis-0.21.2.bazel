@@ -1,0 +1,106 @@
+"""
+@generated
+cargo-raze crate build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+
+# buildifier: disable=load
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+# buildifier: disable=load
+load(
+    "@rules_rust//rust:rust.bzl",
+    "rust_binary",
+    "rust_library",
+    "rust_test",
+)
+
+package(default_visibility = [
+    # Public for visibility by "@raze__crate__version//" targets.
+    #
+    # Prefer access through "//cargo", which limits external
+    # visibility to explicit Cargo.toml dependencies.
+    "//visibility:public",
+])
+
+licenses([
+    "notice",  # BSD-3-Clause from expression "BSD-3-Clause"
+])
+
+# Generated Targets
+
+# Unsupported target "bench_basic" with type "bench" omitted
+
+# Unsupported target "bench_cluster" with type "bench" omitted
+
+# Unsupported target "async-await" with type "example" omitted
+
+# Unsupported target "async-connection-loss" with type "example" omitted
+
+# Unsupported target "async-multiplexed" with type "example" omitted
+
+# Unsupported target "async-pub-sub" with type "example" omitted
+
+# Unsupported target "async-scan" with type "example" omitted
+
+# Unsupported target "basic" with type "example" omitted
+
+# Unsupported target "geospatial" with type "example" omitted
+
+# Unsupported target "streams" with type "example" omitted
+
+rust_library(
+    name = "redis",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "acl",
+        "default",
+        "geospatial",
+        "script",
+        "sha1",
+        "streams",
+    ],
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    data = [],
+    edition = "2018",
+    proc_macro_deps = [
+        "@raze__async_trait__0_1_51//:async_trait",
+    ],
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.21.2",
+    # buildifier: leave-alone
+    deps = [
+        "@raze__combine__4_6_1//:combine",
+        "@raze__dtoa__0_4_8//:dtoa",
+        "@raze__itoa__0_4_8//:itoa",
+        "@raze__percent_encoding__2_1_0//:percent_encoding",
+        "@raze__sha1__0_6_0//:sha1",
+        "@raze__url__2_2_2//:url",
+    ],
+)
+
+# Unsupported target "parser" with type "test" omitted
+
+# Unsupported target "test_acl" with type "test" omitted
+
+# Unsupported target "test_async" with type "test" omitted
+
+# Unsupported target "test_async_async_std" with type "test" omitted
+
+# Unsupported target "test_basic" with type "test" omitted
+
+# Unsupported target "test_cluster" with type "test" omitted
+
+# Unsupported target "test_geospatial" with type "test" omitted
+
+# Unsupported target "test_streams" with type "test" omitted
+
+# Unsupported target "test_types" with type "test" omitted

@@ -23,7 +23,7 @@ alias(
 
 alias(
     name = "tokio",
-    actual = "@raze__tokio__1_9_0//:tokio",
+    actual = "@raze__tokio__1_11_0//:tokio",
     tags = [
         "cargo-raze",
         "manual",
@@ -32,7 +32,7 @@ alias(
 
 alias(
     name = "tonic",
-    actual = "@raze__tonic__0_5_0//:tonic",
+    actual = "@raze__tonic__0_5_2//:tonic",
     tags = [
         "cargo-raze",
         "manual",
@@ -41,17 +41,9 @@ alias(
 
 alias(
     name = "tonic_build",
-    actual = "@raze__tonic_build__0_5_1//:tonic_build",
+    actual = "@raze__tonic_build__0_5_2//:tonic_build",
     tags = [
         "cargo-raze",
         "manual",
     ],
-)
-
-# Export file for Stardoc support
-exports_files(
-    [
-        "crates.bzl",
-    ],
-    visibility = ["//visibility:public"],
 )
