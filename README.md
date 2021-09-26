@@ -17,7 +17,6 @@ Nova requires a good infrastructure to operate and may consume lot of resources.
 - **Scalability**
 - **High-Performance**
 - **Reliability**
-- **Production-ready**
 
 ## Quick Start
 
