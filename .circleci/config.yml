@@ -18,16 +18,28 @@ commands:
 
 jobs:
   build:
-    docker:
-      - image: cimg/base:stable
+    machine:
+      image: 'ubuntu-2004:202010-01'
     steps:
       - checkout
       - setup-bazel
+      - restore_cache:
+          keys:
+            - bazel-cache-{{ .Branch }}
       - run:
           name: "Build"
           command: "bazel build //:packages"
+      - save_cache:
+          paths:
+            - ~/.cache/bazel
+          key: bazel-cache-{{ .Branch }}
+      - run:
+          name: "Move artifacts"
+          command: |
+            mkdir ~/project/artifacts
+            mv ~/project/bazel-bin/packages* ~/project/artifacts
       - store_artifacts:
-          path: ~/project/bazel-bin/packages*
+          path: ~/project/artifacts
 
 workflows:
   build-workflow:
