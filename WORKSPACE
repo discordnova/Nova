@@ -3,14 +3,13 @@ workspace(name = "nova")
 #@unused
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "d0f5f605d0d656007ce6c8b5a82df3037e1d8fe8b121ed42e536f569dec16113",
-    strip_prefix = "protobuf-3.14.0",
+    sha256 = "14e8042b5da37652c92ef6a2759e7d2979d295f60afd7767825e3de68c856c54",
+    strip_prefix = "protobuf-3.18.0",
     urls = [
-        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
-        "https://github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
+        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v3.18.0.tar.gz",
+        "https://github.com/protocolbuffers/protobuf/archive/v3.18.0.tar.gz",
     ],
 )
 
@@ -35,10 +34,9 @@ http_archive(
 
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "8e968b5fcea1d2d64071872b12737bbb5514524ee5f0a4f54f5920266c261acb",
+    sha256 = "e26c54a224f705feee511b24a0c0a11eb8e7ecbbae1fa2a1b7ba3e50a0820c36",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.28.0/rules_go-v0.28.0.zip",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.28.0/rules_go-v0.28.0.zip",
+        "https://github.com/csstaub/gopackagesdriver-repro/blob/main/external/rules_go-70b8365a.tar.gz?raw=true",
     ],
 )
 

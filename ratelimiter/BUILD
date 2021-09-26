@@ -23,14 +23,14 @@ cargo_build_script(
 rust_binary(
     name = "ratelimiter",
     srcs = ["src/main.rs"],
-    deps = all_crate_deps() + [":build_script"],
     visibility = ["//visibility:public"],
+    deps = all_crate_deps() + [":build_script"],
 )
 
 rust_image(
     name = "image",
     srcs = ["src/main.rs"],
-    deps = all_crate_deps() + [":build_script"],
-    visibility = ["//visibility:public"],
     base = "//bazel:base",
+    visibility = ["//visibility:public"],
+    deps = all_crate_deps() + [":build_script"],
 )

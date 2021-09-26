@@ -7,6 +7,6 @@ pub struct NovaError {
 
 impl fmt::Display for NovaError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "An error occured wihind the nova system: {}", self.message) // user-facing output
+        write!(f, "An error occurred within the nova system: {}", self.message) // user-facing output
     }
 }

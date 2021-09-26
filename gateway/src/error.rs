@@ -16,9 +16,7 @@ impl From<tokio_tungstenite::tungstenite::Error> for GatewayError {
 impl From<String> for GatewayError {
     fn from(e: String) -> Self {
         GatewayError {
-            0: NovaError {
-                message: e,
-            },
+            0: NovaError { message: e },
         }
     }
 }

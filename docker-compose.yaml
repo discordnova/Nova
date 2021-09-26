@@ -3,7 +3,7 @@ services:
   nats:
       image: 'nats'
       expose:
-        - "4222"
+        - "4222:422"
       ports:
         - "8222:8222"
         - "4222:4222"

@@ -36,7 +36,7 @@ impl<'de> serde::Deserialize<'de> for Message {
                     let sequence = value.get("s").unwrap().as_u64();
 
                     // we need to find a better solution than clone
-                    match serde_json::from_value(value) {
+                    match Dispatch::deserialize(value) {
                         Ok(data) => {
                             Ok(Message::Dispatch(BaseMessage {
                                 op,

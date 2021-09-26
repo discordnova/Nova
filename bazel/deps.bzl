@@ -104,6 +104,12 @@ def go_dependencies():
         version = "v0.1.0",
     )
     go_repository(
+        name = "com_github_buraksezer_consistent",
+        importpath = "github.com/buraksezer/consistent",
+        sum = "h1:Zfs6bX62wbP3QlbPGKUhqDw7SmNkOzY5bHZIYXYpR5g=",
+        version = "v0.9.0",
+    )
+    go_repository(
         name = "com_github_burntsushi_toml",
         importpath = "github.com/BurntSushi/toml",
         sum = "h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=",
@@ -1318,8 +1324,8 @@ def go_dependencies():
     go_repository(
         name = "org_golang_google_protobuf",
         importpath = "google.golang.org/protobuf",
-        sum = "h1:SnqbnDw1V7RiZcXPx5MEeqPv2s79L9i7BJUlG/+RurQ=",
-        version = "v1.27.1",
+        sum = "h1:bxAC2xTBsZGibn2RTntX0oH50xLsqy1OxA9tTL3p/lk=",
+        version = "v1.26.0",
     )
     go_repository(
         name = "org_golang_x_crypto",

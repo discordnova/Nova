@@ -1,14 +1,12 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "lib",
-    srcs = ["vesion.go"],
+    srcs = ["conn.go"],
     importpath = "github.com/discordnova/nova/novactl/lib",
     visibility = ["//visibility:public"],
-)
-
-go_test(
-    name = "lib_test",
-    srcs = ["version_test.go"],
-    deps = [":lib"],
+    deps = [
+        "//common/management",
+        "@org_golang_google_grpc//:go_default_library",
+    ],
 )

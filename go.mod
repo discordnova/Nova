@@ -10,5 +10,5 @@ require (
 	github.com/rs/zerolog v1.23.0
 	github.com/spf13/cobra v0.0.3
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/grpc v1.26.0 // indirect
 )

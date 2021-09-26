@@ -17,11 +17,10 @@ def load_golang_toolchains():
     go_dependencies()
     gazelle_dependencies()
 
-    # Fixes a bug with the protobuf generation
     go_repository(
         name = "org_golang_google_grpc",
         build_file_proto_mode = "disable",
         importpath = "google.golang.org/grpc",
-        sum = "h1:2dTRdpdFEEhJYQD8EMLB61nnrzSCTbG38PhqdhvOltg=",
-        version = "v1.26.0",
+        sum = "h1:f+PlOh7QV4iIJkPrx5NQ7qaNGFQ3OTse67yaDHfju4E=",
+        version = "v1.41.0",
     )
