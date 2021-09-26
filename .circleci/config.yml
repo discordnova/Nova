@@ -26,6 +26,7 @@ jobs:
       - run:
           name: "Build"
           command: "bazel build //:packages"
+          no_output_timeout: 3h
       - store_artifacts:
           path: ~/project/bazel-bin/packages*
 
