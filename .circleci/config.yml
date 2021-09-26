@@ -18,15 +18,14 @@ commands:
 
 jobs:
   build:
-    docker:
-      - image: cimg/base:stable
+    machine:
+      image: 'ubuntu-2004:202010-01'
     steps:
       - checkout
       - setup-bazel
       - run:
           name: "Build"
           command: "bazel build //:packages"
-          no_output_timeout: 3h
       - store_artifacts:
           path: ~/project/bazel-bin/packages*
 
