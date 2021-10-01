@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "manager_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/discordnova/nova/manager",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//manager/lib",
+        "//manager/lib/scheduler",
+        "@com_github_buraksezer_consistent//:consistent",
+    ],
+)
+
+go_binary(
+    name = "manager",
+    embed = [":manager_lib"],
+    visibility = ["//visibility:public"],
+)

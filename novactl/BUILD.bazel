@@ -10,9 +10,9 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//novactl/cmd",
-        "@com_github_rs_zerolog//:go_default_library",
-        "@com_github_rs_zerolog//log:go_default_library",
-        "@com_github_spf13_cobra//:go_default_library",
+        "@com_github_rs_zerolog//:zerolog",
+        "@com_github_rs_zerolog//log",
+        "@com_github_spf13_cobra//:cobra",
     ],
 )
 

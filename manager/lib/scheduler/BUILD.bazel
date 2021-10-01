@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "scheduler",
+    srcs = ["main.go"],
+    importpath = "github.com/discordnova/nova/manager/lib/scheduler",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_buraksezer_consistent//:consistent",
+        "@com_github_cespare_xxhash//:xxhash",
+    ],
+)

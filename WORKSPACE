@@ -59,6 +59,10 @@ http_archive(
 )
 
 load("//bazel:utils.bzl", "get_toolchain_utils_protocolbuffers", "get_toolchain_utils_rules_pkg")
+load("//:deps.bzl", "go_dependencies")
+
+# gazelle:repository_macro deps.bzl%go_dependencies
+go_dependencies()
 
 get_toolchain_utils_protocolbuffers()
 

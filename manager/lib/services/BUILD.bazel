@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "services",
+    srcs = ["status-server.go"],
+    importpath = "github.com/discordnova/nova/manager/lib/services",
+    visibility = ["//visibility:public"],
+    deps = ["//common/management"],
+)

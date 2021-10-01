@@ -20,8 +20,8 @@ go_library(
     importpath = "github.com/discordnova/nova/common",
     visibility = ["//visibility:public"],
     deps = [
-        "@com_github_prometheus_client_golang//prometheus/promhttp:go_default_library",
-        "@com_github_rs_zerolog//:go_default_library",
-        "@com_github_rs_zerolog//log:go_default_library",
+        "@com_github_prometheus_client_golang//prometheus/promhttp",
+        "@com_github_rs_zerolog//:zerolog",
+        "@com_github_rs_zerolog//log",
     ],
 )
