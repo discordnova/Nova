@@ -1,22 +1,26 @@
 use std::{net::ToSocketAddrs, sync::Arc};
-mod handler;
 mod config;
+mod handler;
 use crate::handler::make_service::MakeSvc;
 
-use hyper::Server;
-use log::{info, error};
-use common::config::Settings;
 use crate::config::Config;
+use common::config::Settings;
+use hyper::Server;
+use log::{error, info};
 
 #[tokio::main]
 async fn main() {
     let settings: Settings<Config> = Settings::new("webhook").unwrap();
+    println!("{:?}", settings);
 
-    let addr = format!("{}:{}", settings.config.server.address, settings.config.server.port)
-        .to_socket_addrs()
-        .unwrap()
-        .next()
-        .unwrap();
+    let addr = format!(
+        "{}:{}",
+        settings.config.server.address, settings.config.server.port
+    )
+    .to_socket_addrs()
+    .unwrap()
+    .next()
+    .unwrap();
 
     info!(
         "Starting server on {}:{}",

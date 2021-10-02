@@ -1,9 +1,8 @@
 use std::env;
 
-use config::{Config, ConfigError, Environment, File};
+use config::{Config, ConfigError, Environment, File, Source};
 use log::info;
-use serde::{Deserialize};
-
+use serde::Deserialize;
 
 #[derive(Debug, Deserialize, Clone)]
 #[serde(bound(deserialize = "T: Deserialize<'de> + std::default::Default + Clone"))]
@@ -14,7 +13,10 @@ pub struct Settings<T> {
     pub nats: crate::nats::NatsConfiguration,
 }
 
-impl<T> Settings<T> where T: Deserialize<'static> + std::default::Default + Clone {
+impl<T> Settings<T>
+where
+    T: Deserialize<'static> + std::default::Default + Clone,
+{
     pub fn new(service_name: &str) -> Result<Settings<T>, ConfigError> {
         let mut default = Config::default();
         // this file my be shared with all the components
@@ -25,8 +27,10 @@ impl<T> Settings<T> where T: Deserialize<'static> + std::default::Default + Clon
         default.merge(File::with_name(&format!("config/{}", mode)).required(false))?;
         default.merge(File::with_name("config/local").required(false))?;
 
+        let env = Environment::with_prefix("NOVA").separator("__");
+        println!("{:?}", env.collect());
         // we can configure each component using environment variables
-        default.merge(Environment::with_prefix("NOVA").separator("_"))?;
+        default.merge(env)?;
         let mut config: Settings<T> = default.clone().try_into().unwrap();
 
         //  try to load the config
