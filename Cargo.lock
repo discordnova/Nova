@@ -216,12 +216,14 @@ name = "common"
 version = "0.1.0"
 dependencies = [
  "config",
+ "enumflags2",
  "hyper",
  "log",
  "nats",
  "pretty_env_logger",
  "prometheus",
  "serde 1.0.130",
+ "serde_repr",
  "tokio",
 ]
 
