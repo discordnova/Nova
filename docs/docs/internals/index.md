@@ -46,6 +46,6 @@ of the discord events, webhooks and more.
 
 #### Protocols
 
-All the protocols a detailed in the [protocols folder](protocols)
+All the protocols a detailed in the [protocols folder](protocols/index)
 
 #### 
