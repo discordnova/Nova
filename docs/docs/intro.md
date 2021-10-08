@@ -25,5 +25,5 @@ With the help of Nova, you can achieve a number of things, such as
 
 ### How did we solve this ?
 
-Nova separates the gateway into multiple smaller components corresponding to multiple
+Nova separates the gateway into multiple smaller components corresponding to each
 discord apis

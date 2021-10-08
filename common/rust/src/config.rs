@@ -1,9 +1,12 @@
 use std::env;
-
 use config::{Config, ConfigError, Environment, File, Source};
 use log::info;
 use serde::Deserialize;
 
+/// Settings<T> is the base structure for all the nova's component config
+/// you can specify a type T and the name of the component. the "config"
+/// field will be equals to the key named after the given component name
+/// and will be of type T
 #[derive(Debug, Deserialize, Clone)]
 #[serde(bound(deserialize = "T: Deserialize<'de> + std::default::Default + Clone"))]
 pub struct Settings<T> {
@@ -13,10 +16,13 @@ pub struct Settings<T> {
     pub nats: crate::nats::NatsConfiguration,
 }
 
+/// 
 impl<T> Settings<T>
 where
     T: Deserialize<'static> + std::default::Default + Clone,
 {
+    /// Initializes a new configuration like the other components of nova
+    /// And starts the prometheus metrics server if needed.
     pub fn new(service_name: &str) -> Result<Settings<T>, ConfigError> {
         let mut default = Config::default();
         // this file my be shared with all the components

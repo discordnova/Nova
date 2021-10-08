@@ -1,5 +1,5 @@
 syntax = "proto3";
-package nova.ratelimit.v1;
+package nova.management.v1alpha;
 
 message Empty {}
 

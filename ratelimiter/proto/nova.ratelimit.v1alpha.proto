@@ -3,7 +3,7 @@
 // the requested route bucket or global rate-limit is hit.
 
 syntax = "proto3";
-package nova.ratelimit.v1;
+package nova.ratelimit.v1alpha;
 
 // The reponse of a RatelimitRequest, it includes the status of the reponse and
 // the bucket informations.

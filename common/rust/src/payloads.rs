@@ -1,14 +1,25 @@
 use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
 
-/// Payload send to the nova cache queues
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(bound(deserialize = "T: Deserialize<'de> + std::default::Default + Clone"))]
+
+
+/// Data structure sent to the cache component
+/// by the gateway & webhook.
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(bound(deserialize = "T: Deserialize<'de> + Debug"))]
 pub struct CachePayload<T> {
+
+    #[serde(rename = "tr")]
     pub tracing: Tracing,
-    pub data: T
+
+    #[serde(rename = "d")]
+    pub data: T,
+
+    #[serde(rename = "o")]
+    pub operation: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Tracing {
     pub node_id: String,
     pub span: Option<String>

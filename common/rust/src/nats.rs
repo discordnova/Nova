@@ -24,7 +24,6 @@ pub struct NatsConfiguration {
     host: String,
 }
 
-/// 
 impl Into<Connection> for NatsConfiguration {
     fn into(self) -> Connection {
         let mut options = Options::new();

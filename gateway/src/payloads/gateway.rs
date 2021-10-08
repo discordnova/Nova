@@ -1,7 +1,10 @@
-use super::{dispatch::Dispatch, opcodes::{OpCodes, hello::Hello}};
+use super::{
+    dispatch::Dispatch,
+    opcodes::{hello::Hello, OpCodes},
+};
+use serde::de::Error;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use serde::de::Error;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 #[serde(bound(deserialize = "T: Deserialize<'de> + std::fmt::Debug"))]
@@ -24,7 +27,10 @@ pub enum Message {
 }
 
 impl<'de> serde::Deserialize<'de> for Message {
-    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> where D::Error : Error {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error>
+    where
+        D::Error: Error,
+    {
         let value = Value::deserialize(d)?;
         let val = value.get("op").and_then(Value::as_u64).unwrap();
 
@@ -37,41 +43,31 @@ impl<'de> serde::Deserialize<'de> for Message {
 
                     // we need to find a better solution than clone
                     match Dispatch::deserialize(value) {
-                        Ok(data) => {
-                            Ok(Message::Dispatch(BaseMessage {
-                                op,
-                                t,
-                                sequence,
-                                data
-                            }))
-                        },
+                        Ok(data) => Ok(Message::Dispatch(BaseMessage {
+                            op,
+                            t,
+                            sequence,
+                            data,
+                        })),
                         Err(e) => Err(Error::custom(e)),
                     }
+                }
+
+                OpCodes::Reconnect => match BaseMessage::deserialize(value) {
+                    Ok(data) => Ok(Message::Reconnect(data)),
+                    Err(e) => Err(Error::custom(e)),
                 },
-                
-                OpCodes::Reconnect => {
-                    match BaseMessage::deserialize(value) {
-                        Ok(data) => Ok(Message::Reconnect(data)),
-                        Err(e) => Err(Error::custom(e)),
-                    }
+                OpCodes::InvalidSession => match BaseMessage::deserialize(value) {
+                    Ok(data) => Ok(Message::InvalidSession(data)),
+                    Err(e) => Err(Error::custom(e)),
                 },
-                OpCodes::InvalidSession => {
-                    match BaseMessage::deserialize(value) {
-                        Ok(data) => Ok(Message::InvalidSession(data)),
-                        Err(e) => Err(Error::custom(e)),
-                    }
+                OpCodes::Hello => match BaseMessage::deserialize(value) {
+                    Ok(data) => Ok(Message::Hello(data)),
+                    Err(e) => Err(Error::custom(e)),
                 },
-                OpCodes::Hello => {
-                    match BaseMessage::deserialize(value) {
-                        Ok(data) => Ok(Message::Hello(data)),
-                        Err(e) => Err(Error::custom(e)),
-                    }
-                },
-                OpCodes::HeartbeatACK => {
-                    match BaseMessage::deserialize(value) {
-                        Ok(data) => Ok(Message::HeartbeatACK(data)),
-                        Err(e) => Err(Error::custom(e)),
-                    }
+                OpCodes::HeartbeatACK => match BaseMessage::deserialize(value) {
+                    Ok(data) => Ok(Message::HeartbeatACK(data)),
+                    Err(e) => Err(Error::custom(e)),
                 },
                 _ => panic!("Cannot convert"),
             }

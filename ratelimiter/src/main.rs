@@ -1,14 +1,14 @@
 // Some implementation of the gRPC service using the shared library.
 
 pub mod ratelimit_pb {
-    tonic::include_proto!("nova.ratelimit.v1");
+    tonic::include_proto!("nova.ratelimit.v1alpha");
 }
 
 use ratelimit_pb::ratelimit_service_server::{RatelimitService, RatelimitServiceServer};
-use ratelimit_pb::{CreateBucketData, RatelimitResponse, RatelimitRequest};
-use tonic::{Request, Status, Response};
-use tonic::transport::Server;
+use ratelimit_pb::{CreateBucketData, RatelimitRequest, RatelimitResponse};
 use std::error::Error;
+use tonic::transport::Server;
+use tonic::{Request, Response, Status};
 
 #[derive(Default)]
 pub struct MyRatelimitService {}
@@ -17,15 +17,15 @@ pub struct MyRatelimitService {}
 impl RatelimitService for MyRatelimitService {
     async fn get_ratelimit_status(
         &self,
-        _request: Request<RatelimitRequest>
+        _request: Request<RatelimitRequest>,
     ) -> Result<Response<RatelimitResponse>, Status> {
-        return Err(Status::not_found("Not implmented"))
+        return Err(Status::not_found("Not implmented"));
     }
     async fn create_bucket(
         &self,
-        _request: Request<CreateBucketData>
-    ) ->Result<Response<CreateBucketData>, Status> {
-        return Err(tonic::Status::not_found("Not implmented"))
+        _request: Request<CreateBucketData>,
+    ) -> Result<Response<CreateBucketData>, Status> {
+        return Err(tonic::Status::not_found("Not implmented"));
     }
 }
 

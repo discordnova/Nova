@@ -34,9 +34,10 @@ http_archive(
 
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "e26c54a224f705feee511b24a0c0a11eb8e7ecbbae1fa2a1b7ba3e50a0820c36",
+    sha256 = "8e968b5fcea1d2d64071872b12737bbb5514524ee5f0a4f54f5920266c261acb",
     urls = [
-        "https://github.com/csstaub/gopackagesdriver-repro/blob/main/external/rules_go-70b8365a.tar.gz?raw=true",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.28.0/rules_go-v0.28.0.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.28.0/rules_go-v0.28.0.zip",
     ],
 )
 
@@ -58,6 +59,10 @@ http_archive(
     ],
 )
 
+load("//bazel:go.bzl", "load_golang_toolchains")
+
+load_golang_toolchains()
+
 load("//bazel:utils.bzl", "get_toolchain_utils_protocolbuffers", "get_toolchain_utils_rules_pkg")
 load("//:deps.bzl", "go_dependencies")
 
@@ -71,10 +76,6 @@ get_toolchain_utils_rules_pkg()
 load("//bazel:rust.bzl", "load_rust_toolchains")
 
 load_rust_toolchains()
-
-load("//bazel:go.bzl", "load_golang_toolchains")
-
-load_golang_toolchains()
 
 load("//bazel:docker.bzl", "load_docker")
 

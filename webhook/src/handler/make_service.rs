@@ -1,12 +1,15 @@
-use std::{future::{Ready, ready}, sync::Arc, task::{Context, Poll}};
+use super::handler::HandlerService;
+use crate::config::Config;
 use hyper::service::Service;
 use nats::Connection;
-use crate::config::Config;
-use super::handler::HandlerService;
-
+use std::{
+    future::{ready, Ready},
+    sync::Arc,
+    task::{Context, Poll},
+};
 
 pub struct MakeSvc {
-    pub settings: Config,
+    pub settings: Arc<Config>,
     pub nats: Arc<Connection>,
 }
 

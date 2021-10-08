@@ -12,7 +12,7 @@ cargo_build_script(
         "PROTOC": "$(location @com_google_protobuf//:protoc)",
     },
     data = [
-        "//ratelimiter/proto:nova.ratelimit.v1.proto",
+        "//ratelimiter/proto:nova.ratelimit.v1alpha.proto",
     ] + [
         "@com_google_protobuf//:protoc",
         "@com_google_protobuf//:protobuf_headers",
