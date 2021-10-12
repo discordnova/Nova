@@ -55,6 +55,7 @@ jobs:
           key: bazel-${{ matrix.os }}
       - name: Execute Bazel tests
         shell: bash
+        if: matrix.os == 'ubuntu-latest'
         run: |
           bazel test //:tests
       # Runs a set of commands using the runners shell
