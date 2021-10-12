@@ -31,11 +31,9 @@ licenses([
 # Generated Targets
 
 rust_library(
-    name = "security_framework_sys",
+    name = "crypto_mac",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "OSX_10_9",
-        "default",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -48,10 +46,10 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "2.4.2",
+    version = "0.10.1",
     # buildifier: leave-alone
     deps = [
-        "@raze__core_foundation_sys__0_8_2//:core_foundation_sys",
-        "@raze__libc__0_2_101//:libc",
+        "@raze__generic_array__0_14_4//:generic_array",
+        "@raze__subtle__2_4_1//:subtle",
     ],
 )

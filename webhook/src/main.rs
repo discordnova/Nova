@@ -5,14 +5,16 @@ use crate::handler::make_service::MakeSvc;
 
 use crate::config::Config;
 use common::config::Settings;
+use common::log::{error, info};
 use hyper::Server;
-use log::{error, info};
 
 #[tokio::main]
 async fn main() {
     let settings: Settings<Config> = Settings::new("webhook").unwrap();
-    println!("{:?}", settings);
+    start(settings).await;
+}
 
+async fn start(settings: Settings<Config>) {
     let addr = format!(
         "{}:{}",
         settings.config.server.address, settings.config.server.port
@@ -27,12 +29,13 @@ async fn main() {
         settings.config.server.address, settings.config.server.port
     );
 
+    let config = Arc::new(settings.config);
     let server = Server::bind(&addr).serve(MakeSvc {
-        settings: settings.config.clone(),
+        settings: config,
         nats: Arc::new(settings.nats.into()),
     });
 
     if let Err(e) = server.await {
-        error!("server error: {}", e);
+        panic!("server error: {}", e);
     }
 }

@@ -14,7 +14,7 @@ filegroup(
         "//cache",
         "//gateway",
         "//novactl",
-        "//ratelimiter",
+        "//rest",
         "//webhook",
     ],
 )
@@ -24,7 +24,7 @@ container_bundle(
     images = {
         "ghcr.io/discordnova/nova/novactl:$(docker_tag)": "//novactl:image",
         "ghcr.io/discordnova/nova/gateway:$(docker_tag)": "//gateway:image",
-        "ghcr.io/discordnova/nova/ratelimiter:$(docker_tag)": "//ratelimiter:image",
+        "ghcr.io/discordnova/nova/rest:$(docker_tag)": "//rest:image",
         "ghcr.io/discordnova/nova/webhook:$(docker_tag)": "//webhook:image",
         "ghcr.io/discordnova/nova/cache:$(docker_tag)": "//cache:image",
     },
@@ -41,7 +41,7 @@ test_suite(
     tests = [
         "//gateway:tests",
         "//novactl:tests",
-        "//ratelimiter:tests",
+        "//rest:tests",
         "//webhook:tests",
     ],
 )

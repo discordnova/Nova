@@ -13,15 +13,6 @@ licenses([
 
 # Aliased targets
 alias(
-    name = "config",
-    actual = "@raze__config__0_11_0//:config",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
     name = "hex",
     actual = "@raze__hex__0_4_3//:hex",
     tags = [
@@ -40,26 +31,17 @@ alias(
 )
 
 alias(
+    name = "libc",
+    actual = "@raze__libc__0_2_101//:libc",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "libsodium_sys",
     actual = "@raze__libsodium_sys__0_2_7//:libsodium_sys",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "log",
-    actual = "@raze__log__0_4_14//:log",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "nats",
-    actual = "@raze__nats__0_15_2//:nats",
     tags = [
         "cargo-raze",
         "manual",

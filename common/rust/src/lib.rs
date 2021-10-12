@@ -5,3 +5,10 @@ pub mod monitoring;
 pub mod nats;
 pub mod payloads;
 pub mod error;
+
+pub use log as log;
+pub use serde as serde;
+pub use ::config as config_crate;
+pub use prometheus as prometheus;
+pub use ::nats as nats_crate;
+pub use testcontainers as testcontainers;

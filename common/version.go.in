@@ -1,5 +1,8 @@
 package common
 
+// This is a file that will be replaced
+// by the `version_template` target in bazel
+
 const (
 	VERSION = "$VERSION"
 )

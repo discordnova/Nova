@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
-
-
 /// Data structure sent to the cache component
 /// by the gateway & webhook.
 #[derive(Serialize, Deserialize, Debug)]

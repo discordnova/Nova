@@ -7,8 +7,8 @@ use crate::{connection::Connection, error::GatewayError, payloads::{
 
 use super::{state::ConnectionState, ConnectionWithState, Shard};
 use futures::StreamExt;
-use log::{error, info};
-use tokio::{select, time::{Instant, sleep}};
+use common::{log::{error, info}};
+use tokio::{select, time::{Instant, interval_at, sleep}};
 
 impl Shard {
     pub async fn start(self: &mut Self) {
@@ -159,7 +159,7 @@ impl Shard {
                 info!("Server hello received");
                 self._util_set_seq(msg.sequence);
                 if let Some(conn) = &mut self.connection {
-                    conn.state.interval = Some(tokio::time::interval_at(
+                    conn.state.interval = Some(interval_at(
                         Instant::now() + Duration::from_millis(msg.data.heartbeat_interval),
                         Duration::from_millis(msg.data.heartbeat_interval),
                     ));

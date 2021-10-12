@@ -2,7 +2,7 @@ use crate::{error::GatewayError, payloads::gateway::BaseMessage};
 
 use super::Connection;
 use futures::{FutureExt, Sink, SinkExt, Stream, StreamExt};
-use log::info;
+use common::log::info;
 use serde::Serialize;
 use std::{
     pin::Pin,

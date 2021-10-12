@@ -5,17 +5,10 @@ use hyper::{
     service::Service,
     Body, Method, Request, Response, StatusCode,
 };
-use log::{error, info, trace};
-use nats::Connection;
+use common::log::{error, info, trace};
+use common::nats_crate::Connection;
 use serde::{Deserialize, Serialize};
-use std::{
-    future::Future,
-    io::{Error, ErrorKind},
-    pin::Pin,
-    str::from_utf8,
-    sync::Arc,
-    task::{Context, Poll},
-};
+use std::{future::Future, io::{Error, ErrorKind}, pin::Pin, str::from_utf8, sync::Arc, task::{Context, Poll}, time::Duration};
 
 /// Hyper service used to handle the discord webhooks
 #[derive(Clone)]
@@ -105,13 +98,14 @@ impl Service<Request<Body>> for HandlerService {
                                     node_id: "".to_string(),
                                     span: None,
                                 },
+                                operation: "".to_string(),
                                 data: value,
                             })
                             .unwrap();
 
                             match self_clone
                                 .nats
-                                .request("nova.cache.dispatch.interaction", payload)
+                                .request_timeout("nova.cache.dispatch.interaction", payload, Duration::from_secs(2))
                             {
                                 Ok(response) => Ok(Response::builder()
                                     .header("Content-Type", "application/json")

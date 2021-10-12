@@ -1,6 +1,6 @@
 use std::str::from_utf8;
 use tokio_tungstenite::tungstenite::Message;
-use log::info;
+use common::log::info;
 
 use crate::error::GatewayError;
 

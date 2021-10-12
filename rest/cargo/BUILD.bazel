@@ -13,8 +13,8 @@ licenses([
 
 # Aliased targets
 alias(
-    name = "config",
-    actual = "@raze__config__0_11_0//:config",
+    name = "futures_util",
+    actual = "@raze__futures_util__0_3_17//:futures_util",
     tags = [
         "cargo-raze",
         "manual",
@@ -31,35 +31,8 @@ alias(
 )
 
 alias(
-    name = "log",
-    actual = "@raze__log__0_4_14//:log",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "nats",
-    actual = "@raze__nats__0_15_2//:nats",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "pretty_env_logger",
-    actual = "@raze__pretty_env_logger__0_4_0//:pretty_env_logger",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "prometheus",
-    actual = "@raze__prometheus__0_12_0//:prometheus",
+    name = "hyper_tls",
+    actual = "@raze__hyper_tls__0_5_0//:hyper_tls",
     tags = [
         "cargo-raze",
         "manual",
@@ -69,15 +42,6 @@ alias(
 alias(
     name = "serde",
     actual = "@raze__serde__1_0_130//:serde",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "testcontainers",
-    actual = "@raze__testcontainers__0_12_0//:testcontainers",
     tags = [
         "cargo-raze",
         "manual",

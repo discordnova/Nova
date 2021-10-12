@@ -1,5 +1,5 @@
 use std::env;
-use config::{Config, ConfigError, Environment, File, Source};
+use config::{Config, ConfigError, Environment, File};
 use log::info;
 use serde::Deserialize;
 
@@ -24,6 +24,8 @@ where
     /// Initializes a new configuration like the other components of nova
     /// And starts the prometheus metrics server if needed.
     pub fn new(service_name: &str) -> Result<Settings<T>, ConfigError> {
+        pretty_env_logger::init();
+
         let mut default = Config::default();
         // this file my be shared with all the components
         default.merge(File::with_name("config/default"))?;
@@ -34,17 +36,19 @@ where
         default.merge(File::with_name("config/local").required(false))?;
 
         let env = Environment::with_prefix("NOVA").separator("__");
-        println!("{:?}", env.collect());
         // we can configure each component using environment variables
         default.merge(env)?;
         let mut config: Settings<T> = default.clone().try_into().unwrap();
 
         //  try to load the config
         config.config = default.get::<T>(&service_name).unwrap();
-        pretty_env_logger::init();
 
         // start the monitoring system if needed
         crate::monitoring::start_monitoring(&config.monitoring);
         Ok(config)
     }
+}
+
+pub fn test_init() {
+    pretty_env_logger::init();
 }

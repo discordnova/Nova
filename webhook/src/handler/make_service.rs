@@ -1,7 +1,7 @@
 use super::handler::HandlerService;
 use crate::config::Config;
 use hyper::service::Service;
-use nats::Connection;
+use common::nats_crate::Connection;
 use std::{
     future::{ready, Ready},
     sync::Arc,
