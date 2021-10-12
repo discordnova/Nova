@@ -21,3 +21,10 @@ def load_golang_toolchains():
         sum = "h1:f+PlOh7QV4iIJkPrx5NQ7qaNGFQ3OTse67yaDHfju4E=",
         version = "v1.41.0",
     )
+
+    go_repository(
+        name = "org_golang_x_crypto",
+        importpath = "golang.org/x/crypto",
+        sum = "h1:gsTQYXdTw2Gq7RBsWvlQ91b+aEQ6bXFUngBGuR8sPpI=",
+        version = "v0.0.0-20210616213533-5ff15b29337e",
+    )
