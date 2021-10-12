@@ -1,4 +1,6 @@
 # Nova
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdiscordnova%2Fnova.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdiscordnova%2Fnova?ref=badge_shield)
+
 
 Nova is an open source Discord framework for creating high-performance app.
 
@@ -29,3 +31,6 @@ If you wish to contribute to Nova, go to [CONTRIBUTING]().
 ## License
 
 Nova is distributed under the Apache 2.0 license, see [LICENSE](LICENSE) for more information.
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdiscordnova%2Fnova.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdiscordnova%2Fnova?ref=badge_large)
