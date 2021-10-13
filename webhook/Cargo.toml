@@ -12,6 +12,7 @@ libsodium-sys = "0.2.7"
 hex = "0.4.3"
 serde_json = { version = "1.0" }
 libc = "0.2.101"
+lazy_static = "1.4.0"
 
 [[bin]]
 name = "webhook"

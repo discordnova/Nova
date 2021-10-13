@@ -15,6 +15,7 @@ async fn main() {
 }
 
 async fn start(settings: Settings<Config>) {
+    
     let addr = format!(
         "{}:{}",
         settings.config.server.address, settings.config.server.port
@@ -36,6 +37,6 @@ async fn start(settings: Settings<Config>) {
     });
 
     if let Err(e) = server.await {
-        panic!("server error: {}", e);
+        error!("server error: {}", e);
     }
 }
