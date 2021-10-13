@@ -5,7 +5,7 @@ use crate::{
     handler::tests::utils::{generate_keypair, sign_message},
     start,
 };
-use common::{config::test_init, nats_crate::Connection};
+use common::{config::test_init, nats_crate::Connection, testcontainers::images::generic::WaitFor};
 use common::{
     config::Settings,
     log::info,
@@ -35,7 +35,10 @@ lazy_static! {
 
     static ref NATS_CONTAINER: Container<'static, Cli, GenericImage> = {
         test_init();
-        let image: GenericImage = GenericImage::new(nats_image());
+
+        let image: GenericImage = GenericImage::new(nats_image())
+            .with_wait_for(WaitFor::message_on_stderr("Server is ready"));
+        
         let container = DOCKER.run(image);
         container.start();
         container.get_host_port(4222).unwrap();
@@ -186,6 +189,7 @@ async fn respond_from_nats_response() {
 
 #[tokio::test]
 async fn response_400_when_invalid_json_body() {
+    let _ = NATS_CONTAINER.deref();
     let _ = TASK.deref();
     let ping = "{".to_string();
     let timestamp = "my datetime :)";
@@ -206,6 +210,7 @@ async fn response_400_when_invalid_json_body() {
 
 #[tokio::test]
 async fn response_400_when_invalid_utf8_body() {
+    let _ = NATS_CONTAINER.deref();
     let _ = TASK.deref();
     // invalid 2 octet sequence
     let ping = vec![0xc3, 0x28];
