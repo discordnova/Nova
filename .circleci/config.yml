@@ -12,6 +12,7 @@ commands:
           name: Install bazel from go
           command: |
             go install github.com/bazelbuild/bazelisk
+      - run: docker info
   setup-ci:
     description: |
       Prepare all the requirements for the CI
