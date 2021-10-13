@@ -17,7 +17,7 @@ commands:
       Prepare all the requirements for the CI
     steps:
       - checkout
-      - setup-bazel-linux
+      - setup-bazel
       #- run:
       #    name: Docker login
       #    command: echo "$GHCR_PASS" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
