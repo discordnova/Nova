@@ -11,7 +11,7 @@ commands:
       - run:
           name: Install bazel from go
           command: |
-            go get github.com/bazelbuild/bazelisk
+            go install github.com/bazelbuild/bazelisk
   setup-ci:
     description: |
       Prepare all the requirements for the CI
@@ -76,7 +76,8 @@ jobs:
       shell: powershell.exe
     steps:
       - run: systeminfo
-      - setup-ci
+      - checkout
+      - run: choco install bazelisk
       - restore_cache:
           keys:
             - bazel-cache-windows-{{ .Branch }}

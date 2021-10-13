@@ -204,7 +204,6 @@ async fn response_400_when_invalid_json_body() {
     assert!(result.status() == 400);
 }
 
-
 #[tokio::test]
 async fn response_400_when_invalid_utf8_body() {
     let _ = TASK.deref();
