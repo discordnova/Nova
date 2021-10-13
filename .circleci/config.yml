@@ -39,7 +39,7 @@ commands:
       - store_artifacts:
           path: ~/project/artifacts
       - store_test_results:
-          path: ~/project/bazel-testlogs/*
+          path: ~/project/bazel-testlogs/
 
 jobs:
   build-linux-arm64:
