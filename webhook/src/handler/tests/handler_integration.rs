@@ -5,7 +5,7 @@ use crate::{
     handler::tests::utils::{generate_keypair, sign_message},
     start,
 };
-use common::{config::test_init, nats_crate::Connection, testcontainers::images::generic::WaitFor};
+use common::{config::test_init, nats_crate::Connection, testcontainers::{Image, images::generic::WaitFor}};
 use common::{
     config::Settings,
     log::info,
@@ -41,10 +41,12 @@ lazy_static! {
         
         let container = DOCKER.run(image);
         container.start();
+        container.image().wait_until_ready(&container);
         container.get_host_port(4222).unwrap();
         container
     };
 
+    
     static ref KEYPAIR: (String, [u8; 64]) = {
         generate_keypair()
     };
