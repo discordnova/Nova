@@ -10,12 +10,9 @@ commands:
       Setup the Bazel build system used for building Android projects
     steps:
       - run:
-          name: Add Bazel Apt repository
+          name: Install bazel from go
           command: |
             go get github.com/bazelbuild/bazelisk
-      - run:
-          name: Install Bazel from Apt
-          command: sudo apt update && sudo apt install bazel
   setup-ci-linux:
     description: |
       Prepare all the requirements for the CI
