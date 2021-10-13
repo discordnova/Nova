@@ -24,8 +24,6 @@ commands:
     steps:
       - checkout
       - setup-bazel-linux
-      - setup_remote_docker:
-          version: 19.03.13
       #- run:
       #    name: Docker login
       #    command: echo "$GHCR_PASS" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
