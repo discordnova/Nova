@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   win: circleci/windows@2.2.0
+  node: circleci/node@4.7.0
 
 commands:
   setup-bazel-linux:
@@ -11,10 +12,8 @@ commands:
       - run:
           name: Add Bazel Apt repository
           command: |
-            sudo apt install curl gnupg
-            curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
-            sudo mv bazel.gpg /etc/apt/trusted.gpg.d/
-            echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+            nvm use 16
+            npm install -g @bazel/bazelisk
       - run:
           name: Install Bazel from Apt
           command: sudo apt update && sudo apt install bazel
@@ -33,10 +32,10 @@ commands:
     steps:
       - run:
           name: "Test"
-          command: "bazel test //:tests"
+          command: "bazelisk test //:tests"
       - run:
           name: "Build"
-          command: "bazel build //:packages"
+          command: "bazelisk build //:packages"
       - run:
           name: "Move artifacts"
           command: |
@@ -75,9 +74,9 @@ jobs:
           name: Publish docker images
           command: |
             bazel run --define docker_repo=ghcr.io --define docker_tag={{ .Branch }} //:container_publish
-  
+
   build-windows:
-    executor: 
+    executor:
       name: win/default
       shell: powershell.exe
     steps:
@@ -87,7 +86,17 @@ jobs:
       - restore_cache:
           keys:
             - bazel-cache-windows-{{ .Branch }}
-      - build-and-test
+      - run:
+          name: "Build"
+          command: "bazelisk build //:packages"
+      - run:
+          name: "Move artifacts"
+          command: |
+            mkdir ~/project/artifacts
+            mv ~/project/bazel-bin/packages* ~/project/artifacts
+      - store_artifacts:
+          path: ~/project/artifacts
+
   build-macos:
     macos:
       xcode: 11.3.0
@@ -99,7 +108,7 @@ jobs:
             - bazel-cache-macos-{{ .Branch }}
       - run:
           name: "Build"
-          command: "bazel build //:packages"
+          command: "bazelisk build //:packages"
       - run:
           name: "Move artifacts"
           command: |
@@ -114,4 +123,4 @@ workflows:
       - build-linux-x86
       - build-linux-arm64
       - build-windows
-      - build-macos
+      # - build-macos
