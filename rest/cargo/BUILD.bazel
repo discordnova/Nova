@@ -40,6 +40,15 @@ alias(
 )
 
 alias(
+    name = "lazy_static",
+    actual = "@raze__lazy_static__1_4_0//:lazy_static",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "serde",
     actual = "@raze__serde__1_0_130//:serde",
     tags = [
@@ -51,6 +60,15 @@ alias(
 alias(
     name = "tokio",
     actual = "@raze__tokio__1_11_0//:tokio",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "xxhash_rust",
+    actual = "@raze__xxhash_rust__0_8_2//:xxhash_rust",
     tags = [
         "cargo-raze",
         "manual",

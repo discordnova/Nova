@@ -36,6 +36,7 @@ rust_library(
     crate_features = [
         "codec",
         "default",
+        "io",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",

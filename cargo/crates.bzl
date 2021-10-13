@@ -14,6 +14,7 @@ _DEPENDENCIES = {
     "webhook": {
         "hex": "@raze__hex__0_4_3//:hex",
         "hyper": "@raze__hyper__0_14_12//:hyper",
+        "lazy_static": "@raze__lazy_static__1_4_0//:lazy_static",
         "libc": "@raze__libc__0_2_101//:libc",
         "libsodium-sys": "@raze__libsodium_sys__0_2_7//:libsodium_sys",
         "serde": "@raze__serde__1_0_130//:serde",
@@ -27,6 +28,7 @@ _DEPENDENCIES = {
         "nats": "@raze__nats__0_15_2//:nats",
         "pretty_env_logger": "@raze__pretty_env_logger__0_4_0//:pretty_env_logger",
         "prometheus": "@raze__prometheus__0_12_0//:prometheus",
+        "redis": "@raze__redis__0_21_2//:redis",
         "serde": "@raze__serde__1_0_130//:serde",
         "testcontainers": "@raze__testcontainers__0_12_0//:testcontainers",
         "tokio": "@raze__tokio__1_11_0//:tokio",
@@ -54,8 +56,10 @@ _DEPENDENCIES = {
         "futures-util": "@raze__futures_util__0_3_17//:futures_util",
         "hyper": "@raze__hyper__0_14_12//:hyper",
         "hyper-tls": "@raze__hyper_tls__0_5_0//:hyper_tls",
+        "lazy_static": "@raze__lazy_static__1_4_0//:lazy_static",
         "serde": "@raze__serde__1_0_130//:serde",
         "tokio": "@raze__tokio__1_11_0//:tokio",
+        "xxhash-rust": "@raze__xxhash_rust__0_8_2//:xxhash_rust",
     },
     "": {
         "libc": "@raze__libc__0_2_101//:libc",
@@ -255,6 +259,16 @@ def raze_fetch_remote_crates():
         sha256 = "1e37cfd5e7657ada45f742d6e99ca5788580b5c529dc78faf11ece6dc702656f",
         strip_prefix = "aho-corasick-0.7.18",
         build_file = Label("//cargo/remote:BUILD.aho-corasick-0.7.18.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "raze__arc_swap__1_4_0",
+        url = "https://crates.io/api/v1/crates/arc-swap/1.4.0/download",
+        type = "tar.gz",
+        sha256 = "e6df5aef5c5830360ce5218cecb8f018af3438af5686ae945094affc86fdec63",
+        strip_prefix = "arc-swap-1.4.0",
+        build_file = Label("//cargo/remote:BUILD.arc-swap-1.4.0.bazel"),
     )
 
     maybe(
@@ -505,6 +519,16 @@ def raze_fetch_remote_crates():
         sha256 = "95059428f66df56b63431fdb4e1947ed2190586af5c5a8a8b71122bdf5a7f469",
         strip_prefix = "cpufeatures-0.2.1",
         build_file = Label("//cargo/remote:BUILD.cpufeatures-0.2.1.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "raze__crc16__0_4_0",
+        url = "https://crates.io/api/v1/crates/crc16/0.4.0/download",
+        type = "tar.gz",
+        sha256 = "338089f42c427b86394a5ee60ff321da23a5c89c9d89514c829687b26359fcff",
+        strip_prefix = "crc16-0.4.0",
+        build_file = Label("//cargo/remote:BUILD.crc16-0.4.0.bazel"),
     )
 
     maybe(
@@ -2405,6 +2429,16 @@ def raze_fetch_remote_crates():
         sha256 = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f",
         strip_prefix = "winapi-x86_64-pc-windows-gnu-0.4.0",
         build_file = Label("//cargo/remote:BUILD.winapi-x86_64-pc-windows-gnu-0.4.0.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "raze__xxhash_rust__0_8_2",
+        url = "https://crates.io/api/v1/crates/xxhash-rust/0.8.2/download",
+        type = "tar.gz",
+        sha256 = "e575e15bedf6e57b5c2d763ffc6c3c760143466cbd09d762d539680ab5992ded",
+        strip_prefix = "xxhash-rust-0.8.2",
+        build_file = Label("//cargo/remote:BUILD.xxhash-rust-0.8.2.bazel"),
     )
 
     maybe(

@@ -1,7 +1,10 @@
 version: 2.1
 
+orbs:
+  win: circleci/windows@2.2.0
+
 commands:
-  setup-bazel:
+  setup-bazel-linux:
     description: |
       Setup the Bazel build system used for building Android projects
     steps:
@@ -15,24 +18,90 @@ commands:
       - run:
           name: Install Bazel from Apt
           command: sudo apt update && sudo apt install bazel
-
-jobs:
-  build:
-    machine:
-      image: 'ubuntu-2004:202010-01'
+  setup-ci-linux:
+    description: |
+      Prepare all the requirements for the CI
     steps:
       - checkout
       - setup-bazel
-      - restore_cache:
-          keys:
-            - bazel-cache-{{ .Branch }}
+      - setup_remote_docker:
+          version: 19.03.13
+          docker_layer_caching: true
+      - run:
+          name: Docker login
+          command: echo "$GHCR_PASS" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+  build-and-test:
+    description: |
+      Builds and test
+    steps:
+      - run:
+          name: "Test"
+          command: "bazel test //:tests"
       - run:
           name: "Build"
           command: "bazel build //:packages"
+      - run:
+          name: "Move artifacts"
+          command: |
+            mkdir ~/project/artifacts
+            mv ~/project/bazel-bin/packages* ~/project/artifacts
+      - store_artifacts:
+          path: ~/project/artifacts
+
+jobs:
+  build-linux-arm64:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
+    steps:
+      - setup-ci-linux
+      - restore_cache:
+          keys:
+            - bazel-cache-linux-arm-{{ .Branch }}
+      - build-and-test
+      - run:
+          name: Publish docker images
+          command: |
+            bazel run --define docker_repo=ghcr.io --define docker_tag=arm-{{ .Branch }} //:container_publish
+
+  build-linux-x86:
+    machine:
+      image: ubuntu-2004:202010-01
+    steps:
+      - setup-ci-linux
       - save_cache:
           paths:
             - ~/.cache/bazel
-          key: bazel-cache-{{ .Branch }}
+          key: bazel-cache-linux-x86-{{ .Branch }}
+      - build-and-test
+      - run:
+          name: Publish docker images
+          command: |
+            bazel run --define docker_repo=ghcr.io --define docker_tag={{ .Branch }} //:container_publish
+  build-windows:
+    executor: 
+      name: win/default
+      shell: powershell.exe
+    steps:
+      - checkout
+      - run: systeminfo
+      - run: choco install bazel
+      - restore_cache:
+          keys:
+            - bazel-cache-windows-{{ .Branch }}
+      - build-and-test
+  build-macos:
+    macos:
+      xcode: 11.3.0
+    steps:
+      - checkout
+      - run: brew install bazel
+      - restore_cache:
+          keys:
+            - bazel-cache-macos-{{ .Branch }}
+      - run:
+          name: "Build"
+          command: "bazel build //:packages"
       - run:
           name: "Move artifacts"
           command: |
@@ -44,4 +113,7 @@ jobs:
 workflows:
   build-workflow:
     jobs:
-      - build
+      - build-x86
+      - build-arm64
+      - build-windows
+      - build-macos

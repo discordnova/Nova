@@ -14,6 +14,7 @@ pub struct Settings<T> {
     pub config: T,
     pub monitoring: crate::monitoring::MonitoringConfiguration,
     pub nats: crate::nats::NatsConfiguration,
+    pub redis: crate::redis::RedisConfiguration,
 }
 
 /// 

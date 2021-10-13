@@ -67,6 +67,15 @@ alias(
 )
 
 alias(
+    name = "redis",
+    actual = "@raze__redis__0_21_2//:redis",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "serde",
     actual = "@raze__serde__1_0_130//:serde",
     tags = [

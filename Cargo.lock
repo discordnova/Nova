@@ -12,6 +12,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "arc-swap"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e6df5aef5c5830360ce5218cecb8f018af3438af5686ae945094affc86fdec63"
+
+[[package]]
 name = "arrayvec"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -181,7 +187,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a909e4d93292cd8e9c42e189f61681eff9d67b6541f96b8a1a737f23737bd001"
 dependencies = [
  "bytes",
+ "futures-core",
  "memchr",
+ "pin-project-lite",
+ "tokio",
+ "tokio-util",
 ]
 
 [[package]]
@@ -194,6 +204,7 @@ dependencies = [
  "nats",
  "pretty_env_logger",
  "prometheus",
+ "redis",
  "serde 1.0.130",
  "testcontainers",
  "tokio",
@@ -248,6 +259,12 @@ checksum = "95059428f66df56b63431fdb4e1947ed2190586af5c5a8a8b71122bdf5a7f469"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "crc16"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "338089f42c427b86394a5ee60ff321da23a5c89c9d89514c829687b26359fcff"
 
 [[package]]
 name = "crossbeam-channel"
@@ -1335,12 +1352,21 @@ version = "0.21.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "202c5bf92cad3d57605c366e644a7fbf305a83f19754fc66678c6265dcc9b8b4"
 dependencies = [
+ "arc-swap",
  "async-trait",
+ "bytes",
  "combine",
+ "crc16",
  "dtoa",
+ "futures",
+ "futures-util",
  "itoa",
  "percent-encoding",
+ "pin-project-lite",
+ "rand 0.8.4",
  "sha1",
+ "tokio",
+ "tokio-util",
  "url",
 ]
 
@@ -1387,8 +1413,10 @@ dependencies = [
  "futures-util",
  "hyper",
  "hyper-tls",
+ "lazy_static",
  "serde 1.0.130",
  "tokio",
+ "xxhash-rust",
 ]
 
 [[package]]
@@ -2095,6 +2123,7 @@ dependencies = [
  "common",
  "hex",
  "hyper",
+ "lazy_static",
  "libc",
  "libsodium-sys",
  "serde 1.0.130",
@@ -2151,6 +2180,12 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
+
+[[package]]
+name = "xxhash-rust"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e575e15bedf6e57b5c2d763ffc6c3c760143466cbd09d762d539680ab5992ded"
 
 [[package]]
 name = "yaml-rust"

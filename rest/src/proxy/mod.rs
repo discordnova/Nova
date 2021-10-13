@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::{config::Config, ratelimit::Ratelimiter};
 use futures_util::future::TryFutureExt;
 use hyper::{
     client::HttpConnector, header::HeaderValue, http::uri::Parts, service::Service, Body, Client,
@@ -10,6 +10,7 @@ use std::{future::Future, pin::Pin, sync::Arc, task::Poll};
 #[derive(Clone)]
 pub struct ServiceProxy {
     client: Client<HttpsConnector<HttpConnector>>,
+    ratelimiter: Arc<Ratelimiter>,
     config: Arc<Config>,
 }
 
@@ -66,9 +67,9 @@ impl Service<Request<Body>> for ServiceProxy {
 }
 
 impl ServiceProxy {
-    pub fn new(config: Arc<Config>) -> Self {
+    pub fn new(config: Arc<Config>, ratelimiter: Arc<Ratelimiter>) -> Self {
         let https = HttpsConnector::new();
         let client = Client::builder().build::<_, hyper::Body>(https);
-        ServiceProxy { client, config }
+        ServiceProxy { client, config, ratelimiter }
     }
 }
