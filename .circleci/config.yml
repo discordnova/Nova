@@ -21,10 +21,16 @@ commands:
       #- run:
       #    name: Docker login
       #    command: echo "$GHCR_PASS" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
-  build-and-test:
-    description: |
-      Builds and test
+jobs:
+  build-linux-arm64:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
     steps:
+      - setup-ci
+      - restore_cache:
+          keys:
+            - bazel-cache-linux-arm-{{ .Branch }}
       - run:
           name: "Test"
           command: "bazelisk test //:tests || true"
@@ -44,18 +50,6 @@ commands:
             mv ~/project/bazel-bin/packages* ~/project/artifacts
       - store_artifacts:
           path: ~/project/artifacts
-
-jobs:
-  build-linux-arm64:
-    machine:
-      image: ubuntu-2004:202101-01
-    resource_class: arm.medium
-    steps:
-      - setup-ci
-      - restore_cache:
-          keys:
-            - bazel-cache-linux-arm-{{ .Branch }}
-      - build-and-test
       # - run:
       #     name: Publish docker images
       #     command: |
@@ -70,7 +64,25 @@ jobs:
           paths:
             - ~/.cache/bazel
           key: bazel-cache-linux-x86-{{ .Branch }}
-      - build-and-test
+      - run:
+          name: "Test"
+          command: "bazelisk test //:tests || true"
+
+      - store_test_results:
+          path: ~/project/bazel-testlogs/rest
+      - store_test_results:
+          path: ~/project/bazel-testlogs/webhook
+
+      - run:
+          name: "Build"
+          command: "bazelisk build //:packages"
+      - run:
+          name: "Move artifacts"
+          command: |
+            mkdir ~/project/artifacts
+            mv ~/project/bazel-bin/packages* ~/project/artifacts
+      - store_artifacts:
+          path: ~/project/artifacts
       # - run:
       #     name: Publish docker images
       #     command: |
@@ -87,7 +99,27 @@ jobs:
       - restore_cache:
           keys:
             - bazel-cache-windows-{{ .Branch }}
-      - build-and-test
+      - run:
+          name: "Test"
+          command: |
+            $ErrorActionPreference = ‘SilentlyContinue’
+            bazelisk test //:tests
+
+      - store_test_results:
+          path: ~/project/bazel-testlogs/rest
+      - store_test_results:
+          path: ~/project/bazel-testlogs/webhook
+
+      - run:
+          name: "Build"
+          command: "bazelisk build //:packages"
+      - run:
+          name: "Move artifacts"
+          command: |
+            mkdir ~/project/artifacts
+            mv ~/project/bazel-bin/packages* ~/project/artifacts
+      - store_artifacts:
+          path: ~/project/artifacts
 
   build-macos:
     macos:
