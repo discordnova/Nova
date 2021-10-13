@@ -28,6 +28,12 @@ commands:
       - run:
           name: "Test"
           command: "bazelisk test //:tests || true"
+
+      - store_test_results:
+          path: ~/project/bazel-testlogs/rest
+      - store_test_results:
+          path: ~/project/bazel-testlogs/webhook
+
       - run:
           name: "Build"
           command: "bazelisk build //:packages"
@@ -38,8 +44,6 @@ commands:
             mv ~/project/bazel-bin/packages* ~/project/artifacts
       - store_artifacts:
           path: ~/project/artifacts
-      - store_test_results:
-          path: ~/project/bazel-testlogs/
 
 jobs:
   build-linux-arm64:
