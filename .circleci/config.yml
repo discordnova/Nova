@@ -27,7 +27,7 @@ commands:
     steps:
       - run:
           name: "Test"
-          command: "bazelisk test //:tests"
+          command: "bazelisk test //:tests || true"
       - run:
           name: "Build"
           command: "bazelisk build //:packages"
@@ -38,6 +38,8 @@ commands:
             mv ~/project/bazel-bin/packages* ~/project/artifacts
       - store_artifacts:
           path: ~/project/artifacts
+      - store_test_results:
+          path: ~/project/bazel-testlogs/*
 
 jobs:
   build-linux-arm64:
