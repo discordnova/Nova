@@ -27,9 +27,9 @@ commands:
       - setup_remote_docker:
           version: 19.03.13
           docker_layer_caching: true
-      - run:
-          name: Docker login
-          command: echo "$GHCR_PASS" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+      #- run:
+      #    name: Docker login
+      #    command: echo "$GHCR_PASS" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
   build-and-test:
     description: |
       Builds and test
@@ -59,10 +59,10 @@ jobs:
           keys:
             - bazel-cache-linux-arm-{{ .Branch }}
       - build-and-test
-      - run:
-          name: Publish docker images
-          command: |
-            bazel run --define docker_repo=ghcr.io --define docker_tag=arm-{{ .Branch }} //:container_publish
+      #- run:
+      #    name: Publish docker images
+      #    command: |
+      #     bazel run --define docker_repo=ghcr.io --define docker_tag=arm-{{ .Branch }} //:container_publish
 
   build-linux-x86:
     machine:
@@ -78,6 +78,7 @@ jobs:
           name: Publish docker images
           command: |
             bazel run --define docker_repo=ghcr.io --define docker_tag={{ .Branch }} //:container_publish
+  
   build-windows:
     executor: 
       name: win/default
@@ -113,7 +114,7 @@ jobs:
 workflows:
   build-workflow:
     jobs:
-      - build-x86
-      - build-arm64
+      - build-linux-x86
+      - build-linux-arm64
       - build-windows
       - build-macos
