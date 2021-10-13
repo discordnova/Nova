@@ -15,12 +15,27 @@ use hyper::{Body, Method, Request};
 use lazy_static::{__Deref, lazy_static};
 use serde_json::json;
 
+#[cfg(all(unix, target_arch = "x86_64"))]
+const fn nats_image<'a>() -> &'a str {
+    return "amd64/nats";
+}
+
+#[cfg(all(unix, target_arch = "aarch64"))]
+const fn nats_image<'a>() -> &'a str {
+    return "arm64v8/nats";
+}
+
+#[cfg(all(target_arch = "x86_64", target_os = "windows"))]
+const fn nats_image<'a>() -> &'a str {
+    return "winamd64/nats";
+}
+
 lazy_static! {
     static ref DOCKER: Cli = Cli::default();
 
     static ref NATS_CONTAINER: Container<'static, Cli, GenericImage> = {
         test_init();
-        let image: GenericImage = GenericImage::new("nats");
+        let image: GenericImage = GenericImage::new(nats_image());
         let container = DOCKER.run(image);
         container.start();
         container.get_host_port(4222).unwrap();
