@@ -2,10 +2,9 @@ version: 2.1
 
 orbs:
   win: circleci/windows@2.2.0
-  node: circleci/node@4.7.0
 
 commands:
-  setup-bazel-linux:
+  setup-bazel:
     description: |
       Setup the Bazel build system used for building Android projects
     steps:
@@ -13,7 +12,7 @@ commands:
           name: Install bazel from go
           command: |
             go get github.com/bazelbuild/bazelisk
-  setup-ci-linux:
+  setup-ci:
     description: |
       Prepare all the requirements for the CI
     steps:
@@ -46,52 +45,42 @@ jobs:
       image: ubuntu-2004:202101-01
     resource_class: arm.medium
     steps:
-      - setup-ci-linux
+      - setup-ci
       - restore_cache:
           keys:
             - bazel-cache-linux-arm-{{ .Branch }}
       - build-and-test
-      #- run:
-      #    name: Publish docker images
-      #    command: |
-      #     bazel run --define docker_repo=ghcr.io --define docker_tag=arm-{{ .Branch }} //:container_publish
+      # - run:
+      #     name: Publish docker images
+      #     command: |
+      #      bazel run --define docker_repo=ghcr.io --define docker_tag=arm-{{ .Branch }} //:container_publish
 
   build-linux-x86:
     machine:
       image: ubuntu-2004:202010-01
     steps:
-      - setup-ci-linux
+      - setup-ci
       - save_cache:
           paths:
             - ~/.cache/bazel
           key: bazel-cache-linux-x86-{{ .Branch }}
       - build-and-test
-      - run:
-          name: Publish docker images
-          command: |
-            bazel run --define docker_repo=ghcr.io --define docker_tag={{ .Branch }} //:container_publish
+      # - run:
+      #     name: Publish docker images
+      #     command: |
+      #       bazel run --define docker_repo=ghcr.io --define docker_tag={{ .Branch }} //:container_publish
 
   build-windows:
     executor:
       name: win/default
       shell: powershell.exe
     steps:
-      - checkout
       - run: systeminfo
-      - run: choco install bazel
+      - setup-ci
       - restore_cache:
           keys:
             - bazel-cache-windows-{{ .Branch }}
-      - run:
-          name: "Build"
-          command: "bazel build //:packages"
-      - run:
-          name: "Move artifacts"
-          command: |
-            mkdir ~/project/artifacts
-            mv ~/project/bazel-bin/packages* ~/project/artifacts
-      - store_artifacts:
-          path: ~/project/artifacts
+      - build-and-test
 
   build-macos:
     macos:
