@@ -12,8 +12,7 @@ commands:
       - run:
           name: Add Bazel Apt repository
           command: |
-            nvm install --lts
-            npm install -g @bazel/bazelisk
+            go get github.com/bazelbuild/bazelisk
       - run:
           name: Install Bazel from Apt
           command: sudo apt update && sudo apt install bazel
