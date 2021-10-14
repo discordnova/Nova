@@ -7,7 +7,7 @@ use crate::{connection::Connection, error::GatewayError, payloads::{
 
 use super::{state::ConnectionState, ConnectionWithState, Shard};
 use futures::StreamExt;
-use common::{log::{error, info}};
+use common::log::{error, info};
 use tokio::{select, time::{Instant, interval_at, sleep}};
 
 impl Shard {

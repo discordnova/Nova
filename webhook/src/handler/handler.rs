@@ -42,39 +42,52 @@ impl HandlerService {
                         ) {
                             Ok(data)
                         } else {
-                            Err(WebhookError::new(StatusCode::UNAUTHORIZED, "invalid signature"))
+                            Err(WebhookError::new(
+                                StatusCode::UNAUTHORIZED,
+                                "invalid signature",
+                            ))
                         }
                     } else {
-                        Err(WebhookError::new(StatusCode::BAD_REQUEST, "failed to read signature"))
+                        Err(WebhookError::new(
+                            StatusCode::BAD_REQUEST,
+                            "failed to read signature",
+                        ))
                     }
                 } else {
-                    Err(WebhookError::new(StatusCode::BAD_REQUEST, "unable to read body"))
+                    Err(WebhookError::new(
+                        StatusCode::BAD_REQUEST,
+                        "unable to read body",
+                    ))
                 }
             } else {
-                Err(WebhookError::new(StatusCode::UNAUTHORIZED, "missing signature headers"))
+                Err(WebhookError::new(
+                    StatusCode::UNAUTHORIZED,
+                    "missing signature headers",
+                ))
             }
         } else {
             Err(WebhookError::new(StatusCode::NOT_FOUND, "not found"))
         }
     }
 
-
-    async fn process_request(&mut self, req: Request<Body>) -> Result<Response<Body>, WebhookError> {
+    async fn process_request(
+        &mut self,
+        req: Request<Body>,
+    ) -> Result<Response<Body>, WebhookError> {
         match self.check_request(req).await {
             Ok(data) => {
                 let utf8 = from_utf8(&data);
                 match utf8 {
                     Ok(data) => match serde_json::from_str::<Interaction>(data) {
-                        Ok(value) => match value.t {
-                            1 => {
+                        Ok(value) => {
+                            if value.t == 1 {
                                 info!("sending pong");
                                 // a ping must be responded with another ping
                                 return Ok(Response::builder()
                                     .header("Content-Type", "application/json")
                                     .body(serde_json::to_string(&Ping { t: 1 }).unwrap().into())
                                     .unwrap());
-                            }
-                            _ => {
+                            } else {
                                 debug!("calling nats");
                                 // this should hopefully not fail ?
                                 let payload =
@@ -95,20 +108,24 @@ impl HandlerService {
                                 ) {
                                     Ok(response) => Ok(Response::builder()
                                         .header("Content-Type", "application/json")
-                                        .body(
-                                            Body::from(response.data)
-                                        )
+                                        .body(Body::from(response.data))
                                         .unwrap()),
-                                    
+
                                     Err(error) => {
                                         error!("failed to request nats: {}", error);
-                                        Err(WebhookError::new(StatusCode::INTERNAL_SERVER_ERROR, "failed to request nats"))
+                                        Err(WebhookError::new(
+                                            StatusCode::INTERNAL_SERVER_ERROR,
+                                            "failed to request nats",
+                                        ))
                                     }
                                 }
                             }
-                        },
+                        }
 
-                        Err(_) => Err(WebhookError::new(StatusCode::BAD_REQUEST, "invalid json body")),
+                        Err(_) => Err(WebhookError::new(
+                            StatusCode::BAD_REQUEST,
+                            "invalid json body",
+                        )),
                     },
 
                     Err(_) => Err(WebhookError::new(StatusCode::BAD_REQUEST, "not utf-8 body")),
@@ -142,7 +159,7 @@ impl Service<Request<Body>> for HandlerService {
 
             match response {
                 Ok(r) => Ok(r),
-                Err(e) => Ok(e.into())
+                Err(e) => Ok(e.into()),
             }
         })
     }
