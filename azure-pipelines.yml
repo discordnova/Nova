@@ -1,0 +1,22 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - script: |
+      - task: Go@0
+        inputs:
+          command: 'custom'
+          customCommand: 'install'
+          arguments: 'github.com/bazelbuild/bazelisk@latest'
+    displayName: 'Install bazel'
+  - script: |
+      bazelisk test //:tests
+    displayName: Run tests
