@@ -1,4 +1,5 @@
 use crate::{config::Config, ratelimit::Ratelimiter};
+use common::log::debug;
 use futures_util::future::TryFutureExt;
 use hyper::{
     client::HttpConnector, header::HeaderValue, http::uri::Parts, service::Service, Body, Client,
@@ -59,26 +60,26 @@ impl Service<Request<Body>> for ServiceProxy {
         let ratelimiter = self.ratelimiter.clone();
 
         return Box::pin(async move {
-            match ratelimiter.check(&req).await {
+            match ratelimiter.before_request(&req).await {
                 Ok(allowed) => match allowed {
-                    true => {
-                        Ok(client
-                        .request(req)
-                        .map_ok(move |res| {
-                            if let Some(bucket) = res.headers().get("x-ratelimit-bucket") {
-                                
-                                println!("bucket ratelimit! {:?} : {:?}", path, bucket);
-                            }
-                            res
-                        }).await.unwrap())
-                    },
-                    false => {
+                    crate::ratelimit::RatelimiterResponse::Ratelimited => {
+                        debug!("ratelimited");
                         Ok(Response::builder().body("ratelimited".into()).unwrap())
-                    },
+                    }
+                    _ => {
+                        debug!("forwarding request");
+                        match client.request(req).await {
+                            Ok(response) => {
+                                ratelimiter.after_request(&path, &response).await;
+                                Ok(response)
+                            }
+                            Err(e) => Err(e),
+                        }
+                    }
                 },
-                Err(_) => {
-                    Ok(Response::builder().body("server error".into()).unwrap())
-                },
+                Err(e) => Ok(Response::builder()
+                    .body(format!("server error: {}", e).into())
+                    .unwrap()),
             }
         });
     }
@@ -88,6 +89,10 @@ impl ServiceProxy {
     pub fn new(config: Arc<Config>, ratelimiter: Arc<Ratelimiter>) -> Self {
         let https = HttpsConnector::new();
         let client = Client::builder().build::<_, hyper::Body>(https);
-        ServiceProxy { client, config, ratelimiter }
+        ServiceProxy {
+            client,
+            config,
+            ratelimiter,
+        }
     }
 }

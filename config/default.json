@@ -13,5 +13,8 @@
         "discord": {
             "token": "<your token>"
         }
+    },
+    "redis": {
+        "url": "redis://localhost"
     }
 }
