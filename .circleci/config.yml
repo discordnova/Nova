@@ -37,7 +37,7 @@ jobs:
           command: "bazelisk test //:tests || true"
 
       - store_artifacts:
-          path: ~/project/bazel-testlogs
+          path: ~/project/bazel-testlogs/*
       
       - store_test_results:
           path: ~/project/bazel-testlogs/rest
@@ -78,7 +78,7 @@ jobs:
           path: ~/project/bazel-testlogs/webhook
 
       - store_artifacts:
-          path: ~/project/bazel-testlogs
+          path: ~/project/bazel-testlogs/*
       
       - run:
           name: "Build"
@@ -116,28 +116,8 @@ jobs:
       - store_test_results:
           path: ~/project/bazel-testlogs/webhook
       - store_artifacts:
-          path: ~/project/bazel-testlogs
+          path: ~/project/bazel-testlogs/*
 
-      - run:
-          name: "Build"
-          command: "bazelisk build //:packages"
-      - run:
-          name: "Move artifacts"
-          command: |
-            mkdir ~/project/artifacts
-            mv ~/project/bazel-bin/packages* ~/project/artifacts
-      - store_artifacts:
-          path: ~/project/artifacts
-
-  build-macos:
-    macos:
-      xcode: 11.3.0
-    steps:
-      - checkout
-      - run: brew install bazel
-      - restore_cache:
-          keys:
-            - bazel-cache-macos-{{ .Branch }}
       - run:
           name: "Build"
           command: "bazelisk build //:packages"
