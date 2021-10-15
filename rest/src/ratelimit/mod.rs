@@ -1,4 +1,4 @@
-use common::redis_crate::{AsyncCommands, RedisError, aio::Connection};
+use common::{error::NovaError, redis_crate::{AsyncCommands, RedisError, aio::Connection}};
 use hyper::{Body, Request};
 use tokio::sync::Mutex;
 use std::sync::Arc;
@@ -15,7 +15,7 @@ impl Ratelimiter {
         }
     }
 
-    pub async fn check(&mut self,request: Request<Body>) -> bool {
+    pub async fn check(&self,request: &Request<Body>) -> Result<bool, NovaError> {
         // we lookup if the route hash is stored in the redis table
         let path = request.uri().path();
         let hash = xxh32(path.as_bytes(), 32);
@@ -24,8 +24,10 @@ impl Ratelimiter {
         let value: Result<String, RedisError> = redis.get(key).await;
 
         match value {
-            Ok(_) => true,
-            Err(error) => false,
+            Ok(response) => {
+                Ok(false)
+            },
+            Err(error) => Err(NovaError::from("failed to issue redis request")),
         }
     }
 }

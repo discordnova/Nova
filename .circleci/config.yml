@@ -36,6 +36,9 @@ jobs:
           name: "Test"
           command: "bazelisk test //:tests || true"
 
+      - store_artifacts:
+          path: ~/project/bazel-testlogs
+      
       - store_test_results:
           path: ~/project/bazel-testlogs/rest
       - store_test_results:
@@ -74,6 +77,9 @@ jobs:
       - store_test_results:
           path: ~/project/bazel-testlogs/webhook
 
+      - store_artifacts:
+          path: ~/project/bazel-testlogs
+      
       - run:
           name: "Build"
           command: "bazelisk build //:packages"
@@ -103,13 +109,14 @@ jobs:
       - run:
           name: "Test"
           command: |
-            $ErrorActionPreference = ‘SilentlyContinue’
-            bazelisk test //:tests
+            bazelisk test //:tests | Out-Null
 
       - store_test_results:
           path: ~/project/bazel-testlogs/rest
       - store_test_results:
           path: ~/project/bazel-testlogs/webhook
+      - store_artifacts:
+          path: ~/project/bazel-testlogs
 
       - run:
           name: "Build"

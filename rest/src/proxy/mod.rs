@@ -14,6 +14,10 @@ pub struct ServiceProxy {
     config: Arc<Config>,
 }
 
+impl ServiceProxy {
+    async fn proxy_call() {}
+}
+
 impl Service<Request<Body>> for ServiceProxy {
     type Response = Response<Body>;
     type Error = hyper::Error;
@@ -51,18 +55,32 @@ impl Service<Request<Body>> for ServiceProxy {
         );
 
         *req.headers_mut() = headers;
-        let res = self.client
-            .request(req)
-            .map_ok(move |res| {
-                if let Some(bucket) = res.headers().get("x-ratelimit-bucket") {
-                    
-                    println!("bucket ratelimit! {:?} : {:?}", path, bucket);
-                }
+        let client = self.client.clone();
+        let ratelimiter = self.ratelimiter.clone();
 
-                res
-            });
-        
-        return Box::pin(res);
+        return Box::pin(async move {
+            match ratelimiter.check(&req).await {
+                Ok(allowed) => match allowed {
+                    true => {
+                        Ok(client
+                        .request(req)
+                        .map_ok(move |res| {
+                            if let Some(bucket) = res.headers().get("x-ratelimit-bucket") {
+                                
+                                println!("bucket ratelimit! {:?} : {:?}", path, bucket);
+                            }
+                            res
+                        }).await.unwrap())
+                    },
+                    false => {
+                        Ok(Response::builder().body("ratelimited".into()).unwrap())
+                    },
+                },
+                Err(_) => {
+                    Ok(Response::builder().body("server error".into()).unwrap())
+                },
+            }
+        });
     }
 }
 

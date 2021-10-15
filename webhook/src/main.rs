@@ -15,7 +15,6 @@ async fn main() {
 }
 
 async fn start(settings: Settings<Config>) {
-    
     let addr = format!(
         "{}:{}",
         settings.config.server.address, settings.config.server.port
