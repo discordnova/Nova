@@ -63,7 +63,7 @@ pub struct OptionalAuditEntryInfo {
     pub count: Option<String>,
     pub id: Option<String>,
     #[serde(rename = "type")]
-    pub type_: Option<OptionalAuditEntryInfo>,
+    pub type_: Option<Box<OptionalAuditEntryInfo>>,
     pub role_name: Option<String>,
 }
 
