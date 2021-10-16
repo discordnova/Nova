@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+import "common/management/nova.management.v1alpha.proto";
+package nova.management.rpc.v1alpha;
+

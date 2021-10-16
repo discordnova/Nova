@@ -1,7 +1,7 @@
 use std::env;
 
 use futures::SinkExt;
-use log::{debug, error, info};
+use common::log::{debug, error, info};
 use serde::Serialize;
 use serde_json::Value;
 use std::fmt::Debug;

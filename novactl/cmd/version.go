@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/discordnova/nova/novactl/lib"
+	"github.com/discordnova/nova/common"
 	"github.com/spf13/cobra"
 )
 
@@ -16,5 +16,5 @@ var (
 )
 
 func version(cmd *cobra.Command, args []string) {
-	fmt.Println(fmt.Sprintf("Nova version: %s", lib.VERSION))
+	fmt.Println(fmt.Sprintf("Nova version: %s", common.VERSION))
 }

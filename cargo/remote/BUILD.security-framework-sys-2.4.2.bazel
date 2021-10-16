@@ -35,6 +35,7 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     crate_features = [
         "OSX_10_9",
+        "default",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",

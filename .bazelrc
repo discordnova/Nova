@@ -1,3 +1,4 @@
 startup --windows_enable_symlinks
 build --enable_runfiles
 build --features=compiler_param_file
+test --define docker_repo=_ --define docker_tag=_
