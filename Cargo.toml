@@ -2,10 +2,10 @@
 
 members = [
     "webhook",
-    "ratelimiter",
     "gateway",
     "cache",
-    "common/rust"
+    "common/rust",
+    "rest"
 ]
 
 [package]
@@ -51,3 +51,7 @@ compile_data_attr = "glob([\"*/**\"])"
 additional_build_file = "bazel/patch/BUILD_script_patch"
 gen_buildrs = false
 additional_deps = [":libsodium_sys_build_script"]
+
+
+[package.metadata.raze.crates.value-bag.'*']
+gen_buildrs = false

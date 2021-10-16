@@ -40,19 +40,12 @@ rust_library(
     aliases = {
     },
     crate_features = [
-        "attributes",
-        "default",
-        "log",
         "std",
-        "tracing-attributes",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
     data = [],
     edition = "2018",
-    proc_macro_deps = [
-        "@raze__tracing_attributes__0_1_15//:tracing_attributes",
-    ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -64,7 +57,6 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@raze__cfg_if__1_0_0//:cfg_if",
-        "@raze__log__0_4_14//:log",
         "@raze__pin_project_lite__0_2_7//:pin_project_lite",
         "@raze__tracing_core__0_1_19//:tracing_core",
     ] + selects.with_or({

@@ -1,19 +1,19 @@
 use hyper::{
-    Response, Body, Request, Server,
-    header::{CONTENT_TYPE},
+    header::CONTENT_TYPE,
     service::{make_service_fn, service_fn},
+    Body, Request, Response, Server,
 };
-use std::net::ToSocketAddrs;
+use log::{error, info};
 use prometheus::{Encoder, TextEncoder};
-use log::{info,error};
 use serde::Deserialize;
+use std::net::ToSocketAddrs;
 
 #[derive(Clone, Debug, Deserialize)]
 /// Options for the monitoring service
 pub struct MonitoringConfiguration {
-    enabled: bool,
-    address: Option<String>,
-    port: Option<i32>,
+    pub enabled: bool,
+    pub address: Option<String>,
+    pub port: Option<i32>,
 }
 
 /// Handler for the hyper http server
@@ -37,17 +37,18 @@ pub fn start_monitoring(configuration: &MonitoringConfiguration) {
     let config = configuration.clone();
     tokio::task::spawn(async move {
         if config.enabled {
-            let address = format!("{}:{}",
-                config.address.expect("a listening address must be specified for the metrics server"),
-                config.port.expect("a listening port must be specified for the metrics server")
+            let address = format!(
+                "{}:{}",
+                config
+                    .address
+                    .expect("a listening address must be specified for the metrics server"),
+                config
+                    .port
+                    .expect("a listening port must be specified for the metrics server")
             );
             info!("Starting monitoring server on {}", address);
-            
-            let listen_address = address
-                .to_socket_addrs()
-                .unwrap()
-                .next()
-                .unwrap();
+
+            let listen_address = address.to_socket_addrs().unwrap().next().unwrap();
             let server = Server::bind(&listen_address).serve(make_service_fn(|_| async {
                 Ok::<_, hyper::Error>(service_fn(serve_metrics))
             }));

@@ -40,15 +40,6 @@ alias(
 )
 
 alias(
-    name = "log",
-    actual = "@raze__log__0_4_14//:log",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
     name = "num",
     actual = "@raze__num__0_4_0//:num",
     tags = [

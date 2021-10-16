@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
 
 use crate::discord_models::{
     application::Application,
@@ -22,7 +23,7 @@ pub struct CachePayload {
     pub data: CacheData,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Tracing {
     pub node_id: String,
     pub span: Option<String>,

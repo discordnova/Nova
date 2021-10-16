@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-focal
 ARG NONROOT_USER=vscode
 
 # Install required programs for the container
-RUN apt update -y && apt install apt-transport-https curl sudo gnupg python build-essential ca-certificates lsb-release -y && \
+RUN apt update -y && apt install libssl-dev pkg-config apt-transport-https curl sudo gnupg python build-essential ca-certificates lsb-release -y && \
     # Add bazel repository gpg keys
     curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/bazel.gpg && \
     # Add docker repository gpg keys

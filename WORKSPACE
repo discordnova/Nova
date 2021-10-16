@@ -1,16 +1,13 @@
 workspace(name = "nova")
-
-#@unused
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "d0f5f605d0d656007ce6c8b5a82df3037e1d8fe8b121ed42e536f569dec16113",
-    strip_prefix = "protobuf-3.14.0",
+    sha256 = "14e8042b5da37652c92ef6a2759e7d2979d295f60afd7767825e3de68c856c54",
+    strip_prefix = "protobuf-3.18.0",
     urls = [
-        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
-        "https://github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
+        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v3.18.0.tar.gz",
+        "https://github.com/protocolbuffers/protobuf/archive/v3.18.0.tar.gz",
     ],
 )
 
@@ -60,7 +57,15 @@ http_archive(
     ],
 )
 
+load("//bazel:go.bzl", "load_golang_toolchains")
+
+load_golang_toolchains()
+
 load("//bazel:utils.bzl", "get_toolchain_utils_protocolbuffers", "get_toolchain_utils_rules_pkg")
+load("//:deps.bzl", "go_dependencies")
+
+# gazelle:repository_macro deps.bzl%go_dependencies
+go_dependencies()
 
 get_toolchain_utils_protocolbuffers()
 
@@ -69,10 +74,6 @@ get_toolchain_utils_rules_pkg()
 load("//bazel:rust.bzl", "load_rust_toolchains")
 
 load_rust_toolchains()
-
-load("//bazel:go.bzl", "load_golang_toolchains")
-
-load_golang_toolchains()
 
 load("//bazel:docker.bzl", "load_docker")
 

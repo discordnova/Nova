@@ -6,14 +6,13 @@ edition = "2018"
 [dependencies]
 hyper = { version = "0.14", features = ["full"] }
 tokio = { version = "1", features = ["full"] }
-log = { version = "0.4", features = ["std"] }
-config = "0.11"
+common = { path = "../common/rust" }
 serde = { version = "1.0.8", features = ["derive"] }
 libsodium-sys = "0.2.7"
 hex = "0.4.3"
 serde_json = { version = "1.0" }
-common = { path = "../common/rust" }
-nats = "0.15.2"
+libc = "0.2.101"
+lazy_static = "1.4.0"
 
 [[bin]]
 name = "webhook"

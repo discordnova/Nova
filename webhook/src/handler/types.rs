@@ -7,4 +7,3 @@ pub struct Interaction {
     pub t: i16,
     pub data: Option<Value>,
 }
-

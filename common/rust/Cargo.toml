@@ -11,6 +11,11 @@ serde_repr = "0.1"
 config = "0.11"
 hyper = { version = "0.14", features = ["full"] }
 tokio = { version = "1", features = ["full"] }
-prometheus = "0.12.0"
-nats = "0.15.2"
 enumflags2 = { version = "0.7.1", features = ["serde"] }
+prometheus = { version = "0.12.0", features = ["process"] }
+nats = "0.15.2"
+testcontainers = "0.12.0"
+
+[dependencies.redis]
+version = "*"
+features = ["cluster", "connection-manager", "tokio-comp"]

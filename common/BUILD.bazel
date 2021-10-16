@@ -1,10 +1,21 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//bazel/lib:expand_template.bzl", "expand_template")
+
+expand_template(
+    name = "version_template",
+    out = "version.go",
+    substitutions = {
+        "$VERSION": "0.0.10",
+    },
+    template = "version.go.in",
+)
 
 go_library(
     name = "common",
     srcs = [
         "logger.go",
         "prometheus.go",
+        "version.go",
     ],
     importpath = "github.com/discordnova/nova/common",
     visibility = ["//visibility:public"],

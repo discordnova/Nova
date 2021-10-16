@@ -49,10 +49,19 @@ licenses([
 rust_library(
     name = "combine",
     srcs = glob(["**/*.rs"]),
+    aliases = {
+        "@raze__futures_core__0_3_17//:futures_core": "futures_core_03",
+        "@raze__tokio__1_11_0//:tokio": "tokio_dep",
+    },
     crate_features = [
         "alloc",
         "bytes",
+        "futures-core-03",
+        "pin-project-lite",
         "std",
+        "tokio",
+        "tokio-dep",
+        "tokio-util",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -69,7 +78,11 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@raze__bytes__1_1_0//:bytes",
+        "@raze__futures_core__0_3_17//:futures_core",
         "@raze__memchr__2_4_1//:memchr",
+        "@raze__pin_project_lite__0_2_7//:pin_project_lite",
+        "@raze__tokio__1_11_0//:tokio",
+        "@raze__tokio_util__0_6_8//:tokio_util",
     ],
 )
 
