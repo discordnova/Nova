@@ -1,10 +1,10 @@
-use nats::{Options, Connection};
+use nats::{Connection, Options};
 use serde::Deserialize;
 
 #[derive(Clone, Debug, Deserialize)]
 struct NatsConfigurationClientCert {
     cert: String,
-    key: String
+    key: String,
 }
 #[derive(Clone, Debug, Deserialize)]
 struct NatsConfigurationTls {
@@ -24,11 +24,12 @@ pub struct NatsConfiguration {
     host: String,
 }
 
-/// 
+// todo: Prefer From since it automatically gives a free Into implementation
+///
 impl Into<Connection> for NatsConfiguration {
     fn into(self) -> Connection {
         let mut options = Options::new();
-        
+
         if let Some(client_cert) = self.client_cert {
             options = options.client_cert(client_cert.cert, client_cert.key);
         }
@@ -47,8 +48,7 @@ impl Into<Connection> for NatsConfiguration {
         options = options.no_echo();
         options = options.reconnect_buffer_size(self.reconnect_buffer_size.unwrap_or(64 * 1024));
         options = options.tls_required(self.tls_required.unwrap_or(false));
-        options = options.with_name(&self.client_name.unwrap_or("Nova".to_string()));
-
+        options = options.with_name(&self.client_name.unwrap_or_else(|| "Nova".to_string()));
 
         if let Some(tls) = self.tls {
             let mut config = nats::rustls::ClientConfig::new();

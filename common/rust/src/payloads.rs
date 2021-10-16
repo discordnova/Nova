@@ -186,7 +186,8 @@ pub enum CacheData {
         code: String,
     },
     InteractionCreate {
-        interaction: Interaction,
+        // boxed to avoid a large difference size between variants (https://rust-lang.github.io/rust-clippy/master/index.html#large_enum_variant)
+        interaction: Box<Interaction>,
     },
     MessageCreate {
         message: Message,

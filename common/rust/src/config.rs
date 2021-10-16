@@ -2,8 +2,7 @@ use std::env;
 
 use config::{Config, ConfigError, Environment, File};
 use log::info;
-use serde::{Deserialize};
-
+use serde::Deserialize;
 
 #[derive(Debug, Deserialize, Clone)]
 #[serde(bound(deserialize = "T: Deserialize<'de> + std::default::Default + Clone"))]
@@ -14,7 +13,10 @@ pub struct Settings<T> {
     pub nats: crate::nats::NatsConfiguration,
 }
 
-impl<T> Settings<T> where T: Deserialize<'static> + std::default::Default + Clone {
+impl<T> Settings<T>
+where
+    T: Deserialize<'static> + std::default::Default + Clone,
+{
     pub fn new(service_name: &str) -> Result<Settings<T>, ConfigError> {
         let mut default = Config::default();
         // this file my be shared with all the components
@@ -30,7 +32,7 @@ impl<T> Settings<T> where T: Deserialize<'static> + std::default::Default + Clon
         let mut config: Settings<T> = default.clone().try_into().unwrap();
 
         //  try to load the config
-        config.config = default.get::<T>(&service_name).unwrap();
+        config.config = default.get::<T>(service_name).unwrap();
         pretty_env_logger::init();
 
         // start the monitoring system if needed
