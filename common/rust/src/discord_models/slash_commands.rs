@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use super::user::User;
+use super::{channel::Message, guild::GuildMember, user::User};
 
 #[derive(Debug, Clone, Deserialize_repr, Serialize_repr)]
 #[repr(u8)]
@@ -14,7 +14,7 @@ pub enum ApplicationCommandOptionType {
     User = 6,
     Channel = 7,
     Role = 8,
-    Mentionable = 8,
+    Mentionable = 9,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -84,4 +84,21 @@ pub struct MessageInteraction {
     pub type_: InteractionRequestType,
     pub name: String,
     pub user: User,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct Interaction {
+    pub id: String,
+    pub application_id: String,
+    #[serde(rename = "type")]
+    pub type_: InteractionRequestType,
+    /// i am not sure about this one https://canary.discord.com/developers/docs/interactions/slash-commands#interaction-object-application-command-interaction-data
+    pub data: ApplicationCommand,
+    pub guild_id: Option<String>,
+    pub channel_id: Option<String>,
+    pub member: Option<GuildMember>,
+    pub user: Option<User>,
+    pub token: String,
+    pub version: i64,
+    pub message: Option<Message>,
 }
