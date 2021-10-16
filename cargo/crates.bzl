@@ -253,6 +253,16 @@ def raze_fetch_remote_crates():
     """This function defines a collection of repos and should be called in a WORKSPACE file"""
     maybe(
         http_archive,
+        name = "raze__adler__1_0_2",
+        url = "https://crates.io/api/v1/crates/adler/1.0.2/download",
+        type = "tar.gz",
+        sha256 = "f26201604c87b1e01bd3d98f8d5d9a8fcbb815e8cedb41ffccbeb4bf593a35fe",
+        strip_prefix = "adler-1.0.2",
+        build_file = Label("//cargo/remote:BUILD.adler-1.0.2.bazel"),
+    )
+
+    maybe(
+        http_archive,
         name = "raze__aho_corasick__0_7_18",
         url = "https://crates.io/api/v1/crates/aho-corasick/0.7.18/download",
         type = "tar.gz",
@@ -533,6 +543,16 @@ def raze_fetch_remote_crates():
 
     maybe(
         http_archive,
+        name = "raze__crc32fast__1_2_1",
+        url = "https://crates.io/api/v1/crates/crc32fast/1.2.1/download",
+        type = "tar.gz",
+        sha256 = "81156fece84ab6a9f2afdb109ce3ae577e42b1228441eded99bd77f627953b1a",
+        strip_prefix = "crc32fast-1.2.1",
+        build_file = Label("//cargo/remote:BUILD.crc32fast-1.2.1.bazel"),
+    )
+
+    maybe(
+        http_archive,
         name = "raze__crossbeam_channel__0_5_1",
         url = "https://crates.io/api/v1/crates/crossbeam-channel/0.5.1/download",
         type = "tar.gz",
@@ -669,6 +689,16 @@ def raze_fetch_remote_crates():
         sha256 = "b394ed3d285a429378d3b384b9eb1285267e7df4b166df24b7a6939a04dc392e",
         strip_prefix = "fastrand-1.5.0",
         build_file = Label("//cargo/remote:BUILD.fastrand-1.5.0.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "raze__flate2__1_0_22",
+        url = "https://crates.io/api/v1/crates/flate2/1.0.22/download",
+        type = "tar.gz",
+        sha256 = "1e6988e897c1c9c485f43b47a529cef42fde0547f9d8d41a7062518f1d8fc53f",
+        strip_prefix = "flate2-1.0.22",
+        build_file = Label("//cargo/remote:BUILD.flate2-1.0.22.bazel"),
     )
 
     maybe(
@@ -1113,6 +1143,16 @@ def raze_fetch_remote_crates():
 
     maybe(
         http_archive,
+        name = "raze__miniz_oxide__0_4_4",
+        url = "https://crates.io/api/v1/crates/miniz_oxide/0.4.4/download",
+        type = "tar.gz",
+        sha256 = "a92518e98c078586bc6c934028adcca4c92a53d6a958196de835170a01d84e4b",
+        strip_prefix = "miniz_oxide-0.4.4",
+        build_file = Label("//cargo/remote:BUILD.miniz_oxide-0.4.4.bazel"),
+    )
+
+    maybe(
+        http_archive,
         name = "raze__mio__0_7_13",
         url = "https://crates.io/api/v1/crates/mio/0.7.13/download",
         type = "tar.gz",
@@ -1479,6 +1519,16 @@ def raze_fetch_remote_crates():
         sha256 = "b9f5105d4fdaab20335ca9565e106a5d9b82b6219b5ba735731124ac6711d23d",
         strip_prefix = "proc-macro2-1.0.29",
         build_file = Label("//cargo/remote:BUILD.proc-macro2-1.0.29.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "raze__procfs__0_9_1",
+        url = "https://crates.io/api/v1/crates/procfs/0.9.1/download",
+        type = "tar.gz",
+        sha256 = "ab8809e0c18450a2db0f236d2a44ec0b4c1412d0eb936233579f0990faa5d5cd",
+        strip_prefix = "procfs-0.9.1",
+        build_file = Label("//cargo/remote:BUILD.procfs-0.9.1.bazel"),
     )
 
     maybe(

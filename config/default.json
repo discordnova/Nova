@@ -1,9 +1,14 @@
 {
     "monitoring": {
-        "enabled": false
+        "enabled": true,
+        "address": "0.0.0.0",
+        "port": 5001
     },
     "nats": {
         "host": "localhost"
+    },
+    "redis": {
+        "url": "redis://localhost"
     },
     "rest": {
         "server": {
@@ -14,7 +19,14 @@
             "token": "<your token>"
         }
     },
-    "redis": {
-        "url": "redis://localhost"
+    "webhook": {
+        "server": {
+            "port": 8080,
+            "address": "0.0.0.0"
+        },
+        "discord": {
+            "public_key": "",
+            "client_id": 123
+        }
     }
 }

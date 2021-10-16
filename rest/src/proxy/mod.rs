@@ -1,23 +1,45 @@
 use crate::{config::Config, ratelimit::Ratelimiter};
-use common::log::debug;
-use futures_util::future::TryFutureExt;
+use common::{log::debug, prometheus::{Counter, HistogramVec, labels, opts, register_counter, register_histogram_vec}};
 use hyper::{
     client::HttpConnector, header::HeaderValue, http::uri::Parts, service::Service, Body, Client,
     HeaderMap, Request, Response, Uri,
 };
 use hyper_tls::HttpsConnector;
+use tokio::sync::Mutex;
 use std::{future::Future, pin::Pin, sync::Arc, task::Poll};
+
+lazy_static::lazy_static! {
+    static ref HTTP_COUNTER: Counter = register_counter!(opts!(
+        "nova_rest_http_requests_total",
+        "Number of HTTP requests made.",
+        labels! {"handler" => "all",}
+    ))
+    .unwrap();
+
+    static ref HTTP_REQ_HISTOGRAM: HistogramVec = register_histogram_vec!(
+        "nova_rest_http_request_duration_seconds",
+        "The HTTP request latencies in seconds.",
+        &["handler"]
+    )
+    .unwrap();
+
+    static ref HTTP_COUNTER_STATUS: Counter = register_counter!(opts!(
+        "nova_rest_http_requests_status",
+        "Number of HTTP requests made by status",
+        labels! {"" => ""}
+    ))
+    .unwrap();
+}
+
 
 #[derive(Clone)]
 pub struct ServiceProxy {
     client: Client<HttpsConnector<HttpConnector>>,
     ratelimiter: Arc<Ratelimiter>,
     config: Arc<Config>,
+    fail: Arc<Mutex<i32>>,
 }
 
-impl ServiceProxy {
-    async fn proxy_call() {}
-}
 
 impl Service<Request<Body>> for ServiceProxy {
     type Response = Response<Body>;
@@ -36,6 +58,9 @@ impl Service<Request<Body>> for ServiceProxy {
     }
 
     fn call(&mut self, mut req: Request<hyper::Body>) -> Self::Future {
+        HTTP_COUNTER.inc();
+
+        let timer = HTTP_REQ_HISTOGRAM.with_label_values(&["all"]).start_timer();
         let host = "discord.com";
         let mut new_parts = Parts::default();
 
@@ -58,9 +83,10 @@ impl Service<Request<Body>> for ServiceProxy {
         *req.headers_mut() = headers;
         let client = self.client.clone();
         let ratelimiter = self.ratelimiter.clone();
+        let fail = self.fail.clone();
 
         return Box::pin(async move {
-            match ratelimiter.before_request(&req).await {
+            let resp = match ratelimiter.before_request(&req).await {
                 Ok(allowed) => match allowed {
                     crate::ratelimit::RatelimiterResponse::Ratelimited => {
                         debug!("ratelimited");
@@ -69,8 +95,12 @@ impl Service<Request<Body>> for ServiceProxy {
                     _ => {
                         debug!("forwarding request");
                         match client.request(req).await {
-                            Ok(response) => {
+                            Ok(mut response) => {
                                 ratelimiter.after_request(&path, &response).await;
+                                if response.status() != 200 {
+                                    *fail.lock().await += 1
+                                }
+                                response.headers_mut().insert("x-fails", HeaderValue::from_str(&format!("{}", fail.lock().await)).unwrap());
                                 Ok(response)
                             }
                             Err(e) => Err(e),
@@ -80,7 +110,9 @@ impl Service<Request<Body>> for ServiceProxy {
                 Err(e) => Ok(Response::builder()
                     .body(format!("server error: {}", e).into())
                     .unwrap()),
-            }
+            };
+            timer.observe_duration();
+            resp
         });
     }
 }
@@ -89,10 +121,12 @@ impl ServiceProxy {
     pub fn new(config: Arc<Config>, ratelimiter: Arc<Ratelimiter>) -> Self {
         let https = HttpsConnector::new();
         let client = Client::builder().build::<_, hyper::Body>(https);
+        let fail = Arc::new(Mutex::new(0));
         ServiceProxy {
             client,
             config,
             ratelimiter,
+            fail
         }
     }
 }
