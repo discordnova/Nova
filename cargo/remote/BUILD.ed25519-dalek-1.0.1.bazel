@@ -35,7 +35,14 @@ licenses([
 rust_library(
     name = "ed25519_dalek",
     srcs = glob(["**/*.rs"]),
+    aliases = {
+        "@raze__serde__1_0_130//:serde": "serde_crate",
+    },
     crate_features = [
+        "default",
+        "rand",
+        "serde_crate",
+        "std",
         "u64_backend",
     ],
     crate_root = "src/lib.rs",
@@ -54,8 +61,10 @@ rust_library(
     deps = [
         "@raze__curve25519_dalek__3_2_0//:curve25519_dalek",
         "@raze__ed25519__1_2_0//:ed25519",
-        "@raze__sha2__0_9_6//:sha2",
-        "@raze__zeroize__1_4_1//:zeroize",
+        "@raze__rand__0_7_3//:rand",
+        "@raze__serde__1_0_130//:serde",
+        "@raze__sha2__0_9_8//:sha2",
+        "@raze__zeroize__1_4_2//:zeroize",
     ],
 )
 

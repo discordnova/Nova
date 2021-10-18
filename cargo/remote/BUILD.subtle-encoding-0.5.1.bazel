@@ -54,6 +54,6 @@ rust_library(
     version = "0.5.1",
     # buildifier: leave-alone
     deps = [
-        "@raze__zeroize__1_4_1//:zeroize",
+        "@raze__zeroize__1_4_2//:zeroize",
     ],
 )

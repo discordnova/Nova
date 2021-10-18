@@ -6,6 +6,7 @@ use crate::handler::make_service::MakeSvc;
 use crate::config::Config;
 use common::config::Settings;
 use common::log::{error, info};
+use ed25519_dalek::PublicKey;
 use hyper::Server;
 
 #[tokio::main]
@@ -30,9 +31,12 @@ async fn start(settings: Settings<Config>) {
     );
 
     let config = Arc::new(settings.config);
+    let public_key =
+        Arc::new(PublicKey::from_bytes(&hex::decode(&config.discord.public_key).unwrap()).unwrap());
     let server = Server::bind(&addr).serve(MakeSvc {
         settings: config,
         nats: Arc::new(settings.nats.into()),
+        public_key: public_key,
     });
 
     if let Err(e) = server.await {

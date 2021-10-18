@@ -51,7 +51,7 @@ rust_library(
     version = "2.4.2",
     # buildifier: leave-alone
     deps = [
-        "@raze__core_foundation_sys__0_8_2//:core_foundation_sys",
-        "@raze__libc__0_2_101//:libc",
+        "@raze__core_foundation_sys__0_8_3//:core_foundation_sys",
+        "@raze__libc__0_2_104//:libc",
     ],
 )

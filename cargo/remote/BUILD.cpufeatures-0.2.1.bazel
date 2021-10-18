@@ -51,7 +51,7 @@ rust_library(
     version = "0.2.1",
     # buildifier: leave-alone
     deps = [
-        "@raze__libc__0_2_101//:libc",
+        "@raze__libc__0_2_104//:libc",
     ] + selects.with_or({
         # aarch64-apple-darwin
         (

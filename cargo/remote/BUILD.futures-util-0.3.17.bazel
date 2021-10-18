@@ -127,6 +127,6 @@ rust_library(
         "@raze__pin_project_lite__0_2_7//:pin_project_lite",
         "@raze__pin_utils__0_1_0//:pin_utils",
         "@raze__proc_macro_nested__0_1_7//:proc_macro_nested",
-        "@raze__slab__0_4_4//:slab",
+        "@raze__slab__0_4_5//:slab",
     ],
 )

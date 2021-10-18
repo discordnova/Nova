@@ -28,8 +28,8 @@ package_aliases_dir = "cargo"
 experimental_api = true
 
 [package.metadata.raze.crates.cpufeatures.'*']
-skipped_deps = ["libc-0.2.101"]
-additional_deps = ["@raze__libc__0_2_101//:libc"]
+skipped_deps = ["libc-0.2.104"]
+additional_deps = ["@raze__libc__0_2_104//:libc"]
 
 [package.metadata.raze.crates.ring.'*']
 compile_data_attr = "glob([\"*/**\"])"
@@ -41,13 +41,5 @@ compile_data_attr = "glob([\"*/**\"])"
 skipped_deps = ["miniz_oxide-0.4.4"]
 additional_deps = ["@raze__miniz_oxide__0_4_4//:miniz_oxide"]
 
-
 [package.metadata.raze.crates.webpki.'*']
 compile_data_attr = "glob([\"*/**\"])"
-
-[package.metadata.raze.crates.libsodium-sys.'*']
-buildrs_additional_environment_variables = { PATH = "/usr/sbin:/usr/bin:/sbin:/bin", "NUM_JOBS" = "2" }
-compile_data_attr = "glob([\"*/**\"])"
-additional_build_file = "bazel/patch/BUILD_script_patch"
-gen_buildrs = false
-additional_deps = [":libsodium_sys_build_script"]

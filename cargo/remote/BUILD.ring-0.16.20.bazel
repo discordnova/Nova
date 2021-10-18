@@ -61,13 +61,13 @@ cargo_build_script(
     version = "0.16.20",
     visibility = ["//visibility:private"],
     deps = [
-        "@raze__cc__1_0_70//:cc",
+        "@raze__cc__1_0_71//:cc",
     ] + selects.with_or({
         # cfg(all(target_arch = "wasm32", target_vendor = "unknown", target_os = "unknown", target_env = ""))
         (
             "@rules_rust//rust/platform:wasm32-unknown-unknown",
         ): [
-            "@raze__web_sys__0_3_53//:web_sys",
+            "@raze__web_sys__0_3_55//:web_sys",
         ],
         "//conditions:default": [],
     }) + selects.with_or({
@@ -190,7 +190,7 @@ rust_library(
         (
             "@rules_rust//rust/platform:wasm32-unknown-unknown",
         ): [
-            "@raze__web_sys__0_3_53//:web_sys",
+            "@raze__web_sys__0_3_55//:web_sys",
         ],
         "//conditions:default": [],
     }) + selects.with_or({
@@ -227,7 +227,7 @@ rust_library(
             "@rules_rust//rust/platform:x86_64-linux-android",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
-            "@raze__libc__0_2_101//:libc",
+            "@raze__libc__0_2_104//:libc",
         ],
         "//conditions:default": [],
     }) + selects.with_or({

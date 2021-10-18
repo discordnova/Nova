@@ -73,7 +73,7 @@ rust_library(
         "@raze__log__0_4_14//:log",
         "@raze__pin_project__1_0_8//:pin_project",
         "@raze__rustls__0_19_1//:rustls",
-        "@raze__tokio__1_11_0//:tokio",
+        "@raze__tokio__1_12_0//:tokio",
         "@raze__tokio_rustls__0_22_0//:tokio_rustls",
         "@raze__tungstenite__0_14_0//:tungstenite",
         "@raze__webpki__0_21_4//:webpki",

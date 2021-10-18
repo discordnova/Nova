@@ -132,11 +132,11 @@ rust_library(
         "@raze__cfg_if__1_0_0//:cfg_if",
         "@raze__fnv__1_0_7//:fnv",
         "@raze__lazy_static__1_4_0//:lazy_static",
-        "@raze__libc__0_2_101//:libc",
+        "@raze__libc__0_2_104//:libc",
         "@raze__memchr__2_4_1//:memchr",
         "@raze__parking_lot__0_11_2//:parking_lot",
         "@raze__protobuf__2_25_1//:protobuf",
-        "@raze__thiserror__1_0_29//:thiserror",
+        "@raze__thiserror__1_0_30//:thiserror",
     ] + selects.with_or({
         # cfg(target_os = "linux")
         (

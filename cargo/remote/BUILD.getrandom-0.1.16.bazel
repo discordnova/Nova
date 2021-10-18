@@ -150,7 +150,7 @@ rust_library(
             "@rules_rust//rust/platform:x86_64-unknown-freebsd",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
-            "@raze__libc__0_2_101//:libc",
+            "@raze__libc__0_2_104//:libc",
         ],
         "//conditions:default": [],
     }) + selects.with_or({

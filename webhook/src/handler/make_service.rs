@@ -7,10 +7,12 @@ use std::{
     sync::Arc,
     task::{Context, Poll},
 };
+use ed25519_dalek::PublicKey;
 
 pub struct MakeSvc {
     pub settings: Arc<Config>,
     pub nats: Arc<Connection>,
+    pub public_key: Arc<PublicKey>
 }
 
 impl<T> Service<T> for MakeSvc {
@@ -26,6 +28,7 @@ impl<T> Service<T> for MakeSvc {
         ready(Ok(HandlerService {
             config: self.settings.clone(),
             nats: self.nats.clone(),
+            public_key: self.public_key.clone()
         }))
     }
 }

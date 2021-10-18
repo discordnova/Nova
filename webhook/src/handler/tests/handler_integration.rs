@@ -4,6 +4,7 @@ use ctor;
 use hyper::{Body, Method, Request, StatusCode};
 use lazy_static::lazy_static;
 use serde_json::json;
+use ed25519_dalek::Keypair;
 
 use common::{
     config::test_init,
@@ -35,7 +36,7 @@ static mut NATS: Option<Container<Cli, GenericImage>> = None;
 static mut SETTINGS: Option<Settings<Config>> = None;
 
 lazy_static! {
-    static ref KEYPAIR: (String, [u8; 64]) = generate_keypair();
+    static ref TEST_KEYPAIR: Keypair = generate_keypair();
     static ref DOCKER: Cli = Cli::default();
 }
 
@@ -59,7 +60,7 @@ unsafe fn init() {
                 address: "0.0.0.0".to_string(),
             },
             discord: crate::config::Discord {
-                public_key: KEYPAIR.0.clone(),
+                public_key: hex::encode(TEST_KEYPAIR.public.clone()),
                 client_id: 0,
             },
         },
@@ -103,7 +104,7 @@ async fn respond_to_pings() {
     let ping = json!({ "type": 1, "id": "0", "application_id": "0", "token": "random token", "version": 1 }).to_string();
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.as_bytes().to_vec()].concat();
-    let signature = sign_message(signature_data, KEYPAIR.1);
+    let signature = sign_message(signature_data, &TEST_KEYPAIR);
 
     let req = Request::builder()
         .method(Method::POST)
@@ -140,7 +141,7 @@ async fn response_500_when_no_nats_response() {
     let ping = json!({ "type": 2, "id": "0", "application_id": "0", "token": "random token", "version": 1 }).to_string();
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.as_bytes().to_vec()].concat();
-    let signature = sign_message(signature_data, KEYPAIR.1);
+    let signature = sign_message(signature_data, &TEST_KEYPAIR);
 
     // we must timeout
     let req = Request::builder()
@@ -166,7 +167,7 @@ async fn respond_from_nats_response() {
     let ping = json!({ "type": 2, "id": "0", "application_id": "0", "token": "random token", "version": 1 }).to_string();
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.as_bytes().to_vec()].concat();
-    let signature = sign_message(signature_data, KEYPAIR.1);
+    let signature = sign_message(signature_data, &TEST_KEYPAIR);
 
     sub.with_handler(move |msg| {
         info!("Received {}", &msg);
@@ -191,7 +192,7 @@ async fn response_400_when_invalid_json_body() {
     let ping = "{".to_string();
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.as_bytes().to_vec()].concat();
-    let signature = sign_message(signature_data, KEYPAIR.1);
+    let signature = sign_message(signature_data, &TEST_KEYPAIR);
 
     let req = Request::builder()
         .method(Method::POST)
@@ -212,7 +213,7 @@ async fn response_400_when_invalid_utf8_body() {
 
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.to_vec()].concat();
-    let signature = sign_message(signature_data, KEYPAIR.1);
+    let signature = sign_message(signature_data, &TEST_KEYPAIR);
 
     let req = Request::builder()
         .method(Method::POST)

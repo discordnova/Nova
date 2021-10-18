@@ -76,6 +76,6 @@ rust_library(
         "@raze__flate2__1_0_22//:flate2",
         "@raze__hex__0_4_3//:hex",
         "@raze__lazy_static__1_4_0//:lazy_static",
-        "@raze__libc__0_2_101//:libc",
+        "@raze__libc__0_2_104//:libc",
     ],
 )

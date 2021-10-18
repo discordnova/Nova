@@ -32,7 +32,7 @@ alias(
 
 alias(
     name = "redis",
-    actual = "@raze__redis__0_21_2//:redis",
+    actual = "@raze__redis__0_21_3//:redis",
     tags = [
         "cargo-raze",
         "manual",
@@ -50,7 +50,7 @@ alias(
 
 alias(
     name = "serde_json",
-    actual = "@raze__serde_json__1_0_67//:serde_json",
+    actual = "@raze__serde_json__1_0_68//:serde_json",
     tags = [
         "cargo-raze",
         "manual",

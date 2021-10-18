@@ -22,6 +22,15 @@ alias(
 )
 
 alias(
+    name = "ed25519_dalek",
+    actual = "@raze__ed25519_dalek__1_0_1//:ed25519_dalek",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "hex",
     actual = "@raze__hex__0_4_3//:hex",
     tags = [
@@ -32,7 +41,7 @@ alias(
 
 alias(
     name = "hyper",
-    actual = "@raze__hyper__0_14_12//:hyper",
+    actual = "@raze__hyper__0_14_13//:hyper",
     tags = [
         "cargo-raze",
         "manual",
@@ -50,7 +59,7 @@ alias(
 
 alias(
     name = "libc",
-    actual = "@raze__libc__0_2_101//:libc",
+    actual = "@raze__libc__0_2_104//:libc",
     tags = [
         "cargo-raze",
         "manual",
@@ -58,8 +67,8 @@ alias(
 )
 
 alias(
-    name = "libsodium_sys",
-    actual = "@raze__libsodium_sys__0_2_7//:libsodium_sys",
+    name = "rand",
+    actual = "@raze__rand__0_7_3//:rand",
     tags = [
         "cargo-raze",
         "manual",
@@ -77,7 +86,7 @@ alias(
 
 alias(
     name = "serde_json",
-    actual = "@raze__serde_json__1_0_67//:serde_json",
+    actual = "@raze__serde_json__1_0_68//:serde_json",
     tags = [
         "cargo-raze",
         "manual",
@@ -86,7 +95,7 @@ alias(
 
 alias(
     name = "tokio",
-    actual = "@raze__tokio__1_11_0//:tokio",
+    actual = "@raze__tokio__1_12_0//:tokio",
     tags = [
         "cargo-raze",
         "manual",

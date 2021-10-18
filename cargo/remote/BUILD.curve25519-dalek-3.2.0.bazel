@@ -36,6 +36,8 @@ rust_library(
     name = "curve25519_dalek",
     srcs = glob(["**/*.rs"]),
     crate_features = [
+        "alloc",
+        "std",
         "u64_backend",
     ],
     crate_root = "src/lib.rs",
@@ -56,6 +58,6 @@ rust_library(
         "@raze__digest__0_9_0//:digest",
         "@raze__rand_core__0_5_1//:rand_core",
         "@raze__subtle__2_4_1//:subtle",
-        "@raze__zeroize__1_4_1//:zeroize",
+        "@raze__zeroize__1_4_2//:zeroize",
     ],
 )

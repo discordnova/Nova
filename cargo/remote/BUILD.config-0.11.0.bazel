@@ -64,7 +64,7 @@ rust_library(
         "@raze__rust_ini__0_13_0//:rust_ini",
         "@raze__serde__1_0_130//:serde",
         "@raze__serde_hjson__0_9_1//:serde_hjson",
-        "@raze__serde_json__1_0_67//:serde_json",
+        "@raze__serde_json__1_0_68//:serde_json",
         "@raze__toml__0_5_8//:toml",
         "@raze__yaml_rust__0_4_5//:yaml_rust",
     ],

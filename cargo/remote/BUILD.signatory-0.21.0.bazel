@@ -58,6 +58,6 @@ rust_library(
         "@raze__getrandom__0_1_16//:getrandom",
         "@raze__signature__1_3_1//:signature",
         "@raze__subtle_encoding__0_5_1//:subtle_encoding",
-        "@raze__zeroize__1_4_1//:zeroize",
+        "@raze__zeroize__1_4_2//:zeroize",
     ],
 )

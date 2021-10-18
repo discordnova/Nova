@@ -23,7 +23,7 @@ alias(
 
 alias(
     name = "hyper",
-    actual = "@raze__hyper__0_14_12//:hyper",
+    actual = "@raze__hyper__0_14_13//:hyper",
     tags = [
         "cargo-raze",
         "manual",
@@ -59,7 +59,7 @@ alias(
 
 alias(
     name = "tokio",
-    actual = "@raze__tokio__1_11_0//:tokio",
+    actual = "@raze__tokio__1_12_0//:tokio",
     tags = [
         "cargo-raze",
         "manual",
