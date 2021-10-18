@@ -44,14 +44,3 @@ additional_deps = ["@raze__miniz_oxide__0_4_4//:miniz_oxide"]
 
 [package.metadata.raze.crates.webpki.'*']
 compile_data_attr = "glob([\"*/**\"])"
-
-[package.metadata.raze.crates.libsodium-sys.'*']
-buildrs_additional_environment_variables = { PATH = "/usr/sbin:/usr/bin:/sbin:/bin", "NUM_JOBS" = "2" }
-compile_data_attr = "glob([\"*/**\"])"
-additional_build_file = "bazel/patch/BUILD_script_patch"
-gen_buildrs = false
-additional_deps = [":libsodium_sys_build_script"]
-
-
-[package.metadata.raze.crates.value-bag.'*']
-gen_buildrs = false

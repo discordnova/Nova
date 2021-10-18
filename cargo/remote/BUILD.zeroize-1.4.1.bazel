@@ -34,6 +34,7 @@ rust_library(
     name = "zeroize",
     srcs = glob(["**/*.rs"]),
     crate_features = [
+        "alloc",
         "zeroize_derive",
     ],
     crate_root = "src/lib.rs",
