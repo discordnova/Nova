@@ -13,6 +13,15 @@ licenses([
 
 # Aliased targets
 alias(
+    name = "ed25519_dalek",
+    actual = "@raze__ed25519_dalek__1_0_1//:ed25519_dalek",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "hex",
     actual = "@raze__hex__0_4_3//:hex",
     tags = [
@@ -49,8 +58,8 @@ alias(
 )
 
 alias(
-    name = "libsodium_sys",
-    actual = "@raze__libsodium_sys__0_2_7//:libsodium_sys",
+    name = "rand",
+    actual = "@raze__rand__0_7_3//:rand",
     tags = [
         "cargo-raze",
         "manual",

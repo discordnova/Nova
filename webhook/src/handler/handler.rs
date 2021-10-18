@@ -17,12 +17,14 @@ use std::{
     task::{Context, Poll},
     time::Duration,
 };
+use ed25519_dalek::PublicKey;
 
 /// Hyper service used to handle the discord webhooks
 #[derive(Clone)]
 pub struct HandlerService {
     pub config: Arc<Config>,
     pub nats: Arc<Connection>,
+    pub public_key: Arc<PublicKey>
 }
 
 impl HandlerService {
@@ -36,7 +38,7 @@ impl HandlerService {
                     let contatenated_data = [timestamp.as_bytes().to_vec(), data.to_vec()].concat();
                     if let Ok(signature_str) = &signature.to_str() {
                         if validate_signature(
-                            &self.config.discord.public_key,
+                            &self.public_key,
                             &contatenated_data,
                             signature_str,
                         ) {

@@ -34,6 +34,7 @@ rust_library(
     name = "subtle",
     srcs = glob(["**/*.rs"]),
     crate_features = [
+        "std",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
