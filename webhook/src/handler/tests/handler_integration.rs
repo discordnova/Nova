@@ -1,106 +1,103 @@
 use std::time::Duration;
-
 use crate::{
     config::Config,
     handler::tests::utils::{generate_keypair, sign_message},
     start,
 };
-use common::{config::test_init, nats_crate::Connection, testcontainers::{Image, images::generic::WaitFor}};
+use common::{
+    config::test_init,
+    nats_crate::Connection,
+    testcontainers::{images::generic::WaitFor, Image},
+};
 use common::{
     config::Settings,
     log::info,
     testcontainers::{clients::Cli, images::generic::GenericImage, Container, Docker},
 };
-use hyper::{Body, Method, Request};
-use lazy_static::{__Deref, lazy_static};
+use hyper::{Body, Method, Request, StatusCode};
+use lazy_static::{lazy_static};
 use serde_json::json;
+use ctor;
 
-#[cfg(all(unix, target_arch = "x86_64"))]
 const fn nats_image<'a>() -> &'a str {
+    #[cfg(all(unix, target_arch = "x86_64"))]
     return "amd64/nats";
-}
-
-#[cfg(all(unix, target_arch = "aarch64"))]
-const fn nats_image<'a>() -> &'a str {
+    #[cfg(all(unix, target_arch = "aarch64"))]
     return "arm64v8/nats";
-}
-
-#[cfg(all(target_arch = "x86_64", target_os = "windows"))]
-const fn nats_image<'a>() -> &'a str {
+    #[cfg(all(target_arch = "x86_64", target_os = "windows"))]
     return "winamd64/nats";
 }
 
+static mut NATS: Option<Container<Cli, GenericImage>> = None;
+static mut SETTINGS: Option<Settings<Config>> = None;
+
 lazy_static! {
+    static ref KEYPAIR: (String, [u8; 64]) = generate_keypair();
     static ref DOCKER: Cli = Cli::default();
+}
 
-    static ref NATS_CONTAINER: Container<'static, Cli, GenericImage> = {
-        test_init();
+#[ctor::ctor]
+unsafe fn init() {
+    test_init();
+    let image = GenericImage::new(nats_image())
+        .with_wait_for(WaitFor::message_on_stderr("Server is ready"));
 
-        let image: GenericImage = GenericImage::new(nats_image())
-            .with_wait_for(WaitFor::message_on_stderr("Server is ready"));
-        
-        let container = DOCKER.run(image);
-        container.start();
-        container.image().wait_until_ready(&container);
-        container.get_host_port(4222).unwrap();
-        container
-    };
+    let container = DOCKER.run(image);
+    container.start();
+    container.image().wait_until_ready(&container);
+    container.get_host_port(4222).unwrap();
 
-    
-    static ref KEYPAIR: (String, [u8; 64]) = {
-        generate_keypair()
-    };
-
-    static ref SETTINGS: Settings<Config> = {
-        let port = NATS_CONTAINER.get_host_port(4222).unwrap();
-        common::config::Settings {
-            config: crate::config::Config {
-                server: crate::config::ServerSettings {
-                    port: 5003,
-                    address: "0.0.0.0".to_string(),
-                },
-                discord: crate::config::Discord {
-                    public_key: KEYPAIR.0.clone(),
-                    client_id: 0,
-                },
+    let port = container.get_host_port(4222).unwrap();
+    NATS = Some(container);
+    SETTINGS = Some(common::config::Settings {
+        config: crate::config::Config {
+            server: crate::config::ServerSettings {
+                port: 5003,
+                address: "0.0.0.0".to_string(),
             },
-            redis: common::redis::RedisConfiguration {
-                url: "".to_string(),
+            discord: crate::config::Discord {
+                public_key: KEYPAIR.0.clone(),
+                client_id: 0,
             },
-            monitoring: common::monitoring::MonitoringConfiguration {
-                enabled: false,
-                address: None,
-                port: None,
-            },
-            nats: common::nats::NatsConfiguration {
-                client_cert: None,
-                root_cert: None,
-                jetstream_api_prefix: None,
-                max_reconnects: None,
-                reconnect_buffer_size: None,
-                tls: None,
-                client_name: None,
-                tls_required: None,
-                host: format!("localhost:{}", port),
-            },
-        }
-    };
+        },
+        redis: common::redis::RedisConfiguration {
+            url: "".to_string(),
+        },
+        monitoring: common::monitoring::MonitoringConfiguration {
+            enabled: false,
+            address: None,
+            port: None,
+        },
+        nats: common::nats::NatsConfiguration {
+            client_cert: None,
+            root_cert: None,
+            jetstream_api_prefix: None,
+            max_reconnects: None,
+            reconnect_buffer_size: None,
+            tls: None,
+            client_name: None,
+            tls_required: None,
+            host: format!("localhost:{}", port),
+        },
+    });
+    let settings = (&mut SETTINGS).as_ref().unwrap();
 
-    static ref TASK: () = {
-        std::thread::spawn(|| {
-            let r = tokio::runtime::Runtime::new().unwrap();
-            r.spawn(async { start(SETTINGS.clone()).await });
-            loop {}
-        });
-        std::thread::sleep(Duration::from_secs(1));
-    };
+    std::thread::spawn(move || {
+        let runtime = tokio::runtime::Runtime::new().unwrap();
+        runtime.block_on(start(settings.clone()));
+    });
+    std::thread::sleep(Duration::from_secs(3));
+}
+
+#[ctor::dtor]
+unsafe fn destroy() {
+    let nats = (&mut NATS).as_ref().unwrap();
+    nats.stop();
 }
 
 #[tokio::test]
 async fn respond_to_pings() {
-    let _ = NATS_CONTAINER.deref();
-    let _ = TASK.deref();
-    let ping = json!({ "type": 1 }).to_string();
+    let ping = json!({ "type": 1, "id": "0", "application_id": "0", "token": "random token", "version": 1 }).to_string();
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.as_bytes().to_vec()].concat();
     let signature = sign_message(signature_data, KEYPAIR.1);
@@ -115,14 +112,12 @@ async fn respond_to_pings() {
     let client = hyper::client::Client::new();
     let result = client.request(req).await.unwrap();
 
-    assert!(result.status() == 200);
+    assert_eq!(result.status(), StatusCode::OK);
 }
 
 #[tokio::test]
 async fn deny_invalid_signatures() {
-    let _ = NATS_CONTAINER.deref();
-    let _ = TASK.deref();
-    let ping = json!({ "type": 1 }).to_string();
+    let ping = json!({ "type": 1, "id": "0", "application_id": "0", "token": "random token", "version": 1 }).to_string();
     let timestamp = "my datetime :)";
 
     let req = Request::builder()
@@ -134,14 +129,12 @@ async fn deny_invalid_signatures() {
         .expect("request builder");
     let client = hyper::client::Client::new();
     let result = client.request(req).await.unwrap();
-    assert!(result.status() == 401);
+    assert_eq!(result.status(), StatusCode::UNAUTHORIZED);
 }
 
 #[tokio::test]
 async fn response_500_when_no_nats_response() {
-    let _ = NATS_CONTAINER.deref();
-    let _ = TASK.deref();
-    let ping = json!({ "type": 0 }).to_string();
+    let ping = json!({ "type": 2, "id": "0", "application_id": "0", "token": "random token", "version": 1 }).to_string();
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.as_bytes().to_vec()].concat();
     let signature = sign_message(signature_data, KEYPAIR.1);
@@ -157,16 +150,17 @@ async fn response_500_when_no_nats_response() {
 
     let client = hyper::client::Client::new();
     let result = client.request(req).await.unwrap();
-    assert!(result.status() == 500);
+    assert_eq!(result.status(), StatusCode::INTERNAL_SERVER_ERROR);
 }
 
 #[tokio::test]
 async fn respond_from_nats_response() {
-    let _ = NATS_CONTAINER.deref();
-    let _ = TASK.deref();
-    let nats: Connection = SETTINGS.clone().nats.into();
+    let nats: Connection;
+    unsafe {
+        nats = SETTINGS.clone().unwrap().nats.into();
+    }
     let sub = nats.subscribe("nova.cache.dispatch.interaction").unwrap();
-    let ping = json!({ "type": 0 }).to_string();
+    let ping = json!({ "type": 2, "id": "0", "application_id": "0", "token": "random token", "version": 1 }).to_string();
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.as_bytes().to_vec()].concat();
     let signature = sign_message(signature_data, KEYPAIR.1);
@@ -186,13 +180,11 @@ async fn respond_from_nats_response() {
         .expect("request builder");
     let client = hyper::client::Client::new();
     let result = client.request(req).await.unwrap();
-    assert!(result.status() == 200);
+    assert_eq!(result.status(), StatusCode::OK);
 }
 
 #[tokio::test]
 async fn response_400_when_invalid_json_body() {
-    let _ = NATS_CONTAINER.deref();
-    let _ = TASK.deref();
     let ping = "{".to_string();
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.as_bytes().to_vec()].concat();
@@ -207,13 +199,11 @@ async fn response_400_when_invalid_json_body() {
         .expect("request builder");
     let client = hyper::client::Client::new();
     let result = client.request(req).await.unwrap();
-    assert!(result.status() == 400);
+    assert_eq!(result.status(), StatusCode::BAD_REQUEST);
 }
 
 #[tokio::test]
 async fn response_400_when_invalid_utf8_body() {
-    let _ = NATS_CONTAINER.deref();
-    let _ = TASK.deref();
     // invalid 2 octet sequence
     let ping = vec![0xc3, 0x28];
 
@@ -230,5 +220,5 @@ async fn response_400_when_invalid_utf8_body() {
         .expect("request builder");
     let client = hyper::client::Client::new();
     let result = client.request(req).await.unwrap();
-    assert!(result.status() == 400);
+    assert_eq!(result.status(), StatusCode::BAD_REQUEST);
 }

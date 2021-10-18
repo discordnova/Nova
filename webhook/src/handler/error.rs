@@ -1,4 +1,4 @@
-use hyper::{Body, Error, Response, StatusCode};
+use hyper::{Body, Response, StatusCode};
 
 pub struct WebhookError {
     pub code: StatusCode,

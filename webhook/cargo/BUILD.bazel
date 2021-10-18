@@ -13,6 +13,15 @@ licenses([
 
 # Aliased targets
 alias(
+    name = "ctor",
+    actual = "@raze__ctor__0_1_21//:ctor",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "hex",
     actual = "@raze__hex__0_4_3//:hex",
     tags = [

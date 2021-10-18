@@ -8,16 +8,16 @@ lazy_static::lazy_static! {
         &["signature"]
     ).unwrap();
 
-    static ref SIGNATURE_BODY_COUNTER: Counter = register_counter!(opts!(
-        "nova_webhook_",
-        "",
+    static ref SIGNATURE_COUNTER: Counter = register_counter!(opts!(
+        "nova_webhook_signatures_verify",
+        "number of signatures verification issued by the service",
         labels! {"handler" => "webhook_main"}
     )).unwrap();
 }
 
 /// Checks the signature of a given data using the hex signature and the public key.
 pub fn validate_signature(hex_public_key: &str, data: &Vec<u8>, hex_signature: &str) -> bool {
-    SIGNATURE_BODY_COUNTER.inc();
+    SIGNATURE_COUNTER.inc();
     let timer = SIGNATURE_TIME_HISTOGRAM.with_label_values(&["webhook_main"]).start_timer();
 
     // First, we need to check if the signature & private key is valid base64.
