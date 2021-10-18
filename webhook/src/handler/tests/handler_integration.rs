@@ -15,7 +15,7 @@ use common::{
     testcontainers::{clients::Cli, images::generic::GenericImage, Container, Docker},
 };
 use hyper::{Body, Method, Request, StatusCode};
-use lazy_static::{lazy_static};
+use lazy_static::lazy_static;
 use serde_json::json;
 use ctor;
 
