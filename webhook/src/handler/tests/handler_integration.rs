@@ -1,23 +1,26 @@
 use std::time::Duration;
+
+use ctor;
+use hyper::{Body, Method, Request, StatusCode};
+use lazy_static::lazy_static;
+use serde_json::json;
+
+use common::{
+    config::test_init,
+    nats_crate::Connection,
+    testcontainers::{Image, images::generic::WaitFor},
+};
+use common::{
+    config::Settings,
+    log::info,
+    testcontainers::{clients::Cli, Container, Docker, images::generic::GenericImage},
+};
+
 use crate::{
     config::Config,
     handler::tests::utils::{generate_keypair, sign_message},
     start,
 };
-use common::{
-    config::test_init,
-    nats_crate::Connection,
-    testcontainers::{images::generic::WaitFor, Image},
-};
-use common::{
-    config::Settings,
-    log::info,
-    testcontainers::{clients::Cli, images::generic::GenericImage, Container, Docker},
-};
-use hyper::{Body, Method, Request, StatusCode};
-use lazy_static::lazy_static;
-use serde_json::json;
-use ctor;
 
 const fn nats_image<'a>() -> &'a str {
     #[cfg(all(unix, target_arch = "x86_64"))]

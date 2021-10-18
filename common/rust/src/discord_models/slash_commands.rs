@@ -93,7 +93,7 @@ pub struct Interaction {
     #[serde(rename = "type")]
     pub type_: InteractionRequestType,
     /// i am not sure about this one https://canary.discord.com/developers/docs/interactions/slash-commands#interaction-object-application-command-interaction-data
-    pub data: ApplicationCommand,
+    pub data: Option<ApplicationCommand>,
     pub guild_id: Option<String>,
     pub channel_id: Option<String>,
     pub member: Option<GuildMember>,

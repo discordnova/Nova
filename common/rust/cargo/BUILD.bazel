@@ -22,6 +22,15 @@ alias(
 )
 
 alias(
+    name = "enumflags2",
+    actual = "@raze__enumflags2__0_7_1//:enumflags2",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "hyper",
     actual = "@raze__hyper__0_14_12//:hyper",
     tags = [
@@ -78,6 +87,15 @@ alias(
 alias(
     name = "serde",
     actual = "@raze__serde__1_0_130//:serde",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "serde_repr",
+    actual = "@raze__serde_repr__0_1_7//:serde_repr",
     tags = [
         "cargo-raze",
         "manual",

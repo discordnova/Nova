@@ -23,6 +23,7 @@ _DEPENDENCIES = {
     },
     "common/rust": {
         "config": "@raze__config__0_11_0//:config",
+        "enumflags2": "@raze__enumflags2__0_7_1//:enumflags2",
         "hyper": "@raze__hyper__0_14_12//:hyper",
         "log": "@raze__log__0_4_14//:log",
         "nats": "@raze__nats__0_15_2//:nats",
@@ -69,8 +70,10 @@ _DEPENDENCIES = {
 # EXPERIMENTAL -- MAY CHANGE AT ANY TIME: A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
 _PROC_MACRO_DEPENDENCIES = {
     "webhook": {
+        "ctor": "@raze__ctor__0_1_21//:ctor",
     },
     "common/rust": {
+        "serde_repr": "@raze__serde_repr__0_1_7//:serde_repr",
     },
     "gateway": {
         "num-derive": "@raze__num_derive__0_3_3//:num_derive",
@@ -579,6 +582,16 @@ def raze_fetch_remote_crates():
         sha256 = "bff07008ec701e8028e2ceb8f83f0e4274ee62bd2dbdc4fefff2e9a91824081a",
         strip_prefix = "crypto-mac-0.10.1",
         build_file = Label("//cargo/remote:BUILD.crypto-mac-0.10.1.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "raze__ctor__0_1_21",
+        url = "https://crates.io/api/v1/crates/ctor/0.1.21/download",
+        type = "tar.gz",
+        sha256 = "ccc0a48a9b826acdf4028595adc9db92caea352f7af011a3034acd172a52a0aa",
+        strip_prefix = "ctor-0.1.21",
+        build_file = Label("//cargo/remote:BUILD.ctor-0.1.21.bazel"),
     )
 
     maybe(
