@@ -6,6 +6,7 @@ pub struct NatsConfigurationClientCert {
     pub cert: String,
     pub key: String,
 }
+
 #[derive(Clone, Debug, Deserialize)]
 pub struct NatsConfigurationTls {
     pub mtu: Option<usize>,
@@ -24,6 +25,7 @@ pub struct NatsConfiguration {
     pub host: String,
 }
 
+// todo: Prefer From since it automatically gives a free Into implementation
 // Allows the configuration to directly create a nats connection
 impl Into<Connection> for NatsConfiguration {
     fn into(self) -> Connection {
@@ -47,7 +49,7 @@ impl Into<Connection> for NatsConfiguration {
         options = options.no_echo();
         options = options.reconnect_buffer_size(self.reconnect_buffer_size.unwrap_or(64 * 1024));
         options = options.tls_required(self.tls_required.unwrap_or(false));
-        options = options.with_name(&self.client_name.unwrap_or("Nova".to_string()));
+        options = options.with_name(&self.client_name.unwrap_or_else(|| "Nova".to_string()));
 
         if let Some(tls) = self.tls {
             let mut config = nats::rustls::ClientConfig::new();

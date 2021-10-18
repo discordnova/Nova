@@ -205,6 +205,7 @@ name = "common"
 version = "0.1.0"
 dependencies = [
  "config",
+ "enumflags2",
  "hyper",
  "log",
  "nats",
@@ -212,6 +213,7 @@ dependencies = [
  "prometheus",
  "redis",
  "serde 1.0.130",
+ "serde_repr",
  "testcontainers",
  "tokio",
 ]
@@ -309,6 +311,16 @@ checksum = "bff07008ec701e8028e2ceb8f83f0e4274ee62bd2dbdc4fefff2e9a91824081a"
 dependencies = [
  "generic-array",
  "subtle",
+]
+
+[[package]]
+name = "ctor"
+version = "0.1.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ccc0a48a9b826acdf4028595adc9db92caea352f7af011a3034acd172a52a0aa"
+dependencies = [
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -2174,6 +2186,7 @@ name = "webhook"
 version = "0.1.0"
 dependencies = [
  "common",
+ "ctor",
  "hex",
  "hyper",
  "lazy_static",

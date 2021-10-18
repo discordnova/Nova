@@ -22,6 +22,7 @@ impl<T> Settings<T>
 where
     T: Deserialize<'static> + std::default::Default + Clone,
 {
+
     /// Initializes a new configuration like the other components of nova
     /// And starts the prometheus metrics server if needed.
     pub fn new(service_name: &str) -> Result<Settings<T>, ConfigError> {
@@ -42,7 +43,9 @@ where
         let mut config: Settings<T> = default.clone().try_into().unwrap();
 
         //  try to load the config
-        config.config = default.get::<T>(&service_name).unwrap();
+        config.config = default.get::<T>(service_name).unwrap();
+        // todo(MatthieuCodder): the following line was not present in the conflict
+        //         pretty_env_logger::init();
 
         // start the monitoring system if needed
         crate::monitoring::start_monitoring(&config.monitoring);

@@ -1,8 +1,10 @@
 use super::error::WebhookError;
-use super::{signature::validate_signature, types::Interaction};
+use super::signature::validate_signature;
 use crate::config::Config;
-use common::log::{debug, error, info};
+use common::discord_models::slash_commands::{Interaction, InteractionRequestType};
+use common::log::{debug, error};
 use common::nats_crate::Connection;
+use common::payloads::CacheData;
 use hyper::{
     body::{to_bytes, Bytes},
     service::Service,
@@ -79,15 +81,12 @@ impl HandlerService {
                 let utf8 = from_utf8(&data);
                 match utf8 {
                     Ok(data) => match serde_json::from_str::<Interaction>(data) {
-                        Ok(value) => {
-                            if value.t == 1 {
-                                info!("sending pong");
-                                // a ping must be responded with another ping
-                                return Ok(Response::builder()
-                                    .header("Content-Type", "application/json")
-                                    .body(serde_json::to_string(&Ping { t: 1 }).unwrap().into())
-                                    .unwrap());
-                            } else {
+                        Ok(value) => match value.type_ {
+                            InteractionRequestType::Ping => Ok(Response::builder()
+                                .header("Content-Type", "application/json")
+                                .body(serde_json::to_string(&Ping { t: 1 }).unwrap().into())
+                                .unwrap()),
+                            _ => {
                                 debug!("calling nats");
                                 // this should hopefully not fail ?
                                 let payload =
@@ -96,8 +95,9 @@ impl HandlerService {
                                             node_id: "".to_string(),
                                             span: None,
                                         },
-                                        operation: "".to_string(),
-                                        data: value,
+                                        data: CacheData::InteractionCreate {
+                                            interaction: Box::new(value),
+                                        },
                                     })
                                     .unwrap();
 
@@ -120,7 +120,7 @@ impl HandlerService {
                                     }
                                 }
                             }
-                        }
+                        },
 
                         Err(_) => Err(WebhookError::new(
                             StatusCode::BAD_REQUEST,
