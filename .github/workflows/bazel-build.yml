@@ -75,5 +75,5 @@ jobs:
       - name: Publish docker images
         shell: bash
         run: |
-           bazel run --define docker_repo=ghcr.io --define docker_tag=${{ steps.extract_branch.outputs.branch }} //:container_publish
+           bazel run --define docker_tag=${{ steps.extract_branch.outputs.branch }} //:container_publish
         if: matrix.os == 'ubuntu-latest'
