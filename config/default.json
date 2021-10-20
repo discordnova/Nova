@@ -28,5 +28,8 @@
             "public_key": "",
             "client_id": 123
         }
+    },
+    "gateway": {
+
     }
 }

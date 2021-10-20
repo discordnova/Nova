@@ -57,6 +57,10 @@ impl Shard {
             .await
         } else {
             info!("Sending login");
+            let mut shards: Option<[u64; 2]> = None;
+            if let Some(sharding) = self.config.shard.as_ref() {
+                shards = Some([sharding.current_shard, sharding.total_shards]);
+            }
             self._send(BaseMessage {
                 t: None,
                 sequence: None,
@@ -69,7 +73,7 @@ impl Shard {
                         browser: "Nova".to_string(),
                         device: "Nova".to_string(),
                     },
-                    shard: Some([0, 2]),
+                    shard: shards,
                     compress: Some(false),
                     large_threshold: Some(500),
                     presence: None,

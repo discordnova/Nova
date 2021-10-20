@@ -8,10 +8,9 @@ mod state;
 
 #[derive(Debug, Deserialize, Serialize, Default, Clone)]
 pub struct Sharding {
-    pub total_shards: i64,
-    pub current_shard: i64
+    pub total_shards: u64,
+    pub current_shard: u64
 }
-
 
 #[derive(Debug, Deserialize, Serialize, Default, Clone)]
 pub struct ShardConfig {
