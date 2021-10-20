@@ -124,10 +124,13 @@ impl HandlerService {
                             }
                         },
 
-                        Err(_) => Err(WebhookError::new(
+                        Err(error) => {
+                            error!("invalid json body: {}", error);
+                            Err(WebhookError::new(
                             StatusCode::BAD_REQUEST,
                             "invalid json body",
-                        )),
+                            ))
+                        },
                     },
 
                     Err(_) => Err(WebhookError::new(StatusCode::BAD_REQUEST, "not utf-8 body")),
