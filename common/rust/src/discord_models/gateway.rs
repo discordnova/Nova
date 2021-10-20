@@ -116,3 +116,9 @@ pub struct Activity {
     pub flags: Option<BitFlags<ActivityFlags>>,
     pub buttons: Option<Vec<ActivityButtons>>,
 }
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(tag = "type")]
+pub enum NewActivity {
+
+}

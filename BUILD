@@ -8,6 +8,10 @@ gazelle(name = "gazelle")
 
 exports_files(["go.mod"])
 
+platform(
+    name = "aarch64",
+)
+
 filegroup(
     name = "binaries",
     srcs = [
@@ -34,16 +38,6 @@ container_push(
     name = "container_publish",
     bundle = ":container_images",
     format = "OCI",
-)
-
-test_suite(
-    name = "tests",
-    tests = [
-        "//gateway:tests",
-        "//novactl:tests",
-        "//rest:tests",
-        "//webhook:tests",
-    ],
 )
 
 pkg_tar(

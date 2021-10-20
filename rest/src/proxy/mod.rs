@@ -2,7 +2,7 @@ use crate::{config::Config, ratelimit::Ratelimiter};
 use common::{log::debug, prometheus::{Counter, HistogramVec, labels, opts, register_counter, register_histogram_vec}};
 use hyper::{
     client::HttpConnector, header::HeaderValue, http::uri::Parts, service::Service, Body, Client,
-    HeaderMap, Request, Response, Uri,
+    Request, Response, Uri,
 };
 use hyper_tls::HttpsConnector;
 use tokio::sync::Mutex;
@@ -72,15 +72,16 @@ impl Service<Request<Body>> for ServiceProxy {
 
         *req.uri_mut() = Uri::from_parts(new_parts).unwrap();
 
-        let mut headers = HeaderMap::default();
-
+        let headers = req.headers_mut();
+        headers.remove("user-agent");
         headers.insert("Host", HeaderValue::from_str("discord.com").unwrap());
         headers.insert(
             "Authorization",
             HeaderValue::from_str(&format!("Bot {}", self.config.discord.token)).unwrap(),
         );
 
-        *req.headers_mut() = headers;
+        println!("{:?}", headers);
+
         let client = self.client.clone();
         let ratelimiter = self.ratelimiter.clone();
         let fail = self.fail.clone();

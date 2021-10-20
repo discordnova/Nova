@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+use crate::discord_models::channel::Channel;
 
 use super::{guild::Integration, user::User, webhook::Webhook};
 
@@ -199,10 +200,15 @@ pub struct AuditLogEntry {
     pub reason: Option<String>,
 }
 
+pub enum NewAuditLogEntry {
+
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct AuditLog {
     pub webhooks: Vec<Webhook>,
     pub users: Vec<User>,
+    pub threads: Vec<Channel>,
     pub audit_log_entries: Vec<AuditLogEntry>,
     pub integrations: Vec<Integration>,
 }

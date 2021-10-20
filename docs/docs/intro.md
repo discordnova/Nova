@@ -1,4 +1,6 @@
-# Introduction
+# Nova
+
+[![Build](https://github.com/discordnova/Nova/actions/workflows/bazel-build.yml/badge.svg)](https://github.com/discordnova/Nova/actions/workflows/bazel-build.yml)
 
 ## What is nova ?
 

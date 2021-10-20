@@ -1,1 +1,0 @@
-exports_files(["libsodium_sys_build_script_script_.rs"])
