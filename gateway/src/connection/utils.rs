@@ -1,6 +1,6 @@
 use std::str::from_utf8;
 use tokio_tungstenite::tungstenite::Message;
-use common::log::info;
+use common::{log::info, types::ws::websocket::WebsocketPacket};
 
 use crate::error::GatewayError;
 
@@ -12,7 +12,7 @@ impl Connection {
     pub(super) async fn _handle_message(
         &mut self,
         data: &Message,
-    ) -> Result<crate::payloads::gateway::Message, GatewayError> {
+    ) -> Result<WebsocketPacket, GatewayError> {
         match data {
             Message::Text(text) => self._handle_discord_message(&text).await,
             Message::Binary(message) => {
@@ -33,7 +33,7 @@ impl Connection {
     pub(super) async fn _handle_discord_message(
         &mut self,
         raw_message: &str,
-    ) -> Result<crate::payloads::gateway::Message, GatewayError> {
+    ) -> Result<WebsocketPacket, GatewayError> {
         match serde_json::from_str(raw_message) {
             Ok(message) => Ok(message),
             Err(err) => Err(GatewayError::from(err.to_string())),

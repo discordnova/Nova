@@ -1,6 +1,6 @@
 use enumflags2::BitFlags;
 use serde::{Deserialize, Serialize};
-use crate::{connection::Connection, payloads::opcodes::identify::Intents};
+use crate::{connection::Connection};
 use self::state::{ConnectionState, SessionState};
 mod actions;
 mod connection;

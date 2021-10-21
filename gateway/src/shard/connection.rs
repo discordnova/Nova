@@ -1,9 +1,6 @@
 use std::{cmp::min, convert::TryInto, time::Duration};
 
-use crate::{connection::Connection, error::GatewayError, payloads::{
-        dispatch::Dispatch,
-        gateway::{BaseMessage, Message},
-    }, shard::state::SessionState};
+use crate::{connection::Connection, error::GatewayError, shard::state::SessionState};
 
 use super::{state::ConnectionState, ConnectionWithState, Shard};
 use futures::StreamExt;

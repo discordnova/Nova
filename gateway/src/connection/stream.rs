@@ -1,8 +1,8 @@
-use crate::{error::GatewayError, payloads::gateway::BaseMessage};
+use crate::{error::GatewayError};
 
 use super::Connection;
 use futures::{FutureExt, Sink, SinkExt, Stream, StreamExt};
-use common::log::info;
+use common::{log::info, types::ws::websocket::WebsocketPacket};
 use serde::Serialize;
 use std::{
     pin::Pin,
@@ -12,7 +12,7 @@ use tokio_tungstenite::tungstenite::Message;
 
 /// Implementation of the Stream trait for the Connection
 impl Stream for Connection {
-    type Item = Result<crate::payloads::gateway::Message, GatewayError>;
+    type Item = Result<WebsocketPacket, GatewayError>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         // first, when a poll is called, we check if the connection is still open
@@ -56,7 +56,7 @@ impl Stream for Connection {
 }
 
 /// Implementation of the Sink trait for the Connection
-impl<T: Serialize> Sink<BaseMessage<T>> for Connection {
+impl Sink<WebsocketPacket> for Connection {
     type Error = tokio_tungstenite::tungstenite::Error;
 
     #[allow(dead_code)]
@@ -70,7 +70,7 @@ impl<T: Serialize> Sink<BaseMessage<T>> for Connection {
     }
 
     #[allow(dead_code)]
-    fn start_send(mut self: Pin<&mut Self>, item: BaseMessage<T>) -> Result<(), Self::Error> {
+    fn start_send(mut self: Pin<&mut Self>, item: WebsocketPacket) -> Result<(), Self::Error> {
         if let Some(conn) = &mut self.connection {
             let message = serde_json::to_string(&item);
             conn.start_send_unpin(Message::Text(message.unwrap()))

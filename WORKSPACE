@@ -1,5 +1,6 @@
 workspace(name = "nova")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
 
 http_archive(
     name = "com_google_protobuf",
@@ -78,3 +79,17 @@ load_rust_toolchains()
 load("//bazel:docker.bzl", "load_docker")
 
 load_docker()
+
+new_git_repository(
+    name = "discord_gateway_tests_generator",
+    remote = "https://github.com/discordnova/discord-gateway-tests-generator.git",
+    strip_prefix = "data",
+    commit = "9923b3c2b9f4efcf507a63ed25c76d1fb4da864d",
+    build_file_content = """
+filegroup(
+    name = "data",
+    srcs = glob(["**/*.json"]),
+    visibility = ["//visibility:public"],
+)
+""",
+)

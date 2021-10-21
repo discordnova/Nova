@@ -32,6 +32,7 @@ _DEPENDENCIES = {
         "prometheus": "@raze__prometheus__0_12_0//:prometheus",
         "redis": "@raze__redis__0_21_3//:redis",
         "serde": "@raze__serde__1_0_130//:serde",
+        "serde_json": "@raze__serde_json__1_0_68//:serde_json",
         "testcontainers": "@raze__testcontainers__0_12_0//:testcontainers",
         "tokio": "@raze__tokio__1_12_0//:tokio",
     },

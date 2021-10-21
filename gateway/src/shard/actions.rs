@@ -1,23 +1,18 @@
 use std::env;
 
+use common::{
+    log::{debug, error, info},
+    types::ws::{
+        resume::Resume,
+        websocket::{BasePacket, WebsocketPacket},
+    },
+};
 use futures::SinkExt;
-use common::log::{debug, error, info};
 use serde::Serialize;
 use serde_json::Value;
 use std::fmt::Debug;
 
-use crate::{
-    error::GatewayError,
-    payloads::{
-        gateway::BaseMessage,
-        opcodes::{
-            identify::{Identify, IdentifyProprerties},
-            presence::PresenceUpdate,
-            resume::Resume,
-            OpCodes,
-        },
-    },
-};
+use crate::error::GatewayError;
 
 use super::Shard;
 
@@ -26,7 +21,7 @@ impl Shard {
     /// sends a message through the websocket
     pub async fn _send<T: Serialize + Debug>(
         &mut self,
-        message: BaseMessage<T>,
+        message: WebsocketPacket,
     ) -> Result<(), GatewayError> {
         debug!("Senging message {:?}", message);
         if let Some(connection) = &mut self.connection {
@@ -44,16 +39,14 @@ impl Shard {
     pub async fn _identify(&mut self) -> Result<(), GatewayError> {
         if let Some(state) = self.state.clone() {
             info!("Using session");
-            self._send(BaseMessage {
-                t: None,
-                sequence: None,
-                op: OpCodes::Resume,
+            self._send(WebsocketPacket::Resume(BasePacket::<Resume> {
                 data: Resume {
                     token: self.config.token.clone(),
                     seq: state.sequence,
                     session_id: state.session_id.clone(),
                 },
-            })
+                sequence: None,
+            }))
             .await
         } else {
             info!("Sending login");
@@ -61,7 +54,7 @@ impl Shard {
             if let Some(sharding) = self.config.shard.as_ref() {
                 shards = Some([sharding.current_shard, sharding.total_shards]);
             }
-            self._send(BaseMessage {
+            self._send(WebsocketPacket {
                 t: None,
                 sequence: None,
                 op: OpCodes::Identify,
@@ -126,7 +119,8 @@ impl Shard {
             t: None,
             sequence: None,
             op: OpCodes::Heartbeat,
-            data: self.state.as_ref().unwrap().sequence
-        }).await
+            data: self.state.as_ref().unwrap().sequence,
+        })
+        .await
     }
 }

@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
 load("//cargo:crates.bzl", "all_crate_deps", "crate_deps")
 
 rust_library(
@@ -7,4 +7,12 @@ rust_library(
     proc_macro_deps = crate_deps(["serde_repr"]),
     visibility = ["//visibility:public"],
     deps = all_crate_deps(),
+)
+
+rust_test(
+    name = "common_test",
+    crate = ":common",
+    data = [
+        "@discord_gateway_tests_generator//:data",
+    ],
 )

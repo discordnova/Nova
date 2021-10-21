@@ -213,6 +213,7 @@ dependencies = [
  "prometheus",
  "redis",
  "serde 1.0.130",
+ "serde_json",
  "serde_repr",
  "testcontainers",
  "tokio",
