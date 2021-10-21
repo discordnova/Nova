@@ -96,9 +96,9 @@ impl HandlerService {
                                                 node_id: "".to_string(),
                                                 span: None,
                                             },
-                                            data: WebsocketPacket::Dispatch(Dispatch::InteractionCreate(
+                                            data: WebsocketPacket::Dispatch(Box::new(Dispatch::InteractionCreate(
                                                 Box::new(interaction)
-                                            )),
+                                            ))),
                                         })
                                         .unwrap();
 
