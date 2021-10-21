@@ -6,5 +6,6 @@ pub struct ThreadDelete {
     id: String,
     guild_id: String,
     parent_id: String,
-    type_: String,
+    #[serde(rename = "type")]
+    type_: u64,
 }

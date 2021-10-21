@@ -1,11 +1,13 @@
 use enumflags2::{bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
 
+use crate::types::utils::enumflags2_serde::from_enumflag2_truncated;
 use super::{teams::Team, user::User};
 
 #[bitflags]
 #[repr(u64)]
 #[derive(Debug, Clone, Copy)]
+#[non_exhaustive]
 pub enum ApplicationFlags {
     GatewayPresence = 1 << 12,
     GatewayPresenceLimit = 1 << 13,
@@ -16,7 +18,7 @@ pub enum ApplicationFlags {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Application {
+pub struct FullApplication {
     pub id: String,
     pub name: String,
     pub icon: Option<String>,
@@ -34,5 +36,21 @@ pub struct Application {
     pub primary_sku_id: Option<String>,
     pub slug: Option<String>,
     pub cover_image: Option<String>,
-    pub flags: Option<BitFlags<ApplicationFlags>>,
+
+    #[serde(deserialize_with = "from_enumflag2_truncated")]
+    pub flags: BitFlags<ApplicationFlags>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct PartialApplication {
+    pub id: String,
+    #[serde(deserialize_with = "from_enumflag2_truncated")]
+    pub flags: BitFlags<ApplicationFlags>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum Application {
+    PartialApplication(PartialApplication),
+    FullApplication(FullApplication)
 }

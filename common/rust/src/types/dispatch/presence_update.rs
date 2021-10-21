@@ -26,7 +26,7 @@ pub struct ClientStatus {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct PresenceUpdate {
     pub user: User,
-    pub guild_id: String,
+    pub guild_id: Option<String>,
     pub status: PresenceUpdateStatus,
     pub activities: Vec<Activity>,
     pub client_status: ClientStatus,
@@ -103,7 +103,7 @@ pub struct Activity {
     #[serde(rename = "type")]
     pub type_: ActivityTypes,
     pub url: Option<String>,
-    pub created_at: String,
+    pub created_at: i64,
     pub timestamps: Option<ActivityTimestamps>,
     pub application_id: Option<String>,
     pub details: Option<String>,

@@ -15,4 +15,7 @@ rust_test(
     data = [
         "@discord_gateway_tests_generator//:data",
     ],
+    env = {
+        "RUST_BACKTRACE": "full",
+    }
 )

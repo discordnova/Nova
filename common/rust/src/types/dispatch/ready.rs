@@ -3,6 +3,7 @@ use crate::types::{application::Application, guild::Guild, user::User};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Ready {
+    #[serde(rename = "v")]
     version: u8,
     user: User,
     guilds: Vec<Guild>,

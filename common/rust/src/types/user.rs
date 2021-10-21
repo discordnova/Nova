@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use super::guild::Integration;
+use crate::types::utils::enumflags2_serde::from_enumflag2_truncated;
 
 #[bitflags]
 #[repr(u64)]
@@ -34,7 +35,7 @@ pub enum PremiumTypes {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 /// Represents a User within Discord
-pub struct User {
+pub struct FullUser {
     pub id: String,
     pub username: String,
     pub discriminator: String,
@@ -47,7 +48,21 @@ pub struct User {
     pub email: Option<String>,
     pub flags: Option<BitFlags<UserFlags>>,
     pub premium_type: Option<PremiumTypes>,
-    pub public_flags: Option<BitFlags<UserFlags>>,
+
+    #[serde(deserialize_with = "from_enumflag2_truncated")]
+    pub public_flags: BitFlags<UserFlags>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct PartialUser {
+    pub id: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum User {
+    FullUser(FullUser),
+    PartialUser(PartialUser)
 }
 
 #[derive(Debug, Clone, Deserialize_repr, Serialize_repr)]

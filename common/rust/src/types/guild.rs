@@ -229,6 +229,7 @@ pub struct Guild {
 pub struct GuildMember {
     pub user: Option<User>,
     pub nick: Option<String>,
+    #[serde(default)]
     pub roles: Vec<String>,
     pub joined_at: String,
     pub premium_since: Option<String>,

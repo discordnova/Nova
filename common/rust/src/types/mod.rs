@@ -16,5 +16,7 @@ pub mod webhook;
 pub mod ws;
 pub mod dispatch;
 
+mod utils;
+
 #[cfg(test)]
 mod tests;

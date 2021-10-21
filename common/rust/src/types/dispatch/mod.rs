@@ -133,7 +133,7 @@ generate_enums!(
     ThreadUpdate: ThreadUpdate,
     ThreadDelete: ThreadDelete,
     ThreadListSync: ThreadListSync,
-    ThreasMemberUpdate: ThreadMemberUpdate,
+    ThreadMemberUpdate: ThreadMemberUpdate,
     ThreadMembersUpdate: ThreadMembersUpdate,
     GuildCreate: GuildCreate,
     GuildUpdate: GuildUpdate,

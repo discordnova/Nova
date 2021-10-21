@@ -311,11 +311,11 @@ pub struct Message {
     pub member: Option<GuildMember>,
     pub content: String,
     pub timestamp: String,
-    pub edited_timestamp: String,
+    pub edited_timestamp: Option<String>,
     pub tts: bool,
     pub mention_everyone: bool,
     pub mentions: Vec<User>, // todo: It is a Vector of User objects, with an additional partial member field (GuildMember)
-    pub mentions_roles: Vec<String>,
+    pub mention_roles: Vec<String>,
     pub mention_channels: Option<Vec<Channel>>,
     pub attachments: Vec<Attachment>,
     pub embeds: Vec<Embed>,
@@ -334,7 +334,7 @@ pub struct Message {
     pub referenced_message: Option<Box<Message>>,
     pub interaction: Option<MessageInteraction>,
     pub thread: Option<Channel>,
-    pub components: Option<Component>,
+    pub components: Option<Vec<Component>>,
     pub sticker_items: Option<Vec<MessageStickerItem>>,
     // deprecated
     // pub stickers: Option<Vec<MessageSticker>>,
