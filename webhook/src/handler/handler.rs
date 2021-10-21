@@ -5,6 +5,7 @@ use common::log::{debug, error, trace};
 use common::nats_crate::Connection;
 use common::types::dispatch::Dispatch;
 use common::types::slash_commands::{Interaction, InteractionRequestType};
+use common::types::ws::websocket::WebsocketPacket;
 use ed25519_dalek::PublicKey;
 use hyper::{
     body::{to_bytes, Bytes},
@@ -95,8 +96,8 @@ impl HandlerService {
                                                 node_id: "".to_string(),
                                                 span: None,
                                             },
-                                            data: Dispatch::InteractionCreate(Box::new(
-                                                interaction,
+                                            data: WebsocketPacket::Dispatch(Dispatch::InteractionCreate(
+                                                Box::new(interaction)
                                             )),
                                         })
                                         .unwrap();
