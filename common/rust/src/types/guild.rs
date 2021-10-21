@@ -170,8 +170,20 @@ pub struct WelcomeScreen {
     pub welcome_channels: Vec<WelcomeScreenChannel>,
 }
 
+const fn default_unavailable() -> bool {
+    false
+ }
+ 
+
+ #[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct UnavailableGuild {
+    pub id: String,
+    #[serde(default = "default_unavailable")]
+    pub unavailable: bool,
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Guild {
+pub struct FullGuild {
     pub id: String,
     pub name: String,
     pub icon: Option<String>,
@@ -223,6 +235,14 @@ pub struct Guild {
 
     // https://discord.com/developers/docs/topics/gateway#guild-member-add
     pub guild_id: Option<String>
+}
+
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum Guild {
+    FullGuild(FullGuild),
+    UnavailableGuild(UnavailableGuild),
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

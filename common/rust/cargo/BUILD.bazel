@@ -58,6 +58,15 @@ alias(
 )
 
 alias(
+    name = "paste",
+    actual = "@raze__paste__1_0_5//:paste",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "pretty_env_logger",
     actual = "@raze__pretty_env_logger__0_4_0//:pretty_env_logger",
     tags = [
@@ -78,6 +87,24 @@ alias(
 alias(
     name = "redis",
     actual = "@raze__redis__0_21_3//:redis",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "sentry",
+    actual = "@raze__sentry__0_23_0//:sentry",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "sentry_log",
+    actual = "@raze__sentry_log__0_23_0//:sentry_log",
     tags = [
         "cargo-raze",
         "manual",

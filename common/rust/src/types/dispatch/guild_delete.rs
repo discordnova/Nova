@@ -1,14 +1,3 @@
-use serde::{Deserialize, Serialize};
+use crate::types::guild::UnavailableGuild;
 
-const fn default_unavailable() -> bool {
-   false
-}
-
-
-// todo: move to main types
-#[derive(Deserialize, Serialize, Debug)]
-pub struct GuildDelete {
-    pub id: String,
-    #[serde(default = "default_unavailable")]
-    pub unavailable: bool,
-}
+pub type GuildDelete = UnavailableGuild;

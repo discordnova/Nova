@@ -19,6 +19,7 @@ mod ratelimit;
 #[tokio::main]
 async fn main() {
     let settings: Settings<Config> = Settings::new("rest").unwrap();
+    let _guard = settings.sentry();
     let config = Arc::new(settings.config);
     let redis_client: Client = settings.redis.into();
     let redis = Arc::new(Mutex::new(

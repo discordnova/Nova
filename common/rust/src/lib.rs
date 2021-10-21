@@ -5,6 +5,7 @@ pub use log;
 pub use prometheus;
 pub use serde;
 pub use testcontainers;
+pub use sentry;
 
 /// This crate is all the utilities shared by the nova rust projects
 /// It includes logging, config and protocols.

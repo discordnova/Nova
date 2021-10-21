@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use enumflags2::BitFlags;
 use serde::{Deserialize, Serialize};
 use crate::{connection::Connection};
@@ -5,6 +7,7 @@ use self::state::{ConnectionState, SessionState};
 mod actions;
 mod connection;
 mod state;
+use common::{nats_crate::Connection as NatsConnection, types::ws::identify::Intents};
 
 #[derive(Debug, Deserialize, Serialize, Default, Clone)]
 pub struct Sharding {
@@ -34,16 +37,18 @@ struct ConnectionWithState {
 pub struct Shard {
     connection: Option<ConnectionWithState>,
     state: Option<SessionState>,
-    config: ShardConfig
+    config: ShardConfig,
+    nats: Arc<NatsConnection>,
 }
 
 impl Shard {
     /// Creates a new shard instance
-    pub fn new(config: ShardConfig) -> Self {
+    pub fn new(config: ShardConfig, nats: Arc<NatsConnection>) -> Self {
         Shard {
             connection: None,
             state: None,
             config,
+            nats,
         }
     }
 }

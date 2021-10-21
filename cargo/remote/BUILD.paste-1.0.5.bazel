@@ -30,16 +30,13 @@ licenses([
 
 # Generated Targets
 
-# Unsupported target "parse_url" with type "bench" omitted
-
 rust_library(
-    name = "url",
+    name = "paste",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "serde",
     ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
+    crate_type = "proc-macro",
     data = [],
     edition = "2018",
     rustc_flags = [
@@ -49,17 +46,18 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "2.2.2",
+    version = "1.0.5",
     # buildifier: leave-alone
     deps = [
-        "@raze__form_urlencoded__1_0_1//:form_urlencoded",
-        "@raze__idna__0_2_3//:idna",
-        "@raze__matches__0_1_9//:matches",
-        "@raze__percent_encoding__2_1_0//:percent_encoding",
-        "@raze__serde__1_0_130//:serde",
     ],
 )
 
-# Unsupported target "data" with type "test" omitted
+# Unsupported target "compiletest" with type "test" omitted
 
-# Unsupported target "unit" with type "test" omitted
+# Unsupported target "test_attr" with type "test" omitted
+
+# Unsupported target "test_doc" with type "test" omitted
+
+# Unsupported target "test_expr" with type "test" omitted
+
+# Unsupported target "test_item" with type "test" omitted

@@ -46,11 +46,13 @@ pub struct FullUser {
     pub locale: Option<String>,
     pub verified: Option<bool>,
     pub email: Option<String>,
-    pub flags: Option<BitFlags<UserFlags>>,
     pub premium_type: Option<PremiumTypes>,
 
     #[serde(deserialize_with = "from_enumflag2_truncated")]
     pub public_flags: BitFlags<UserFlags>,
+    
+    #[serde(deserialize_with = "from_enumflag2_truncated")]
+    pub flags: BitFlags<UserFlags>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

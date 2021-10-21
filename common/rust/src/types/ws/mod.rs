@@ -8,6 +8,5 @@ pub mod reconnect;
 pub mod request_guild_members;
 pub mod invalid_session;
 pub mod hello;
-pub mod heartbeat_ack;
 
 pub type RawJson = Map<String, Value>;

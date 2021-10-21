@@ -12,6 +12,7 @@ use hyper::Server;
 #[tokio::main]
 async fn main() {
     let settings: Settings<Config> = Settings::new("webhook").unwrap();
+    let _guard = settings.sentry();
     start(settings).await;
 }
 

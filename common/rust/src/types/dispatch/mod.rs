@@ -1,4 +1,3 @@
-use crate::types::ws::RawJson;
 use serde::de::Error as SerdeDeError;
 use serde::{Deserialize, Serialize};
 
@@ -28,6 +27,7 @@ use self::{
     thread_update::ThreadUpdate, typing_start::TypingStart, user_update::UserUpdate,
     voice_state_update::VoiceStateUpdate, webhook_update::WebhookUpdate,
 };
+use crate::types::ws::websocket::BasePacket;
 
 pub mod application_command_create;
 pub mod application_command_delete;
@@ -79,47 +79,48 @@ pub mod thread_members_update;
 pub mod thread_update;
 pub mod typing_start;
 pub mod user_update;
+pub mod voice_server_update;
 pub mod voice_state_update;
 pub mod webhook_update;
-pub mod voice_server_update;
+use paste::paste;
 
 macro_rules! generate_enums {
     ($($name: tt: $type: tt,)+) => {
-        #[derive(Deserialize)]
+
+        #[derive(Deserialize, Serialize, Debug)]
         #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
         pub enum DispatchType {
-            $($name,)+
+            $(
+                $name,
+            )+
         }
 
-        #[derive(Serialize, Debug)]
+        #[derive(Serialize, Debug, Deserialize)]
+        #[serde(rename_all = "snake_case")]
+        #[serde(tag = "type")]
         pub enum Dispatch {
             $($name($type),)+
         }
 
-        impl<'de> Deserialize<'de> for Dispatch {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-            where
-                D: serde::Deserializer<'de> {
-
-                let object = RawJson::deserialize(deserializer)?;
-
-                let t = object.get("t")
-                    .ok_or_else(|| SerdeDeError::custom(""))
-                    .and_then(DispatchType::deserialize)
-                    .map_err(SerdeDeError::custom)?;
-
-                let d = object.get("d")
-                    .ok_or_else(|| SerdeDeError::custom("missing data"))?
-                    .to_owned();
-
-                match t {
-                    $(DispatchType::$name => serde_json::from_value(d).map(Dispatch::$name)
+        impl From<BasePacket> for Result<Dispatch, serde_json::Error> {
+            fn from(packet: BasePacket) -> Self {
+                match packet.type_.unwrap() {
+                    $(DispatchType::$name => serde_json::from_value(packet.data.unwrap()).map(Dispatch::$name)
                     .map_err(SerdeDeError::custom),)+
                 }
             }
         }
 
-    };
+        paste! {
+            impl Dispatch {
+                pub fn snake_case_name(&self) -> String {
+                    match self {
+                        $(Dispatch::$name(_) => stringify!([<$name:snake>]).to_string(),)+
+                    }
+                }
+            }
+        }
+    }
 }
 
 generate_enums!(

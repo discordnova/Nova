@@ -43,3 +43,8 @@ additional_deps = ["@raze__miniz_oxide__0_4_4//:miniz_oxide"]
 
 [package.metadata.raze.crates.webpki.'*']
 compile_data_attr = "glob([\"*/**\"])"
+
+[package.metadata.raze.crates.reqwest.'*']
+compile_data_attr = "glob([\"*/**\"])"
+skipped_deps = ["serde_json-1.0.68"]
+additional_deps = ["@raze__serde_json__1_0_68//:serde_json"]

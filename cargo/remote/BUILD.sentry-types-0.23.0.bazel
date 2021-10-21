@@ -25,18 +25,17 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # MIT from expression "MIT OR Apache-2.0"
+    "notice",  # Apache-2.0 from expression "Apache-2.0"
 ])
 
 # Generated Targets
 
-# Unsupported target "parse_url" with type "bench" omitted
-
 rust_library(
-    name = "url",
+    name = "sentry_types",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "serde",
+        "default",
+        "protocol",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -49,17 +48,19 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "2.2.2",
+    version = "0.23.0",
     # buildifier: leave-alone
     deps = [
-        "@raze__form_urlencoded__1_0_1//:form_urlencoded",
-        "@raze__idna__0_2_3//:idna",
-        "@raze__matches__0_1_9//:matches",
-        "@raze__percent_encoding__2_1_0//:percent_encoding",
+        "@raze__chrono__0_4_19//:chrono",
+        "@raze__debugid__0_7_2//:debugid",
         "@raze__serde__1_0_130//:serde",
+        "@raze__serde_json__1_0_68//:serde_json",
+        "@raze__thiserror__1_0_30//:thiserror",
+        "@raze__url__2_2_2//:url",
+        "@raze__uuid__0_8_2//:uuid",
     ],
 )
 
-# Unsupported target "data" with type "test" omitted
+# Unsupported target "test_auth" with type "test" omitted
 
-# Unsupported target "unit" with type "test" omitted
+# Unsupported target "test_protocol_v7" with type "test" omitted

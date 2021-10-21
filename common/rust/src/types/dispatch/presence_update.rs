@@ -114,7 +114,7 @@ pub struct Activity {
     pub secrets: Option<ActivitySecrets>,
     pub instance: Option<bool>,
     pub flags: Option<BitFlags<ActivityFlags>>,
-    pub buttons: Option<Vec<ActivityButtons>>,
+    pub buttons: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

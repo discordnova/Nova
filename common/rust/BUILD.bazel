@@ -4,7 +4,7 @@ load("//cargo:crates.bzl", "all_crate_deps", "crate_deps")
 rust_library(
     name = "common",
     srcs = glob(["src/**"]),
-    proc_macro_deps = crate_deps(["serde_repr"]),
+    proc_macro_deps = crate_deps(["serde_repr", "paste"]),
     visibility = ["//visibility:public"],
     deps = all_crate_deps(),
 )

@@ -40,9 +40,13 @@ pub struct IdentifyProprerties {
 pub struct Identify {
     pub token: String,
     pub properties: IdentifyProprerties,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub compress: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub large_threshold: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub shard: Option<[u64; 2]>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub presence: Option<PresenceUpdate>,
     pub intents: BitFlags<Intents>,
 }

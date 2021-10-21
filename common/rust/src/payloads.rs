@@ -1,14 +1,13 @@
 use std::fmt::Debug;
 
 use serde::{Deserialize, Serialize};
-use crate::types::dispatch::Dispatch;
+use crate::types::ws::websocket::WebsocketPacket;
 
 /// Payload send to the nova cache queues
 #[derive(Serialize, Deserialize, Debug)]
-// #[serde(bound(deserialize = "T: Deserialize<'de> + std::default::Default + Clone"))]
 pub struct CachePayload {
     pub tracing: Tracing,
-    pub data: Dispatch,
+    pub data: WebsocketPacket,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

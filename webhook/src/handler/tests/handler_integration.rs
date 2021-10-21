@@ -163,7 +163,7 @@ async fn respond_from_nats_response() {
     unsafe {
         nats = SETTINGS.clone().unwrap().nats.into();
     }
-    let sub = nats.subscribe("nova.cache.dispatch.interaction").unwrap();
+    let sub = nats.subscribe("nova.cache.dispatch.interaction_create").unwrap();
     let ping = json!({ "type": 2, "id": "0", "application_id": "0", "token": "random token", "version": 1 }).to_string();
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.as_bytes().to_vec()].concat();

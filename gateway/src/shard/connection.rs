@@ -3,9 +3,16 @@ use std::{cmp::min, convert::TryInto, time::Duration};
 use crate::{connection::Connection, error::GatewayError, shard::state::SessionState};
 
 use super::{state::ConnectionState, ConnectionWithState, Shard};
+use common::{log::{debug, error, info}, types::{
+        dispatch::Dispatch,
+        user::User,
+        ws::websocket::{BasePacket, WebsocketPacket},
+    }};
 use futures::StreamExt;
-use common::log::{error, info};
-use tokio::{select, time::{Instant, interval_at, sleep}};
+use tokio::{
+    select,
+    time::{interval_at, sleep, Instant},
+};
 
 impl Shard {
     pub async fn start(self: &mut Self) {
@@ -24,7 +31,9 @@ impl Shard {
             if reconnects < self.config.max_reconnects {
                 let time = min(
                     self.config.reconnect_delay_maximum,
-                    self.config.reconnect_delay_minimum * (((reconnects - 1) as f32) * self.config.reconnect_delay_growth_factor) as usize,
+                    self.config.reconnect_delay_minimum
+                        * (((reconnects - 1) as f32) * self.config.reconnect_delay_growth_factor)
+                            as usize,
                 );
                 info!(
                     "The shard got disconnected, waiting for reconnect ({}ms)",
@@ -55,7 +64,7 @@ impl Shard {
                         payload = connection.conn.next() => {
                             match payload {
                                 Some(data) => match data {
-                                    Ok(message) => self._handle(&message).await,
+                                    Ok(message) => self._handle(message).await,
                                     Err(error) => {
                                         return Err(GatewayError::from(format!("An error occured while being connected to Discord: {:?}", error).to_string()));
                                     },
@@ -77,7 +86,7 @@ impl Shard {
                         payload = connection.conn.next() => {
                             match payload {
                                 Some(data) => match data {
-                                    Ok(message) => self._handle(&message).await,
+                                    Ok(message) => self._handle(message).await,
                                     Err(error) => {
                                         return Err(GatewayError::from(format!("An error occured while being connected to Discord: {:?}", error).to_string()));
                                     },
@@ -89,7 +98,6 @@ impl Shard {
                         }
                     )
                 }
-                
             }
         }
     }
@@ -99,7 +107,9 @@ impl Shard {
         if let Some(conn) = &mut self.connection {
             if !conn.state.last_heartbeat_acknowledged {
                 error!("we missed a hertbeat");
-                Err(GatewayError::from("a hertbeat was dropped, we need to restart the connection".to_string()))
+                Err(GatewayError::from(
+                    "a hertbeat was dropped, we need to restart the connection".to_string(),
+                ))
             } else {
                 conn.state.last_heartbeat_acknowledged = false;
                 conn.state.last_heartbeat_time = Instant::now();
@@ -110,80 +120,92 @@ impl Shard {
         }
     }
 
-    fn _util_set_seq(&mut self, seq: Option<u64>) {
-        if let Some(seq) = seq {
+    async fn _handle(&mut self, message: BasePacket) {
+        if let Some(seq) = &message.sequence {
             if let Some(state) = &mut self.state {
-                state.sequence = seq;
+                state.sequence = seq.clone();
             }
         }
-    }
+        let sequence = message.sequence.clone();
+        debug!("packet type: {:?}", message.type_);
 
-    async fn _handle(&mut self, message: &Message) {
-        match message {
-            Message::Dispatch(msg) => {
-                self._util_set_seq(msg.sequence);
-                self._dispatch(&msg).await;
-            }
-            // we need to reconnect to the gateway
-            Message::Reconnect(msg) => {
-                self._util_set_seq(msg.sequence);
-                info!("Gateway disconnect requested");
-                self._disconnect().await;
-            }
-            Message::InvalidSession(msg) => {
-                self._util_set_seq(msg.sequence);
-                info!("invalid session");
-                let data = msg.data;
-                if !data {
-                    info!("Session removed");
-                    // reset the session data
-                    self.state = None;
-                    if let Err(e) = self._identify().await {
-                        error!("Error while sending identify: {:?}", e);
+        let packet: Result<WebsocketPacket, serde_json::Error> = message.into();
+        match packet {
+            Ok(data) => match data {
+                WebsocketPacket::Dispatch(msg) => {
+                    self._dispatch(&msg, sequence).await;
+                }
+                // we need to reconnect to the gateway
+                WebsocketPacket::Reconnect(msg) => {
+                    info!("Gateway disconnect requested");
+                    self._disconnect().await;
+                }
+                WebsocketPacket::InvalidSession(msg) => {
+                    info!("invalid session");
+                    if !msg {
+                        info!("Session removed");
+                        // reset the session data
+                        self.state = None;
+                        if let Err(e) = self._identify().await {
+                            error!("Error while sending identify: {:?}", e);
+                        }
                     }
                 }
-            }
-            Message::HeartbeatACK(msg) => {
-                info!("Heartbeat ack received");
-                self._util_set_seq(msg.sequence);
-                if let Some(conn) = &mut self.connection {
-                    conn.state.last_heartbeat_acknowledged = true;
-                    let latency = Instant::now() - conn.state.last_heartbeat_time;
-                    info!("Latency updated {}ms", latency.as_millis());
+                WebsocketPacket::HeartbeatACK(_msg) => {
+                    info!("Heartbeat ack received");
+                    if let Some(conn) = &mut self.connection {
+                        conn.state.last_heartbeat_acknowledged = true;
+                        let latency = Instant::now() - conn.state.last_heartbeat_time;
+                        info!("Latency updated {}ms", latency.as_millis());
+                    }
                 }
-            }
-            Message::Hello(msg) => {
-                info!("Server hello received");
-                self._util_set_seq(msg.sequence);
-                if let Some(conn) = &mut self.connection {
-                    conn.state.interval = Some(interval_at(
-                        Instant::now() + Duration::from_millis(msg.data.heartbeat_interval),
-                        Duration::from_millis(msg.data.heartbeat_interval),
-                    ));
+                WebsocketPacket::Hello(msg) => {
+                    info!("Server hello received");
+                    if let Some(conn) = &mut self.connection {
+                        conn.state.interval = Some(interval_at(
+                            Instant::now() + Duration::from_millis(msg.heartbeat_interval),
+                            Duration::from_millis(msg.heartbeat_interval),
+                        ));
+                    }
+    
+                    if let Err(e) = self._identify().await {
+                        error!("error while sending identify: {:?}", e);
+                    }
                 }
-                
-                if let Err(e) = self._identify().await {
-                    error!("error while sending identify: {:?}", e);
-                }
+                _ => error!("unknown payload: {:?}", data),
             },
+            Err(err) => error!("failed to deserialize payload: {:?}", err),
         }
     }
 
-    async fn _dispatch(&mut self, dispatch: &BaseMessage<Dispatch>) {
-        match &dispatch.data {
+    async fn _dispatch(&mut self, dispatch: &Dispatch, sequence: Option<u64>) {
+        match dispatch {
             Dispatch::Ready(ready) => {
-                info!("Received gateway dispatch ready");
-                info!(
-                    "Logged in as {}",
-                    ready.user.get("username").unwrap().to_string()
-                );
+                match &ready.user {
+                    User::FullUser(user) => {
+                        info!("Received gateway dispatch ready");
+                        info!("Logged in as {}", user.username);
+                    }
+
+                    User::PartialUser(_) => todo!(),
+                };
                 self.state = Some(SessionState {
-                    sequence: dispatch.sequence.unwrap(),
+                    sequence: sequence.unwrap(),
                     session_id: ready.session_id.clone(),
                 });
             }
-            Dispatch::Other(_data) => {
-                // todo: build dispatch & forward to nats
+            _ => {
+                let name = format!(
+                    "nova.cache.dispatch.{}",
+                    dispatch.snake_case_name(),
+                );
+                debug!("event!: {:?}", name);
+                if let Err(_) = self.nats.publish(
+                    &name,
+                    serde_json::to_string(dispatch).unwrap(),
+                ) {
+                    error!("failed to publish event!")
+                }
             }
         }
     }

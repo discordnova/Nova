@@ -1,0 +1,107 @@
+"""
+@generated
+cargo-raze crate build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+
+# buildifier: disable=load
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+# buildifier: disable=load
+load(
+    "@rules_rust//rust:rust.bzl",
+    "rust_binary",
+    "rust_library",
+    "rust_test",
+)
+
+package(default_visibility = [
+    # Public for visibility by "@raze__crate__version//" targets.
+    #
+    # Prefer access through "//cargo", which limits external
+    # visibility to explicit Cargo.toml dependencies.
+    "//visibility:public",
+])
+
+licenses([
+    "notice",  # Apache-2.0 from expression "Apache-2.0"
+])
+
+# Generated Targets
+
+# Unsupported target "anyhow-demo" with type "example" omitted
+
+# Unsupported target "before-send" with type "example" omitted
+
+# Unsupported target "event-processors" with type "example" omitted
+
+# Unsupported target "health" with type "example" omitted
+
+# Unsupported target "log-demo" with type "example" omitted
+
+# Unsupported target "message-demo" with type "example" omitted
+
+# Unsupported target "panic-demo" with type "example" omitted
+
+# Unsupported target "send-with-extra" with type "example" omitted
+
+# Unsupported target "thread-demo" with type "example" omitted
+
+# Unsupported target "tracing-demo" with type "example" omitted
+
+rust_library(
+    name = "sentry",
+    srcs = glob(["**/*.rs"]),
+    aliases = {
+        "@raze__reqwest__0_11_6//:reqwest": "reqwest_",
+    },
+    crate_features = [
+        "backtrace",
+        "contexts",
+        "default",
+        "httpdate",
+        "native-tls",
+        "panic",
+        "reqwest",
+        "reqwest_",
+        "sentry-backtrace",
+        "sentry-contexts",
+        "sentry-panic",
+        "transport",
+    ],
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    data = [],
+    edition = "2018",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.23.0",
+    # buildifier: leave-alone
+    deps = [
+        "@raze__httpdate__1_0_1//:httpdate",
+        "@raze__reqwest__0_11_6//:reqwest",
+        "@raze__sentry_backtrace__0_23_0//:sentry_backtrace",
+        "@raze__sentry_contexts__0_23_0//:sentry_contexts",
+        "@raze__sentry_core__0_23_0//:sentry_core",
+        "@raze__sentry_panic__0_23_0//:sentry_panic",
+        "@raze__tokio__1_12_0//:tokio",
+    ],
+)
+
+# Unsupported target "test_async" with type "test" omitted
+
+# Unsupported target "test_basic" with type "test" omitted
+
+# Unsupported target "test_client" with type "test" omitted
+
+# Unsupported target "test_log" with type "test" omitted
+
+# Unsupported target "test_processors" with type "test" omitted
+
+# Unsupported target "test_tracing" with type "test" omitted

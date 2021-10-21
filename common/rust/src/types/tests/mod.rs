@@ -1,3 +1,5 @@
+use crate::types::ws::websocket::BasePacket;
+
 use super::ws::websocket::WebsocketPacket;
 use serde_json::Value;
 use std::{collections::HashMap, fs};
@@ -20,7 +22,9 @@ pub fn gateway_payload_deserialize_from_nova_gateway_tests_generator() {
     for cases in test_cases {
         let mut i = 0;
         for test in cases.1 {
-            let result = serde_json::from_value::<WebsocketPacket>(test);
+            let raw = serde_json::from_value::<BasePacket>(test).unwrap();
+            let result: Result<WebsocketPacket, serde_json::Error> = raw.into();
+            
             if !result.is_ok() {
                 failures.push(format!(
                     "Failed test {} on index {}: {}",
