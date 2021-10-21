@@ -54,6 +54,7 @@ unsafe fn init() {
     let port = container.get_host_port(4222).unwrap();
     NATS = Some(container);
     SETTINGS = Some(common::config::Settings {
+        sentry_dsn: None,
         config: crate::config::Config {
             server: crate::config::ServerSettings {
                 port: 5003,
