@@ -49,9 +49,11 @@ pub struct FullUser {
     pub premium_type: Option<PremiumTypes>,
 
     #[serde(deserialize_with = "from_enumflag2_truncated")]
+    #[serde(default)]
     pub public_flags: BitFlags<UserFlags>,
     
     #[serde(deserialize_with = "from_enumflag2_truncated")]
+    #[serde(default)]
     pub flags: BitFlags<UserFlags>,
 }
 
