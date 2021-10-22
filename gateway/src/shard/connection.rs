@@ -133,10 +133,10 @@ impl Shard {
         match packet {
             Ok(data) => match data {
                 WebsocketPacket::Dispatch(msg) => {
-                    self._dispatch(&msg, sequence).await;
+                    self._dispatch(msg, sequence).await;
                 }
                 // we need to reconnect to the gateway
-                WebsocketPacket::Reconnect(msg) => {
+                WebsocketPacket::Reconnect(_msg) => {
                     info!("Gateway disconnect requested");
                     self._disconnect().await;
                 }
@@ -178,8 +178,8 @@ impl Shard {
         }
     }
 
-    async fn _dispatch(&mut self, dispatch: &Dispatch, sequence: Option<u64>) {
-        match dispatch {
+    async fn _dispatch(&mut self, dispatch: Box<Dispatch>, sequence: Option<u64>) {
+        match *dispatch {
             Dispatch::Ready(ready) => {
                 match &ready.user {
                     User::FullUser(user) => {
@@ -199,10 +199,20 @@ impl Shard {
                     "nova.cache.dispatch.{}",
                     dispatch.snake_case_name(),
                 );
+                let payload =
+                serde_json::to_string(&common::payloads::CachePayload {
+                    tracing: common::payloads::Tracing {
+                        node_id: "".to_string(),
+                        span: None,
+                    },
+                    data: dispatch,
+                })
+                .unwrap();
+
                 debug!("event!: {:?}", name);
                 if let Err(_) = self.nats.publish(
                     &name,
-                    serde_json::to_string(dispatch).unwrap(),
+                    payload,
                 ) {
                     error!("failed to publish event!")
                 }
