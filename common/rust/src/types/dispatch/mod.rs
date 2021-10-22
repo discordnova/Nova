@@ -97,7 +97,7 @@ macro_rules! generate_enums {
 
         #[derive(Serialize, Debug, Deserialize)]
         #[serde(rename_all = "snake_case")]
-        #[serde(tag = "type")]
+        #[serde(tag = "t", content = "c")]
         pub enum Dispatch {
             $($name($type),)+
         }

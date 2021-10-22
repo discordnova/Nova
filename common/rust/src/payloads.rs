@@ -7,6 +7,7 @@ use crate::types::dispatch::Dispatch;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CachePayload {
     pub tracing: Tracing,
+    #[serde(flatten)]
     pub data: Box<Dispatch>,
 }
 
