@@ -29,7 +29,7 @@ pub struct ApplicationCommandOption {
     #[serde(rename = "type")]
     pub type_: ApplicationCommandOptionType,
     pub name: String,
-    pub description: String,
+    pub description: Option<String>,
     pub required: Option<bool>,
     pub choices: Option<Vec<ApplicationCommandOptionChoice>>,
     pub options: Option<Vec<ApplicationCommandOption>>,
