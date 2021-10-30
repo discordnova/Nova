@@ -38,10 +38,15 @@ pub struct ApplicationCommandOption {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ApplicationCommand {
     pub id: String,
+    pub type_: ApplicationCommandType,
+    pub application_id: String,
+    
     pub guild_id: Option<String>,
     pub name: String,
     pub description: Option<String>,
+    
     pub options: Option<Vec<ApplicationCommandOption>>,
+    
     pub default_permission: Option<bool>,
 }
 
@@ -87,7 +92,7 @@ pub struct MessageInteraction {
 
 // todo: redo the types
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Interaction {
+pub struct OldInteraction {
     pub id: String,
     pub application_id: String,
     #[serde(rename = "type")]
@@ -114,17 +119,29 @@ pub struct InteractionBase<T> {
     pub verion: i8,
     pub message: Option<Message>,
 }
-pub enum NewInteraction {
-    Ping {
-        application_id: String,
-        id: String,
-        token: String,
-        type_: i8,
-        user: User,
-        version: String,
+
+#[derive(Deserialize, Serialize)]
+pub struct Interaction {
+    pub id: String,
+    pub application_id: String,
+    pub guild_id: Option<String>,
+    pub channel_id: Option<String>,
+    pub version: Option<i8>,
+    pub token: String,
+
+    #[serde(flatten)]
+    pub data: InteractionType,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum InteractionType {
+    Ping {},
+    ApplicationCommand {},
+    MessageComponent {
+        message: Message,
+        
     },
-    ApplicationCommand {
-        application_id: String,
-        channel_id: String,
+    ApplicationCommandAutocomplete {
+        
     }
 }

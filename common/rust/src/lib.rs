@@ -16,3 +16,5 @@ pub mod monitoring;
 pub mod nats;
 pub mod payloads;
 pub mod redis;
+
+pub mod low_level_discord;
