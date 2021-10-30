@@ -95,6 +95,7 @@ impl Service<Request<Body>> for ServiceProxy {
                     }
                     _ => {
                         debug!("forwarding request");
+                        *req.version_mut() = hyper::Version::HTTP_11;
                         match client.request(req).await {
                             Ok(mut response) => {
                                 ratelimiter.after_request(&path, &response).await;
@@ -102,6 +103,15 @@ impl Service<Request<Body>> for ServiceProxy {
                                     *fail.lock().await += 1
                                 }
                                 response.headers_mut().insert("x-fails", HeaderValue::from_str(&format!("{}", fail.lock().await)).unwrap());
+                                response.headers_mut().remove("Connection");
+                                response.headers_mut().remove("Keep-Alive");
+                                response.headers_mut().remove("Proxy-Authenticate");
+                                response.headers_mut().remove("Proxy-Authorization");
+                                response.headers_mut().remove("Te");
+                                response.headers_mut().remove("Trailers");
+                                response.headers_mut().remove("Upgrade");
+                                response.headers_mut().remove("Transfer-Encoding");
+                                
                                 Ok(response)
                             }
                             Err(e) => Err(e),
