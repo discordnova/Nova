@@ -89,18 +89,18 @@ pub struct MessageInteraction {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Interaction {
     pub id: String,
-    // pub application_id: String,
+    pub application_id: String,
     #[serde(rename = "type")]
     pub type_: InteractionRequestType,
-    // /// i am not sure about this one https://canary.discord.com/developers/docs/interactions/slash-commands#interaction-object-application-command-interaction-data
-    // pub data: Option<ApplicationCommand>,
-    // pub guild_id: Option<String>,
-    // pub channel_id: Option<String>,
-    // pub member: Option<GuildMember>,
-    // pub user: Option<User>,
-    // pub token: String,
-    // pub version: i64,
-    // pub message: Option<Message>,
+    /// i am not sure about this one https://canary.discord.com/developers/docs/interactions/slash-commands#interaction-object-application-command-interaction-data
+    pub data: Option<ApplicationCommand>,
+    pub guild_id: Option<String>,
+    pub channel_id: Option<String>,
+    pub member: Option<GuildMember>,
+    pub user: Option<User>,
+    pub token: String,
+    pub version: i64,
+    pub message: Option<Message>,
 }
 
 pub struct InteractionBase<T> {
