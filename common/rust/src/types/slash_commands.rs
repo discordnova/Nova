@@ -40,7 +40,7 @@ pub struct ApplicationCommand {
     pub id: String,
     pub guild_id: Option<String>,
     pub name: String,
-    pub description: String,
+    pub description: Option<String>,
     pub options: Option<Vec<ApplicationCommandOption>>,
     pub default_permission: Option<bool>,
 }
