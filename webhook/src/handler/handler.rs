@@ -100,7 +100,7 @@ impl HandlerService {
                                     .unwrap();
 
                                 match self.nats.request_timeout(
-                                    "nova.cache.dispatch.interaction",
+                                    "nova.cache.dispatch.interaction_create",
                                     payload,
                                     Duration::from_secs(2),
                                 ) {
