@@ -5,18 +5,8 @@ edition = "2018"
 
 [dependencies]
 common = { path = "../common/rust" }
-tokio-tungstenite = { version = "*", features = ["rustls-tls"] }
 tokio = { version = "1", features = ["full"] }
-
-url = "2.2.2"
-futures-util = "0.3.17"
-futures = "0.3.17"
-
+twilight-gateway = { version = "0.6" }
+serde = { version = "1.0.8", features = ["derive"] }
+futures = "0.3"
 serde_json = { version = "1.0" }
-serde = { version = "1.0", features = ["derive"] }
-serde_repr = "0.1"
-enumflags2 = { version = "0.7.1", features = ["serde"] }
-
-num-traits = "0.2"
-num-derive = "0.3"
-num = "0.4"

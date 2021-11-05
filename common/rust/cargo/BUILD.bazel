@@ -94,6 +94,15 @@ alias(
 )
 
 alias(
+    name = "serde_json",
+    actual = "@raze__serde_json__1_0_68//:serde_json",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
     name = "serde_repr",
     actual = "@raze__serde_repr__0_1_7//:serde_repr",
     tags = [
@@ -114,6 +123,15 @@ alias(
 alias(
     name = "tokio",
     actual = "@raze__tokio__1_12_0//:tokio",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "twilight_model",
+    actual = "@raze__twilight_model__0_6_5//:twilight_model",
     tags = [
         "cargo-raze",
         "manual",

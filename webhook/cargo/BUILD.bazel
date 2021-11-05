@@ -101,3 +101,12 @@ alias(
         "manual",
     ],
 )
+
+alias(
+    name = "twilight_model",
+    actual = "@raze__twilight_model__0_6_5//:twilight_model",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)

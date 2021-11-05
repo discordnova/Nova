@@ -1,10 +1,10 @@
 use super::error::WebhookError;
 use super::signature::validate_signature;
 use crate::config::Config;
-use common::discord_models::slash_commands::{Interaction, InteractionRequestType};
 use common::log::{debug, error};
 use common::nats_crate::Connection;
-use common::payloads::CacheData;
+use common::payloads::SerializeHelper;
+use ed25519_dalek::PublicKey;
 use hyper::{
     body::{to_bytes, Bytes},
     service::Service,
@@ -19,54 +19,50 @@ use std::{
     task::{Context, Poll},
     time::Duration,
 };
-use ed25519_dalek::PublicKey;
+use twilight_model::application::interaction::Interaction;
+use twilight_model::gateway::event::Event;
+use twilight_model::gateway::payload::InteractionCreate;
 
 /// Hyper service used to handle the discord webhooks
 #[derive(Clone)]
 pub struct HandlerService {
     pub config: Arc<Config>,
     pub nats: Arc<Connection>,
-    pub public_key: Arc<PublicKey>
+    pub public_key: Arc<PublicKey>,
 }
 
 impl HandlerService {
     async fn check_request(&self, req: Request<Body>) -> Result<Bytes, WebhookError> {
         if req.method() == Method::POST {
-            let headers = req.headers().clone();
-            let signature = headers.get("X-Signature-Ed25519");
-            let timestamp = headers.get("X-Signature-Timestamp");
-            if let (Some(timestamp), Some(signature)) = (timestamp, signature) {
-                if let Ok(data) = to_bytes(req.into_body()).await {
-                    let contatenated_data = [timestamp.as_bytes().to_vec(), data.to_vec()].concat();
-                    if let Ok(signature_str) = &signature.to_str() {
-                        if validate_signature(
-                            &self.public_key,
-                            &contatenated_data,
-                            signature_str,
-                        ) {
-                            Ok(data)
-                        } else {
-                            Err(WebhookError::new(
-                                StatusCode::UNAUTHORIZED,
-                                "invalid signature",
-                            ))
-                        }
-                    } else {
-                        Err(WebhookError::new(
-                            StatusCode::BAD_REQUEST,
-                            "failed to read signature",
-                        ))
-                    }
-                } else {
-                    Err(WebhookError::new(
-                        StatusCode::BAD_REQUEST,
-                        "unable to read body",
-                    ))
-                }
+            let signature = if let Some(sig) = req.headers().get("X-Signature-Ed25519") {
+                sig.to_owned()
+            } else {
+                return Err(WebhookError::new(
+                    StatusCode::BAD_REQUEST,
+                    "missing signature header",
+                ));
+            };
+
+            let timestamp = if let Some(timestamp) = req.headers().get("X-Signature-Timestamp") {
+                timestamp.to_owned()
+            } else {
+                return Err(WebhookError::new(
+                    StatusCode::BAD_REQUEST,
+                    "missing timestamp header",
+                ));
+            };
+            let data = to_bytes(req.into_body()).await?;
+
+            if validate_signature(
+                &self.public_key,
+                &[timestamp.as_bytes().to_vec(), data.to_vec()].concat(),
+                signature.to_str()?,
+            ) {
+                Ok(data)
             } else {
                 Err(WebhookError::new(
                     StatusCode::UNAUTHORIZED,
-                    "missing signature headers",
+                    "invalid signature",
                 ))
             }
         } else {
@@ -83,8 +79,8 @@ impl HandlerService {
                 let utf8 = from_utf8(&data);
                 match utf8 {
                     Ok(data) => match serde_json::from_str::<Interaction>(data) {
-                        Ok(value) => match value.type_ {
-                            InteractionRequestType::Ping => Ok(Response::builder()
+                        Ok(value) => match value {
+                            Interaction::Ping(_) => Ok(Response::builder()
                                 .header("Content-Type", "application/json")
                                 .body(serde_json::to_string(&Ping { t: 1 }).unwrap().into())
                                 .unwrap()),
@@ -97,9 +93,9 @@ impl HandlerService {
                                             node_id: "".to_string(),
                                             span: None,
                                         },
-                                        data: CacheData::InteractionCreate {
-                                            interaction: Box::new(value),
-                                        },
+                                        data: SerializeHelper(Event::InteractionCreate(
+                                            Box::new(InteractionCreate(value)),
+                                        )),
                                     })
                                     .unwrap();
 
@@ -127,10 +123,10 @@ impl HandlerService {
                         Err(error) => {
                             error!("invalid json body: {}", error);
                             Err(WebhookError::new(
-                            StatusCode::BAD_REQUEST,
-                            "invalid json body",
+                                StatusCode::BAD_REQUEST,
+                                "invalid json body",
                             ))
-                        },
+                        }
                     },
 
                     Err(_) => Err(WebhookError::new(StatusCode::BAD_REQUEST, "not utf-8 body")),

@@ -15,6 +15,8 @@ enumflags2 = { version = "0.7.1", features = ["serde"] }
 prometheus = { version = "0.12.0", features = ["process"] }
 nats = "0.15.2"
 testcontainers = "0.12.0"
+twilight-model = { version = "0.6" }
+serde_json = { version = "1.0" }
 
 [dependencies.redis]
 version = "*"

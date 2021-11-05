@@ -7,10 +7,6 @@ test_suite(name = "tests")
 rust_binary(
     name = "gateway",
     srcs = glob(["src/**/*.rs"]),
-    proc_macro_deps = crate_deps([
-        "serde_repr",
-        "num-derive",
-    ]),
     visibility = ["//visibility:public"],
     deps = all_crate_deps() + ["//common/rust:common"],
 )

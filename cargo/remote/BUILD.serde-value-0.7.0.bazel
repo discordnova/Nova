@@ -25,18 +25,18 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # MIT from expression "MIT OR Apache-2.0"
+    "notice",  # MIT from expression "MIT"
 ])
 
 # Generated Targets
 
 rust_library(
-    name = "num_derive",
+    name = "serde_value",
     srcs = glob(["**/*.rs"]),
     crate_features = [
     ],
     crate_root = "src/lib.rs",
-    crate_type = "proc-macro",
+    crate_type = "lib",
     data = [],
     edition = "2018",
     rustc_flags = [
@@ -46,29 +46,10 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.3",
+    version = "0.7.0",
     # buildifier: leave-alone
     deps = [
-        "@raze__proc_macro2__1_0_30//:proc_macro2",
-        "@raze__quote__1_0_10//:quote",
-        "@raze__syn__1_0_80//:syn",
+        "@raze__ordered_float__2_8_0//:ordered_float",
+        "@raze__serde__1_0_130//:serde",
     ],
 )
-
-# Unsupported target "empty_enum" with type "test" omitted
-
-# Unsupported target "issue-6" with type "test" omitted
-
-# Unsupported target "issue-9" with type "test" omitted
-
-# Unsupported target "newtype" with type "test" omitted
-
-# Unsupported target "newtype-2015" with type "test" omitted
-
-# Unsupported target "num_derive_without_num" with type "test" omitted
-
-# Unsupported target "trivial" with type "test" omitted
-
-# Unsupported target "trivial-2015" with type "test" omitted
-
-# Unsupported target "with_custom_values" with type "test" omitted
