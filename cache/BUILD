@@ -18,7 +18,7 @@ rust_test(
 
 rust_image(
     name = "image",
-    base = "//bazel:base",
+    base = "@debian//image",
     binary = ":cache",
     visibility = ["//visibility:public"],
 )

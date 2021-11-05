@@ -20,7 +20,7 @@ def images():
     download_pkgs(
         name = "download_base_pkgs",
         image_tar = "@debian//image",
-        packages = ["libgcc-10-dev", "libc6"]
+        packages = ["libgcc-10-dev", "libc6", "ca-certificates"]
     )
     install_pkgs(
         name = "base_pkgs",
@@ -45,12 +45,6 @@ def load_docker():
     deps()
     _go_image_repos()
     _rust_image_repos()
-    container_pull(
-        name = "distroless_debian10",
-        registry = "gcr.io",
-        repository = "distroless/base-debian10",
-        tag = "latest",
-    )
     container_pull(
         name = "debian",
         registry = "docker.io",
