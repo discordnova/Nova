@@ -53,11 +53,7 @@ jobs:
         with:
           path: "~/.cache/bazel"
           key: bazel-${{ matrix.os }}
-      - name: Execute Bazel tests
-        shell: bash
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          bazel test //...:all
+
       # Runs a set of commands using the runners shell
       - name: Execute build script
         shell: bash
@@ -77,3 +73,9 @@ jobs:
         run: |
            bazel run --define docker_tag=${{ steps.extract_branch.outputs.branch }} //:container_publish
         if: matrix.os == 'ubuntu-latest'
+
+      - name: Execute Bazel tests
+        shell: bash
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          bazel test //...:all
