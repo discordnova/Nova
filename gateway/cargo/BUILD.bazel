@@ -13,53 +13,8 @@ licenses([
 
 # Aliased targets
 alias(
-    name = "enumflags2",
-    actual = "@raze__enumflags2__0_7_1//:enumflags2",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
     name = "futures",
     actual = "@raze__futures__0_3_17//:futures",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "futures_util",
-    actual = "@raze__futures_util__0_3_17//:futures_util",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "num",
-    actual = "@raze__num__0_4_0//:num",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "num_derive",
-    actual = "@raze__num_derive__0_3_3//:num_derive",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "num_traits",
-    actual = "@raze__num_traits__0_2_14//:num_traits",
     tags = [
         "cargo-raze",
         "manual",
@@ -85,15 +40,6 @@ alias(
 )
 
 alias(
-    name = "serde_repr",
-    actual = "@raze__serde_repr__0_1_7//:serde_repr",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
     name = "tokio",
     actual = "@raze__tokio__1_12_0//:tokio",
     tags = [
@@ -103,17 +49,8 @@ alias(
 )
 
 alias(
-    name = "tokio_tungstenite",
-    actual = "@raze__tokio_tungstenite__0_15_0//:tokio_tungstenite",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "url",
-    actual = "@raze__url__2_2_2//:url",
+    name = "twilight_gateway",
+    actual = "@raze__twilight_gateway__0_6_5//:twilight_gateway",
     tags = [
         "cargo-raze",
         "manual",

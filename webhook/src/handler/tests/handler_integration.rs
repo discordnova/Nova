@@ -101,7 +101,7 @@ unsafe fn destroy() {
 
 #[tokio::test]
 async fn respond_to_pings() {
-    let ping = json!({ "type": 1, "id": "0", "application_id": "0", "token": "random token", "version": 1 }).to_string();
+    let ping = json!({ "type": 1, "id": "0", "application_id": "0", "token": "random token", "version": 1, "channel_id": "123" }).to_string();
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.as_bytes().to_vec()].concat();
     let signature = sign_message(signature_data, &TEST_KEYPAIR);
@@ -113,6 +113,7 @@ async fn respond_to_pings() {
         .header("X-Signature-Timestamp", timestamp)
         .body(Body::from(ping.clone()))
         .expect("request builder");
+
     let client = hyper::client::Client::new();
     let result = client.request(req).await.unwrap();
 
@@ -121,7 +122,7 @@ async fn respond_to_pings() {
 
 #[tokio::test]
 async fn deny_invalid_signatures() {
-    let ping = json!({ "type": 1, "id": "0", "application_id": "0", "token": "random token", "version": 1 }).to_string();
+    let ping = json!({ "type": 1, "id": "0", "application_id": "0", "token": "random token", "version": 1, "channel_id": "123" }).to_string();
     let timestamp = "my datetime :)";
 
     let req = Request::builder()
@@ -138,7 +139,19 @@ async fn deny_invalid_signatures() {
 
 #[tokio::test]
 async fn response_500_when_no_nats_response() {
-    let ping = json!({ "type": 2, "id": "0", "application_id": "0", "token": "random token", "version": 1 }).to_string();
+    let ping = json!({
+        "type": 2,
+        "id": "0",
+        "application_id": "0",
+        "token": "random token",
+        "version": 1,
+        "channel_id": "123",
+        "data": {
+            "id": "0",
+            "name": "command"
+        }
+    }).to_string();
+
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.as_bytes().to_vec()].concat();
     let signature = sign_message(signature_data, &TEST_KEYPAIR);
@@ -164,7 +177,19 @@ async fn respond_from_nats_response() {
         nats = SETTINGS.clone().unwrap().nats.into();
     }
     let sub = nats.subscribe("nova.cache.dispatch.interaction").unwrap();
-    let ping = json!({ "type": 2, "id": "0", "application_id": "0", "token": "random token", "version": 1 }).to_string();
+    let ping = json!({
+        "type": 2,
+        "id": "0",
+        "application_id": "0",
+        "token": "random token",
+        "version": 1,
+        "channel_id": "123",
+        "data": {
+            "id": "0",
+            "name": "command"
+        }
+    }).to_string();
+    
     let timestamp = "my datetime :)";
     let signature_data = [timestamp.as_bytes().to_vec(), ping.as_bytes().to_vec()].concat();
     let signature = sign_message(signature_data, &TEST_KEYPAIR);
@@ -182,6 +207,7 @@ async fn respond_from_nats_response() {
         .header("X-Signature-Timestamp", timestamp)
         .body(Body::from(ping.clone()))
         .expect("request builder");
+    
     let client = hyper::client::Client::new();
     let result = client.request(req).await.unwrap();
     assert_eq!(result.status(), StatusCode::OK);
@@ -201,6 +227,7 @@ async fn response_400_when_invalid_json_body() {
         .header("X-Signature-Timestamp", timestamp)
         .body(Body::from(ping.clone()))
         .expect("request builder");
+    
     let client = hyper::client::Client::new();
     let result = client.request(req).await.unwrap();
     assert_eq!(result.status(), StatusCode::BAD_REQUEST);

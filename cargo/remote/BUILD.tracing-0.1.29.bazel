@@ -40,12 +40,17 @@ rust_library(
     aliases = {
     },
     crate_features = [
+        "attributes",
         "std",
+        "tracing-attributes",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
     data = [],
     edition = "2018",
+    proc_macro_deps = [
+        "@raze__tracing_attributes__0_1_18//:tracing_attributes",
+    ],
     rustc_flags = [
         "--cap-lints=allow",
     ],

@@ -14,6 +14,7 @@ libc = "0.2.101"
 lazy_static = "1.4.0"
 ctor = "0.1.21"
 ed25519-dalek = "1"
+twilight-model = { version = "0.6" }
 rand = "0.7"
 
 [[bin]]

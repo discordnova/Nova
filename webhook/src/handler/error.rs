@@ -1,4 +1,4 @@
-use hyper::{Body, Response, StatusCode};
+use hyper::{header::ToStrError, Body, Response, StatusCode};
 
 pub struct WebhookError {
     pub code: StatusCode,
@@ -20,5 +20,17 @@ impl Into<Response<Body>> for WebhookError {
             .status(self.code)
             .body(self.message.into())
             .unwrap()
+    }
+}
+
+impl From<hyper::Error> for WebhookError {
+    fn from(_: hyper::Error) -> Self {
+        WebhookError::new(StatusCode::BAD_REQUEST, "invalid request")
+    }
+}
+
+impl From<ToStrError> for WebhookError {
+    fn from(_: ToStrError) -> Self {
+        WebhookError::new(StatusCode::BAD_REQUEST, "invalid request")
     }
 }

@@ -42,8 +42,6 @@ cargo_build_script(
     build_script_env = {
     },
     crate_features = [
-        "i128",
-        "std",
     ],
     crate_root = "build.rs",
     data = glob(["**"]),
@@ -72,8 +70,6 @@ rust_library(
     name = "num_integer",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "i128",
-        "std",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",

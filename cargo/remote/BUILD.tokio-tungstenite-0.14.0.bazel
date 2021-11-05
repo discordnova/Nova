@@ -47,7 +47,6 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     crate_features = [
         "connect",
-        "default",
         "rustls",
         "rustls-tls",
         "stream",
@@ -66,7 +65,7 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.15.0",
+    version = "0.14.0",
     # buildifier: leave-alone
     deps = [
         "@raze__futures_util__0_3_17//:futures_util",
@@ -75,7 +74,7 @@ rust_library(
         "@raze__rustls__0_19_1//:rustls",
         "@raze__tokio__1_12_0//:tokio",
         "@raze__tokio_rustls__0_22_0//:tokio_rustls",
-        "@raze__tungstenite__0_14_0//:tungstenite",
+        "@raze__tungstenite__0_13_0//:tungstenite",
         "@raze__webpki__0_21_4//:webpki",
         "@raze__webpki_roots__0_21_1//:webpki_roots",
     ],
