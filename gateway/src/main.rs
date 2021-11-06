@@ -48,8 +48,8 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                 };
                 let value = serde_json::to_string(&data)?;
                 debug!("nats send: {}", value);
-                nats.request(
-                    &format!("nova.cache.discord.{}", data.data.0.kind().name().unwrap()),
+                nats.publish(
+                    &format!("nova.cache.dispatch.{}", data.data.0.kind().name().unwrap()),
                     value,
                 )?;
             }
