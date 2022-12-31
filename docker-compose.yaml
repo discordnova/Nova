@@ -1,7 +1,26 @@
 version: "3.3"
 services:
   cache:
+    image: ghcr.io/discordnova/nova/cache
     build: 
       context: .
       args:
         - COMPONENT=cache
+  gateway:
+    image: ghcr.io/discordnova/nova/gateway
+    build: 
+      context: .
+      args:
+        - COMPONENT=gateway
+  rest:
+    image: ghcr.io/discordnova/nova/rest
+    build: 
+      context: .
+      args:
+        - COMPONENT=rest
+  webhook:
+    image: ghcr.io/discordnova/nova/webhook
+    build: 
+      context: .
+      args:
+        - COMPONENT=webhook

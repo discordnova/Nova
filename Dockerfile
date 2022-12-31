@@ -1,4 +1,4 @@
-ARG COMPONENT
+
 
 FROM clux/muslrust:stable AS chef
 USER root
@@ -26,7 +26,8 @@ RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 # Final os
 FROM runtime-base AS runtime
+ARG COMPONENT
+ENV COMPONENT=${COMPONENT}
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/${COMPONENT} /usr/local/bin/
 USER nova
-ENV COMPONENT ${COMPONENT}
-CMD /usr/local/bin/${COMPONENT}
+ENTRYPOINT /usr/local/bin/${COMPONENT}
