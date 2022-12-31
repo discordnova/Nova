@@ -36,8 +36,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "16"
-          cache: ${{ steps.detect-package-manager.outputs.manager }}
-          cache-dependency-path: ${{ env.BUILD_PATH }}/package-lock.json
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v2
@@ -46,7 +44,6 @@ jobs:
         working-directory: ${{ env.BUILD_PATH }}
       - name: Build
         run: |
-          
           ${{ steps.detect-package-manager.outputs.runner }} docusaurus build
         working-directory: ${{ env.BUILD_PATH }}
       - name: Upload artifact
