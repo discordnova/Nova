@@ -1,5 +1,5 @@
 pub use ::config as config_crate;
-pub use ::nats as nats_crate;
+pub use ::async_nats as nats_crate;
 pub use ::redis as redis_crate;
 pub use log;
 pub use prometheus;

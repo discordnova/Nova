@@ -1,7 +1,7 @@
 [package]
 name = "shared"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 pretty_env_logger = "0.4"
@@ -13,7 +13,7 @@ hyper = { version = "0.14", features = ["full"] }
 tokio = { version = "1", features = ["full"] }
 enumflags2 = { version = "0.7.1", features = ["serde"] }
 prometheus = { version = "0.13", features = ["process"] }
-nats = "0.23"
+async-nats = "0.25.1"
 testcontainers = "0.14"
 twilight-model = "0.14"
 serde_json = { version = "1.0" }

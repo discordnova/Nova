@@ -1,7 +1,7 @@
 use super::handler::HandlerService;
 use crate::config::Config;
 use hyper::service::Service;
-use shared::nats_crate::Connection;
+use shared::nats_crate::Client;
 use std::{
     future::{ready, Ready},
     sync::Arc,
@@ -11,7 +11,7 @@ use ed25519_dalek::PublicKey;
 
 pub struct MakeSvc {
     pub settings: Arc<Config>,
-    pub nats: Arc<Connection>,
+    pub nats: Arc<Client>,
     pub public_key: Arc<PublicKey>
 }
 

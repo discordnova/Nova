@@ -4,10 +4,10 @@ mod handler;
 use crate::handler::make_service::MakeSvc;
 
 use crate::config::Config;
-use shared::config::Settings;
-use shared::log::{error, info};
 use ed25519_dalek::PublicKey;
 use hyper::Server;
+use shared::config::Settings;
+use shared::log::{error, info};
 
 #[tokio::main]
 async fn main() {
@@ -35,7 +35,7 @@ async fn start(settings: Settings<Config>) {
         Arc::new(PublicKey::from_bytes(&hex::decode(&config.discord.public_key).unwrap()).unwrap());
     let server = Server::bind(&addr).serve(MakeSvc {
         settings: config,
-        nats: Arc::new(settings.nats.into()),
+        nats: Arc::new(settings.nats.to_client().await.unwrap()),
         public_key: public_key,
     });
 

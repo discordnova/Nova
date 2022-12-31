@@ -1,5 +1,5 @@
 use config::ConfigError;
-use std::fmt::Debug;
+use std::{fmt::Debug, io};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -12,4 +12,7 @@ pub enum GenericError {
 
     #[error("step `{0}` failed")]
     StepFailed(String),
+
+    #[error("io error")]
+    Io(#[from] io::Error)
 }

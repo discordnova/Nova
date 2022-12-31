@@ -8,7 +8,7 @@ use hyper::{
     Body, Method, Request, Response, StatusCode,
 };
 use serde::{Deserialize, Serialize};
-use shared::nats_crate::Connection;
+use shared::nats_crate::Client;
 use shared::{
     log::{debug, error},
     payloads::{CachePayload, DispatchEventTagged, Tracing},
@@ -19,7 +19,6 @@ use std::{
     str::from_utf8,
     sync::Arc,
     task::{Context, Poll},
-    time::Duration,
 };
 use twilight_model::gateway::event::{DispatchEvent};
 use twilight_model::{
@@ -31,7 +30,7 @@ use twilight_model::{
 #[derive(Clone)]
 pub struct HandlerService {
     pub config: Arc<Config>,
-    pub nats: Arc<Connection>,
+    pub nats: Arc<Client>,
     pub public_key: Arc<PublicKey>,
 }
 
@@ -107,14 +106,13 @@ impl HandlerService {
 
                                     let payload = serde_json::to_string(&data).unwrap();
 
-                                    match self.nats.request_timeout(
-                                        "nova.cache.dispatch.INTERACTION_CREATE",
-                                        payload,
-                                        Duration::from_secs(2),
-                                    ) {
+                                    match self.nats.request(
+                                        "nova.cache.dispatch.INTERACTION_CREATE".to_string(),
+                                        Bytes::from(payload),
+                                    ).await {
                                         Ok(response) => Ok(Response::builder()
                                             .header("Content-Type", "application/json")
-                                            .body(Body::from(response.data))
+                                            .body(Body::from(response.reply.unwrap()))
                                             .unwrap()),
 
                                         Err(error) => {

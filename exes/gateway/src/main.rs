@@ -2,7 +2,7 @@ use config::Config;
 use shared::{
     config::Settings,
     log::{debug, info},
-    nats_crate::Connection,
+    nats_crate::Client,
     payloads::{CachePayload, DispatchEventTagged, Tracing},
 };
 use std::{convert::TryFrom, error::Error};
@@ -15,7 +15,7 @@ use twilight_model::gateway::event::DispatchEvent;
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let settings: Settings<Config> = Settings::new("gateway").unwrap();
     let (shard, mut events) = Shard::new(settings.config.token, settings.config.intents);
-    let nats: Connection = settings.nats.into();
+    let nats: Client = settings.nats.to_client().await?;
 
     shard.start().await?;
 
@@ -26,7 +26,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
             }
 
             _ => {
-                let name = event.kind().name().unwrap();
+                let name = event.kind().name();
                 if let Ok(dispatch_event) = DispatchEvent::try_from(event) {
                     let data = CachePayload {
                         tracing: Tracing {
@@ -39,7 +39,9 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                     };
                     let value = serde_json::to_string(&data)?;
                     debug!("nats send: {}", value);
-                    nats.publish(&format!("nova.cache.dispatch.{}", name), value)?;
+                    let bytes = bytes::Bytes::from(value);
+                    nats.publish(format!("nova.cache.dispatch.{}", name.unwrap()), bytes)
+                        .await?;
                 }
             }
         }
