@@ -49,8 +49,7 @@ where
 
         //  try to load the config
         settings.config = config.get::<T>(service_name)?;
-        pretty_env_logger::init();
-
+        
         // start the monitoring system if needed
         crate::monitoring::start_monitoring(&settings.monitoring);
         Ok(settings)

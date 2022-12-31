@@ -19,3 +19,10 @@ hold tight this is going to be fast.
 
 ## Setting up a nova instance
 
+Clone the [example repo](https://github.com/discordnova/nova-quickstart.git) like so
+
+`git clone https://github.com/discordnova/nova-quickstart.git`,
+
+In this folder, find the `config.yml.example` file and rename it to match `config.yml`
+
+Next, you need to fill all the environment variables to match your discord bot.
