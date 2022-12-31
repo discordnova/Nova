@@ -1,13 +1,7 @@
 version: "3.3"
 services:
-  nats:
-      image: 'nats'
-      ports:
-        - "8222:8222"
-        - "4222:4222"
-      hostname: nats-server
-  redis:
-      image: 'redis'
-      ports:
-        - "6379:6379"
-      hostname: redis
+  cache:
+    build: 
+      context: .
+      args:
+        - COMPONENT=cache

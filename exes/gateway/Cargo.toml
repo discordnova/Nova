@@ -1,0 +1,13 @@
+[package]
+name = "gateway"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+shared = { path = "../../libs/shared" }
+tokio = { version = "1", features = ["full"] }
+twilight-gateway = { version = "0.14" }
+twilight-model = "0.14"
+serde = { version = "1.0.8", features = ["derive"] }
+futures = "0.3"
+serde_json = { version = "1.0" }
