@@ -1,7 +1,3 @@
----
-sidebar_position: 2
----
-
 # 5 Minutes quickstart
 
 This page shows you how to start a new nova project
