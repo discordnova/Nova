@@ -4,7 +4,9 @@ members = [
     "exes/gateway/",
     "exes/rest/",
     "exes/webhook/",
+    "exes/ratelimit/",
 
     "libs/proto/",
-    "libs/shared/"
+    "libs/shared/",
+    "libs/leash/"
 ]

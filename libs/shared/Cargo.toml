@@ -19,6 +19,7 @@ twilight-model = "0.14"
 serde_json = { version = "1.0" }
 thiserror = "1.0.38"
 inner = "0.1.1"
+anyhow = "1.0.68"
 
 [dependencies.redis]
 version = "*"

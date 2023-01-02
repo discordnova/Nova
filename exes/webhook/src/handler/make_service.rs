@@ -1,22 +1,15 @@
-use super::handler::HandlerService;
-use crate::config::Config;
 use hyper::service::Service;
-use shared::nats_crate::Client;
 use std::{
     future::{ready, Ready},
-    sync::Arc,
     task::{Context, Poll},
 };
-use ed25519_dalek::PublicKey;
 
-pub struct MakeSvc {
-    pub settings: Arc<Config>,
-    pub nats: Arc<Client>,
-    pub public_key: Arc<PublicKey>
+pub struct MakeSvc<T: Clone> {
+    pub service: T,
 }
 
-impl<T> Service<T> for MakeSvc {
-    type Response = HandlerService;
+impl<T, V: Clone> Service<T> for MakeSvc<V> {
+    type Response = V;
     type Error = std::io::Error;
     type Future = Ready<Result<Self::Response, Self::Error>>;
 
@@ -25,10 +18,12 @@ impl<T> Service<T> for MakeSvc {
     }
 
     fn call(&mut self, _: T) -> Self::Future {
-        ready(Ok(HandlerService {
-            config: self.settings.clone(),
-            nats: self.nats.clone(),
-            public_key: self.public_key.clone()
-        }))
+        ready(Ok(self.service.clone()))
+    }
+}
+
+impl<T: Clone> MakeSvc<T> {
+    pub fn new(service: T) -> Self {
+        Self { service }
     }
 }

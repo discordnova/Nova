@@ -1,7 +1,7 @@
-use std::error::Error;
+use std::{error::Error, pin::Pin};
 
 use async_nats::{Client, Subscriber};
-use futures_util::stream::StreamExt;
+use futures_util::{stream::StreamExt, Future};
 use log::info;
 use managers::{
     automoderation::Automoderation, bans::Bans, channels::Channels,
@@ -22,7 +22,7 @@ pub enum CacheSourcedEvents {
 }
 
 #[derive(Default)]
-struct MegaCache {
+struct Cache {
     automoderation: Automoderation,
     channels: Channels,
     bans: Bans,
@@ -42,18 +42,18 @@ struct MegaCache {
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let settings: Settings<CacheConfiguration> = Settings::new("cache").unwrap();
     info!("loaded configuration: {:?}", settings);
-
-    let nats: Client = settings.nats.to_client().await?;
+    let nats =
+        Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>>>>>::into(settings.nats).await?;
     // let redis: redis::Client = settings.redis.into();
 
-    let mut cache = MegaCache::default();
+    let mut cache = Cache::default();
 
     let mut sub = nats.subscribe("nova.cache.dispatch.*".to_string()).await?;
     listen(&mut sub, &mut cache, settings.config.toggles).await;
     Ok(())
 }
 
-async fn listen(sub: &mut Subscriber, cache: &mut MegaCache, features: Vec<String>) {
+async fn listen(sub: &mut Subscriber, cache: &mut Cache, features: Vec<String>) {
     while let Some(data) = sub.next().await {
         let cp: CachePayload = serde_json::from_slice(&data.payload).unwrap();
         let event = cp.data.data;

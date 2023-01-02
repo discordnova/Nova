@@ -7,6 +7,7 @@ edition = "2018"
 
 [dependencies]
 shared = { path = "../../libs/shared" }
+proto = { path = "../../libs/proto" }
 async-nats = "0.25.1"
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1.0.8", features = ["derive"] }
@@ -15,3 +16,4 @@ serde_json = { version = "1.0" }
 redis = "*"
 futures-util = "*"
 twilight-model = "0.14"
+anyhow = "1.0.68"

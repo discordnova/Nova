@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package nova.ratelimit.ratelimiter;
+
+service Ratelimiter {
+    rpc GetBucketInformation(BucketInformationRequest) returns (BucketInformationResponse);
+    rpc SubmitTicket(stream BucketSubmitTicketRequest) returns (stream BucketSubmitTicketResponse);
+}
+
+message BucketInformationRequest {
+    string path = 1;
+}
+
+message BucketInformationResponse {
+    uint64 limit = 1;
+    uint64 remaining = 2;
+    uint64 reset_after = 3;
+    uint64 started_at = 4;
+}
+
+
+message BucketSubmitTicketRequest {
+    oneof data {
+        string path = 1;
+        Headers headers = 2;
+    }
+
+    message Headers {
+        map<string, string> headers = 1;
+        uint64 precise_time = 2;
+    }
+    
+}
+
+message BucketSubmitTicketResponse {
+    int64 accepted = 1;
+}

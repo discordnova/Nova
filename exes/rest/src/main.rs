@@ -1,46 +1,56 @@
-use std::{convert::Infallible, sync::Arc};
+use config::ReverseProxyConfig;
 
-use crate::{config::Config, ratelimit::Ratelimiter};
-use shared::{
-    config::Settings,
-    log::{error, info},
-    redis_crate::Client,
+use handler::handle_request;
+use hyper::{
+    server::conn::AddrStream,
+    service::{make_service_fn, service_fn},
+    Body, Client, Request, Server,
 };
-use hyper::{server::conn::AddrStream, service::make_service_fn, Server};
-use std::net::ToSocketAddrs;
-use tokio::sync::Mutex;
-
-use crate::proxy::ServiceProxy;
+use hyper_tls::HttpsConnector;
+use leash::{ignite, AnyhowResultFuture, Component};
+use shared::config::Settings;
+use std::convert::Infallible;
 
 mod config;
-mod proxy;
-mod ratelimit;
+mod handler;
+mod ratelimit_client;
 
-#[tokio::main]
-async fn main() {
-    let settings: Settings<Config> = Settings::new("rest").unwrap();
-    let config = Arc::new(settings.config);
-    let redis_client: Client = settings.redis.into();
-    let redis = Arc::new(Mutex::new(
-        redis_client.get_async_connection().await.unwrap(),
-    ));
-    let ratelimiter = Arc::new(Ratelimiter::new(redis));
+struct ReverseProxyServer {}
+impl Component for ReverseProxyServer {
+    type Config = ReverseProxyConfig;
+    const SERVICE_NAME: &'static str = "rest";
 
-    let addr = format!("{}:{}", config.server.address, config.server.port)
-        .to_socket_addrs()
-        .unwrap()
-        .next()
-        .unwrap();
+    fn start(&self, settings: Settings<Self::Config>) -> AnyhowResultFuture<()> {
+        Box::pin(async move {
+            // Client to the remote ratelimiters
+            let ratelimiter = ratelimit_client::RemoteRatelimiter::new();
+            let client = Client::builder().build(HttpsConnector::new());
 
-    let service_fn = make_service_fn(move |_: &AddrStream| {
-        let service_proxy = ServiceProxy::new(config.clone(), ratelimiter.clone());
-        async move { Ok::<_, Infallible>(service_proxy) }
-    });
+            let service_fn = make_service_fn(move |_: &AddrStream| {
+                let client = client.clone();
+                let ratelimiter = ratelimiter.clone();
+                async move {
+                    Ok::<_, Infallible>(service_fn(move |request: Request<Body>| {
+                        let client = client.clone();
+                        let ratelimiter = ratelimiter.clone();
+                        async move {
+                            handle_request(client, ratelimiter, "token".to_string(), request).await
+                        }
+                    }))
+                }
+            });
 
-    let server = Server::bind(&addr).serve(service_fn);
+            let server = Server::bind(&settings.config.server.listening_adress).serve(service_fn);
 
-    info!("starting ratelimit server");
-    if let Err(e) = server.await {
-        error!("server error: {}", e);
+            server.await?;
+
+            Ok(())
+        })
+    }
+
+    fn new() -> Self {
+        Self {}
     }
 }
+
+ignite!(ReverseProxyServer);

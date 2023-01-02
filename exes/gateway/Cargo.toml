@@ -5,6 +5,8 @@ edition = "2018"
 
 [dependencies]
 shared = { path = "../../libs/shared" }
+proto = { path = "../../libs/proto" }
+leash = { path = "../../libs/leash" }
 tokio = { version = "1", features = ["full"] }
 twilight-gateway = { version = "0.14" }
 twilight-model = "0.14"
@@ -12,3 +14,4 @@ serde = { version = "1.0.8", features = ["derive"] }
 futures = "0.3"
 serde_json = { version = "1.0" }
 bytes = "*"
+anyhow = "*"

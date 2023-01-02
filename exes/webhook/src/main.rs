@@ -1,45 +1,47 @@
-use std::{net::ToSocketAddrs, sync::Arc};
 mod config;
 mod handler;
-use crate::handler::make_service::MakeSvc;
+use std::{future::Future, pin::Pin};
 
-use crate::config::Config;
-use ed25519_dalek::PublicKey;
+use crate::{
+    config::WebhookConfig,
+    handler::{handler::WebhookService, make_service::MakeSvc},
+};
 use hyper::Server;
-use shared::config::Settings;
-use shared::log::{error, info};
+use leash::{ignite, AnyhowResultFuture, Component};
+use shared::{config::Settings, log::info, nats_crate::Client};
 
-#[tokio::main]
-async fn main() {
-    let settings: Settings<Config> = Settings::new("webhook").unwrap();
-    start(settings).await;
-}
+#[derive(Clone, Copy)]
+struct WebhookServer {}
 
-async fn start(settings: Settings<Config>) {
-    let addr = format!(
-        "{}:{}",
-        settings.config.server.address, settings.config.server.port
-    )
-    .to_socket_addrs()
-    .unwrap()
-    .next()
-    .unwrap();
+impl Component for WebhookServer {
+    type Config = WebhookConfig;
+    const SERVICE_NAME: &'static str = "webhook";
 
-    info!(
-        "Starting server on {}:{}",
-        settings.config.server.address, settings.config.server.port
-    );
+    fn start(&self, settings: Settings<Self::Config>) -> AnyhowResultFuture<()> {
+        Box::pin(async move {
+            info!("Starting server on {}", settings.server.listening_adress);
 
-    let config = Arc::new(settings.config);
-    let public_key =
-        Arc::new(PublicKey::from_bytes(&hex::decode(&config.discord.public_key).unwrap()).unwrap());
-    let server = Server::bind(&addr).serve(MakeSvc {
-        settings: config,
-        nats: Arc::new(settings.nats.to_client().await.unwrap()),
-        public_key: public_key,
-    });
+            let bind = settings.server.listening_adress;
+            let nats =
+                Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>>>>>::into(settings.nats)
+                    .await?;
 
-    if let Err(e) = server.await {
-        error!("server error: {}", e);
+            let make_service = MakeSvc::new(WebhookService {
+                config: settings.config,
+                nats: nats.clone(),
+            });
+
+            let server = Server::bind(&bind).serve(make_service);
+
+            server.await?;
+
+            Ok(())
+        })
+    }
+
+    fn new() -> Self {
+        Self {}
     }
 }
+
+ignite!(WebhookServer);

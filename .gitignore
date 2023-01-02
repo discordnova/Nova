@@ -3,3 +3,4 @@ target/
 **/local*
 .ijwb
 .idea
+config.yml

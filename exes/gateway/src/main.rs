@@ -1,51 +1,69 @@
-use config::Config;
+use config::GatewayConfig;
+use leash::{ignite, AnyhowResultFuture, Component};
 use shared::{
     config::Settings,
     log::{debug, info},
     nats_crate::Client,
     payloads::{CachePayload, DispatchEventTagged, Tracing},
 };
-use std::{convert::TryFrom, error::Error};
+use std::{convert::TryFrom, pin::Pin};
 use twilight_gateway::{Event, Shard};
 mod config;
-use futures::StreamExt;
+use futures::{Future, StreamExt};
 use twilight_model::gateway::event::DispatchEvent;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
-    let settings: Settings<Config> = Settings::new("gateway").unwrap();
-    let (shard, mut events) = Shard::new(settings.config.token, settings.config.intents);
-    let nats: Client = settings.nats.to_client().await?;
+struct GatewayServer {}
+impl Component for GatewayServer {
+    type Config = GatewayConfig;
+    const SERVICE_NAME: &'static str = "gateway";
 
-    shard.start().await?;
+    fn start(&self, settings: Settings<Self::Config>) -> AnyhowResultFuture<()> {
+        Box::pin(async move {
+            let (shard, mut events) = Shard::builder(settings.token.to_owned(), settings.intents)
+                .shard(settings.shard, settings.shard_total)?
+                .build();
 
-    while let Some(event) = events.next().await {
-        match event {
-            Event::Ready(ready) => {
-                info!("Logged in as {}", ready.user.name);
-            }
+            let nats =
+                Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>>>>>::into(settings.nats)
+                    .await?;
 
-            _ => {
-                let name = event.kind().name();
-                if let Ok(dispatch_event) = DispatchEvent::try_from(event) {
-                    let data = CachePayload {
-                        tracing: Tracing {
-                            node_id: "".to_string(),
-                            span: None,
-                        },
-                        data: DispatchEventTagged {
-                            data: dispatch_event,
-                        },
-                    };
-                    let value = serde_json::to_string(&data)?;
-                    debug!("nats send: {}", value);
-                    let bytes = bytes::Bytes::from(value);
-                    nats.publish(format!("nova.cache.dispatch.{}", name.unwrap()), bytes)
-                        .await?;
+            shard.start().await?;
+
+            while let Some(event) = events.next().await {
+                match event {
+                    Event::Ready(ready) => {
+                        info!("Logged in as {}", ready.user.name);
+                    }
+
+                    _ => {
+                        let name = event.kind().name();
+                        if let Ok(dispatch_event) = DispatchEvent::try_from(event) {
+                            let data = CachePayload {
+                                tracing: Tracing {
+                                    node_id: "".to_string(),
+                                    span: None,
+                                },
+                                data: DispatchEventTagged {
+                                    data: dispatch_event,
+                                },
+                            };
+                            let value = serde_json::to_string(&data)?;
+                            debug!("nats send: {}", value);
+                            let bytes = bytes::Bytes::from(value);
+                            nats.publish(format!("nova.cache.dispatch.{}", name.unwrap()), bytes)
+                                .await?;
+                        }
+                    }
                 }
             }
-        }
+
+            Ok(())
+        })
     }
 
-    Ok(())
+    fn new() -> Self {
+        Self {}
+    }
 }
+
+ignite!(GatewayServer);

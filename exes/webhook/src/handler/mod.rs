@@ -1,5 +1,5 @@
 mod error;
-mod handler;
+pub mod handler;
 pub mod make_service;
 mod signature;
 

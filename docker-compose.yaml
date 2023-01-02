@@ -1,26 +1,92 @@
 version: "3.3"
 services:
+  nats:
+    image: bitnami/nats
+    restart: always
+    ports:
+      - 4222:4222
+      - 8222:8222
+  redis:
+    image: redis
+
   cache:
     image: ghcr.io/discordnova/nova/cache
+    restart: always
     build: 
       context: .
       args:
         - COMPONENT=cache
+    volumes:
+      - ./config.yml:/config/default.yml
+    environment:
+      - RUST_LOG=info
+    depends_on:
+      - nats
+      - redis
+  
   gateway:
     image: ghcr.io/discordnova/nova/gateway
+    restart: always
     build: 
       context: .
       args:
         - COMPONENT=gateway
+    volumes:
+      - ./config.yml:/config/default.yml
+    environment:
+      - RUST_LOG=info
+    depends_on:
+      - nats
+    ports:
+      - 9000:9000
+
   rest:
     image: ghcr.io/discordnova/nova/rest
+    restart: always
     build: 
       context: .
       args:
         - COMPONENT=rest
+    volumes:
+      - ./config.yml:/config/default.yml
+    environment:
+      - RUST_LOG=info
+    depends_on:
+      - ratelimit
+    ports:
+      - 9001:9000
+      - 8080:8080
+
   webhook:
     image: ghcr.io/discordnova/nova/webhook
+    restart: always
     build: 
       context: .
       args:
         - COMPONENT=webhook
+    volumes:
+      - ./config.yml:/config/default.yml
+    environment:
+      - RUST_LOG=info
+    depends_on:
+      - nats
+    ports:
+      - 9002:9000
+      - 8081:8080
+  ratelimit:
+    image: ghcr.io/discordnova/nova/ratelimit
+    restart: always
+    build: 
+      context: .
+      args:
+        - COMPONENT=ratelimit
+    volumes:
+      - ./config.yml:/config/default.yml
+    environment:
+      - RUST_LOG=info
+    depends_on:
+      - nats
+      - redis
+    ports:
+      - 9003:9000
+      - 8082:8080
