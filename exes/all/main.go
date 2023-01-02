@@ -1,7 +1,7 @@
 package main
 
 /*
-#cgo LDFLAGS: -Lbuild -lall
+#cgo LDFLAGS: -L./build -lall -lcrypto -lz -ldl -lssl -lm -static-libgcc
 #include "./build/all.h"
 */
 import "C"

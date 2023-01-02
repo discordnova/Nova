@@ -15,7 +15,6 @@ fn main() {
         .to_string();
 
     let config = Config {
-        namespace: Some(String::from("ffi")),
         language: Language::C,
         ..Default::default()
     };

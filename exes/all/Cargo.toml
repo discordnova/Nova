@@ -25,7 +25,7 @@ config = "0.13.3"
 pretty_env_logger = "0.4.0"
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["staticlib"]
 
 [build-dependencies]
 cbindgen = "0.24.3"
