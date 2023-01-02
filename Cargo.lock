@@ -1792,6 +1792,7 @@ dependencies = [
  "anyhow",
  "futures-util",
  "hyper",
+ "leash",
  "proto",
  "serde",
  "serde_json",

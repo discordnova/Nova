@@ -1,0 +1,21 @@
+[package]
+name = "ratelimit"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+shared = { path = "../../libs/shared" }
+proto = { path = "../../libs/proto" }
+leash = { path = "../../libs/leash" }
+hyper = { version = "0.14", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1.0.8", features = ["derive"] }
+twilight-http-ratelimiting = { git = "https://github.com/MatthieuCoder/twilight.git" }
+anyhow = "*"
+futures-util = "0.3.17"
+tracing = "*"
+serde_json = { version = "1.0" }
+tonic = "0.8.3"
+tokio-stream = "0.1.11"
