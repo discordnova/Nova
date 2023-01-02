@@ -4,7 +4,7 @@ use ed25519_dalek::PublicKey;
 use serde::{Deserialize, Deserializer};
 
 fn default_listening_address() -> SocketAddr {
-    SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 8080))
+    SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 8080))
 }
 
 #[derive(Debug, Deserialize, Clone, Copy)]

@@ -1,19 +1,29 @@
 use anyhow::Result;
 use serde::de::DeserializeOwned;
-use shared::config::Settings;
+use shared::{
+    config::Settings,
+    log::{error, info},
+};
 use std::{future::Future, pin::Pin};
+use tokio::{signal::{unix::SignalKind}, sync::oneshot};
 
 pub type AnyhowResultFuture<T> = Pin<Box<dyn Future<Output = Result<T>>>>;
 pub trait Component: Send + Sync + 'static + Sized {
     type Config: Default + Clone + DeserializeOwned;
 
     const SERVICE_NAME: &'static str;
-    fn start(&self, settings: Settings<Self::Config>) -> AnyhowResultFuture<()>;
+    fn start(
+        &self,
+        settings: Settings<Self::Config>,
+        stop: oneshot::Receiver<()>,
+    ) -> AnyhowResultFuture<()>;
     fn new() -> Self;
 
     fn _internal_start(self) -> AnyhowResultFuture<()> {
         Box::pin(async move {
+            pretty_env_logger::init();
             let settings = Settings::<Self::Config>::new(Self::SERVICE_NAME);
+            let (stop, stop_channel) = oneshot::channel();
 
             // Start the grpc healthcheck
             tokio::spawn(async move {});
@@ -21,7 +31,21 @@ pub trait Component: Send + Sync + 'static + Sized {
             // Start the prometheus monitoring job
             tokio::spawn(async move {});
 
-            self.start(settings?).await
+            tokio::spawn(async move {
+                match tokio::signal::unix::signal(SignalKind::terminate()).unwrap().recv().await {
+                    Some(()) => {
+                        info!("Stopping program.");
+
+                        stop.send(()).unwrap();
+                    }
+                    None => {
+                        error!("Unable to listen for shutdown signal");
+                        // we also shut down in case of error
+                    }
+                }
+            });
+
+            self.start(settings?, stop_channel).await
         })
     }
 }
@@ -41,6 +65,7 @@ macro_rules! ignite {
 #[cfg(test)]
 mod test {
     use serde::Deserialize;
+    use tokio::sync::oneshot;
 
     use crate::Component;
 
@@ -57,6 +82,7 @@ mod test {
         fn start(
             &self,
             _settings: shared::config::Settings<Self::Config>,
+            _stop: oneshot::Receiver<()>,
         ) -> crate::AnyhowResultFuture<()> {
             Box::pin(async move { Ok(()) })
         }
@@ -65,6 +91,6 @@ mod test {
             Self {}
         }
     }
-    
+
     ignite!(TestComponent);
 }

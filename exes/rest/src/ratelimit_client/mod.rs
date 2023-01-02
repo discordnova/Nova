@@ -64,7 +64,7 @@ impl RemoteRatelimiter {
                 obj_clone.get_ratelimiters().await.unwrap();
                 tokio::select! {
                     () = &mut sleep => {
-                        println!("timer elapsed");
+                        debug!("timer elapsed");
                     },
                     _ = tx.recv() => {}
                 }

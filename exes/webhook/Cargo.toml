@@ -17,6 +17,7 @@ lazy_static = "1.4.0"
 ed25519-dalek = "1"
 twilight-model = { version = "0.14" }
 anyhow = "1.0.68"
+futures-util = "0.3.25"
 
 [[bin]]
 name = "webhook"

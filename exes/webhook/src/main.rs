@@ -9,6 +9,7 @@ use crate::{
 use hyper::Server;
 use leash::{ignite, AnyhowResultFuture, Component};
 use shared::{config::Settings, log::info, nats_crate::Client};
+use tokio::sync::oneshot;
 
 #[derive(Clone, Copy)]
 struct WebhookServer {}
@@ -17,7 +18,11 @@ impl Component for WebhookServer {
     type Config = WebhookConfig;
     const SERVICE_NAME: &'static str = "webhook";
 
-    fn start(&self, settings: Settings<Self::Config>) -> AnyhowResultFuture<()> {
+    fn start(
+        &self,
+        settings: Settings<Self::Config>,
+        stop: oneshot::Receiver<()>,
+    ) -> AnyhowResultFuture<()> {
         Box::pin(async move {
             info!("Starting server on {}", settings.server.listening_adress);
 
@@ -33,7 +38,9 @@ impl Component for WebhookServer {
 
             let server = Server::bind(&bind).serve(make_service);
 
-            server.await?;
+            server.with_graceful_shutdown(async {
+                stop.await.expect("should not fail");
+            }).await?;
 
             Ok(())
         })

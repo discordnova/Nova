@@ -1143,6 +1143,7 @@ name = "leash"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "pretty_env_logger",
  "serde",
  "shared",
  "tokio",
@@ -2183,7 +2184,6 @@ dependencies = [
  "hyper",
  "inner",
  "log",
- "pretty_env_logger",
  "prometheus",
  "redis",
  "serde",
@@ -3006,6 +3006,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "ed25519-dalek",
+ "futures-util",
  "hex",
  "hyper",
  "lazy_static",

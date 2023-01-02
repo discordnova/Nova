@@ -3,6 +3,7 @@ use std::{
     convert::TryFrom,
     hash::{Hash, Hasher},
     str::FromStr,
+    time::Instant,
 };
 
 use anyhow::bail;
@@ -38,7 +39,7 @@ fn normalize_path(request_path: &str) -> (&str, &str) {
 pub async fn handle_request(
     client: Client<HttpsConnector<HttpConnector>, Body>,
     ratelimiter: RemoteRatelimiter,
-    token: String,
+    token: &str,
     mut request: Request<Body>,
 ) -> Result<Response<Body>, anyhow::Error> {
     let (hash, uri_string) = {
@@ -57,7 +58,7 @@ pub async fn handle_request(
         let request_path = request.uri().path();
         let (api_path, trimmed_path) = normalize_path(&request_path);
 
-        let mut uri_string = format!("http://192.168.0.27:8000{}{}", api_path, trimmed_path);
+        let mut uri_string = format!("https://discord.com{}{}", api_path, trimmed_path);
         if let Some(query) = request.uri().query() {
             uri_string.push('?');
             uri_string.push_str(query);
@@ -79,6 +80,7 @@ pub async fn handle_request(
         (hash.finish().to_string(), uri_string)
     };
 
+    let start_ticket_request = Instant::now();
     let header_sender = match ratelimiter.ticket(hash).await {
         Ok(sender) => sender,
         Err(e) => {
@@ -86,6 +88,7 @@ pub async fn handle_request(
             bail!("failed to reteive ticket");
         }
     };
+    let time_took_ticket = Instant::now() - start_ticket_request;
 
     request.headers_mut().insert(
         AUTHORIZATION,
@@ -106,9 +109,7 @@ pub async fn handle_request(
     request.headers_mut().remove(AUTHORIZATION);
     request.headers_mut().append(
         AUTHORIZATION,
-        HeaderValue::from_static(
-            "Bot ODA3MTg4MzM1NzE3Mzg0MjEy.G3sXFM.8gY2sVYDAq2WuPWwDskAAEFLfTg8htooxME-LE",
-        ),
+        HeaderValue::from_str(&format!("Bot {}", token))?,
     );
 
     let uri = match Uri::from_str(&uri_string) {
@@ -119,14 +120,26 @@ pub async fn handle_request(
         }
     };
     *request.uri_mut() = uri;
-    let resp = match client.request(request).await {
+
+    let start_upstream_req = Instant::now();
+    let mut resp = match client.request(request).await {
         Ok(response) => response,
         Err(e) => {
             error!("Error when requesting the Discord API: {:?}", e);
             bail!("failed to request the discord api");
         }
     };
+    let upstream_time_took = Instant::now() - start_upstream_req;
 
+    resp.headers_mut().append(
+        "X-TicketRequest-Ms",
+        HeaderValue::from_str(&time_took_ticket.as_millis().to_string()).unwrap(),
+    );
+    resp.headers_mut().append(
+        "X-Upstream-Ms",
+        HeaderValue::from_str(&upstream_time_took.as_millis().to_string()).unwrap(),
+    );
+    
     let ratelimit_headers = resp
         .headers()
         .into_iter()
