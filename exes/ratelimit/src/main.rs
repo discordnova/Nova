@@ -15,7 +15,7 @@ mod redis_global_local_bucket_ratelimiter;
 struct RatelimiterServerComponent {}
 impl Component for RatelimiterServerComponent {
     type Config = ();
-    const SERVICE_NAME: &'static str = "rest";
+    const SERVICE_NAME: &'static str = "ratelimiter";
 
     fn start(
         &self,
