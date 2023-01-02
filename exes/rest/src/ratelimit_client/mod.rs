@@ -30,14 +30,14 @@ impl Drop for RemoteRatelimiter {
 impl RemoteRatelimiter {
     async fn get_ratelimiters(&self) -> Result<(), anyhow::Error> {
         // get list of dns responses
-        let responses = dns_lookup::lookup_host("ratelimit")
+        /*let responses = dns_lookup::lookup_host("localhost")
             .unwrap()
             .into_iter()
-            .map(|f| f.to_string());
+            .map(|f| f.to_string());*/
 
         let mut write = self.remotes.write().await;
 
-        for ip in responses {
+        for ip in ["localhost"] {
             let a = VNode::new(ip.into()).await?;
             write.add(a.clone());
         }

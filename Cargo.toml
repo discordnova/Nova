@@ -5,6 +5,7 @@ members = [
     "exes/rest/",
     "exes/webhook/",
     "exes/ratelimit/",
+    "exes/all",
 
     "libs/proto/",
     "libs/shared/",

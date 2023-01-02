@@ -5,11 +5,11 @@ use shared::{
     log::{error, info},
 };
 use std::{future::Future, pin::Pin};
-use tokio::{signal::{unix::SignalKind}, sync::oneshot};
+use tokio::{signal::unix::SignalKind, sync::oneshot};
 
-pub type AnyhowResultFuture<T> = Pin<Box<dyn Future<Output = Result<T>>>>;
+pub type AnyhowResultFuture<T> = Pin<Box<dyn Future<Output = Result<T>> + Send>>;
 pub trait Component: Send + Sync + 'static + Sized {
-    type Config: Default + Clone + DeserializeOwned;
+    type Config: Default + Clone + DeserializeOwned + Send;
 
     const SERVICE_NAME: &'static str;
     fn start(
@@ -32,7 +32,11 @@ pub trait Component: Send + Sync + 'static + Sized {
             tokio::spawn(async move {});
 
             tokio::spawn(async move {
-                match tokio::signal::unix::signal(SignalKind::terminate()).unwrap().recv().await {
+                match tokio::signal::unix::signal(SignalKind::terminate())
+                    .unwrap()
+                    .recv()
+                    .await
+                {
                     Some(()) => {
                         info!("Stopping program.");
 
@@ -44,7 +48,6 @@ pub trait Component: Send + Sync + 'static + Sized {
                     }
                 }
             });
-
             self.start(settings?, stop_channel).await
         })
     }
@@ -55,8 +58,9 @@ macro_rules! ignite {
     ($c:ty) => {
         #[allow(dead_code)]
         fn main() -> anyhow::Result<()> {
+            use leash::Component;
             let rt = tokio::runtime::Runtime::new()?;
-            rt.block_on(Box::new(<$c as Component>::new())._internal_start())?;
+            rt.block_on(<$c as Component>::new()._internal_start())?;
             Ok(())
         }
     };
@@ -67,7 +71,7 @@ mod test {
     use serde::Deserialize;
     use tokio::sync::oneshot;
 
-    use crate::Component;
+    use crate as leash;
 
     #[derive(Clone, Copy)]
     struct TestComponent {}
@@ -75,7 +79,7 @@ mod test {
     #[derive(Default, Clone, Deserialize, Copy)]
     struct TestComponentConfig {}
 
-    impl Component for TestComponent {
+    impl leash::Component for TestComponent {
         type Config = TestComponentConfig;
         const SERVICE_NAME: &'static str = "test_component";
 

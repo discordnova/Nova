@@ -34,7 +34,7 @@ impl Hash for VNode {
 
 impl VNode {
     pub async fn new(address: String) -> Result<Self, tonic::transport::Error> {
-        let client = RatelimiterClient::connect(format!("http://{}:8080", address.clone())).await?;
+        let client = RatelimiterClient::connect(format!("http://{}:8093", address.clone())).await?;
 
         Ok(VNode { client, address })
     }

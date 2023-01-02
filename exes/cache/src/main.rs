@@ -43,7 +43,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let settings: Settings<CacheConfiguration> = Settings::new("cache").unwrap();
     info!("loaded configuration: {:?}", settings);
     let nats =
-        Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>>>>>::into(settings.nats).await?;
+        Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>>>::into(settings.nats).await?;
     // let redis: redis::Client = settings.redis.into();
 
     let mut cache = Cache::default();

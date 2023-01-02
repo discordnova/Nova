@@ -19,7 +19,7 @@ pub struct NatsConfiguration {
     pub host: String,
 }
 
-impl From<NatsConfiguration> for Pin<Box<dyn Future<Output = anyhow::Result<Client>>>> {
+impl From<NatsConfiguration> for Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>> {
     fn from(value: NatsConfiguration) -> Self {
         Box::pin(async move { Ok(async_nats::connect(value.host).await?) })
     }
