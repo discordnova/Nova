@@ -50,7 +50,7 @@ jobs:
       - name: All in one
         run: |
           cd exes/all
-          mingw32-make.exe build
+          make build
       
       - name: Move artifacts
         run: |
@@ -125,7 +125,7 @@ jobs:
       - name: All in one
         run: |
           cd exes/all
-          mingw32-make.exe build
+          make build
       
       - name: Move artifacts
         run: |
