@@ -63,21 +63,21 @@ jobs:
         uses: ATiltedTree/setup-rust@v1
         with:
           rust-version: stable
-        - uses: actions/setup-go@v3
-          with:
-            go-version: '1.16.1' # The Go version to download (if necessary) and use.
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.16.1' # The Go version to download (if necessary) and use.
       - name: Build | Compile
         run: cargo build --release
       - name: Build | All in one
-        run:
-          - cd exes/all
-          - make build
+        run: |
+          cd exes/all
+          make build
         shell: bash
       - name: Finish | Prepare artifacts
-        run:
-          - mkdir -p artifacts
-          - cp target/release/{cache,gateway,webhook,ratelimit} ./artifacts
-          - cp exes/all/build/all ./artifacts
+        run: |
+          mkdir -p artifacts
+          cp target/release/{cache,gateway,webhook,ratelimit} ./artifacts
+          cp exes/all/build/all ./artifacts
         shell: bash
       - name: Finish | Archive build results
         uses: actions/upload-artifact@v3
