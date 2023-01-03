@@ -84,7 +84,7 @@ impl WebhookService {
                             match value.kind {
                                 InteractionType::Ping => Ok(Response::builder()
                                     .header("Content-Type", "application/json")
-                                    .body(r#"{"t":1}"#.into())
+                                    .body(r#"{"type":1}"#.into())
                                     .unwrap()),
                                 _ => {
                                     debug!("calling nats");
@@ -113,7 +113,7 @@ impl WebhookService {
                                     {
                                         Ok(response) => Ok(Response::builder()
                                             .header("Content-Type", "application/json")
-                                            .body(Body::from(response.reply.unwrap()))
+                                            .body(Body::from(response.payload))
                                             .unwrap()),
 
                                         Err(error) => {
@@ -156,8 +156,7 @@ impl Service<hyper::Request<Body>> for WebhookService {
     }
 
     fn call(&mut self, req: Request<Body>) -> Self::Future {
-        let future =
-            Self::process_request(req, self.nats.clone(), self.config.discord.public_key);
+        let future = Self::process_request(req, self.nats.clone(), self.config.discord.public_key);
         Box::pin(async move {
             let response = future.await;
 
