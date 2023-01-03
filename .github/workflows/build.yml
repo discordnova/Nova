@@ -55,12 +55,12 @@ jobs:
       - name: Move artifacts
         run: |
           mkdir -p artifacts
-          cp target/release/{cache,gateway,webhook,ratelimit}* ./artifacts
+          cp target/release/{cache,gateway,webhook,ratelimit} ./artifacts
           cp exes/all/build/all ./artifacts/nova
 
       - uses: actions/upload-artifact@v3
         with:
-          name: artifacts
+          name: macos
           path: artifacts/*
 
   build_windows:
@@ -92,12 +92,12 @@ jobs:
       - name: Move artifacts
         run: |
           mkdir -p artifacts
-          cp target/release/{cache,gateway,webhook,ratelimit}* ./artifacts
-          cp exes/all/build/all ./artifacts/nova
+          cp target/release/{cache,gateway,webhook,ratelimit}.exe ./artifacts
+          cp exes/all/build/all ./artifacts/nova.exe
 
       - uses: actions/upload-artifact@v3
         with:
-          name: artifacts
+          name: windows
           path: artifacts/*
 
   build_linux:
@@ -125,15 +125,16 @@ jobs:
       - name: All in one
         run: |
           cd exes/all
+          export CGO_LDFLAGS='-lcrypto'
           make build
       
       - name: Move artifacts
         run: |
           mkdir -p artifacts
-          cp target/release/{cache,gateway,webhook,ratelimit}* ./artifacts
+          cp target/release/{cache,gateway,webhook,ratelimit} ./artifacts
           cp exes/all/build/all ./artifacts/nova
 
       - uses: actions/upload-artifact@v3
         with:
-          name: artifacts
+          name: linux_glibc
           path: artifacts/*
