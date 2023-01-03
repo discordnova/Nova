@@ -40,7 +40,9 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: '1.18.4'
-      
+      - run: |
+        brew uninstall openssl
+        brew untap local/openssl
       - name: Build
         run: |
           cargo build --release
@@ -125,7 +127,6 @@ jobs:
       - name: All in one
         run: |
           cd exes/all
-          export CGO_LDFLAGS='-lcrypto'
           make build
       
       - name: Move artifacts
