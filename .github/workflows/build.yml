@@ -24,63 +24,115 @@ jobs:
           components: clippy
       - name: Build | Lint
         run: cargo clippy
-  compile:
-    name: Compile
-    runs-on: ubuntu-latest
+  
+  build_macos:
+    name: 'Build for MacOS'
+    runs-on: macOS-latest
+
     steps:
-      - name: Setup | Checkout
-        uses: actions/checkout@v2
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v1
+      - uses: actions/checkout@v2
+      - uses: arduino/setup-protoc@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Setup | Rust
-        uses: ATiltedTree/setup-rust@v1
-        with:
-          rust-version: stable
-      - name: Build | Compile
-        run: cargo check
-  build:
-    name: build
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macOS-latest
-        rust:
-          - stable
-    runs-on: ${{ matrix.os }}
-    needs: [compile]
-    steps:
-      - name: Setup | Checkout
-        uses: actions/checkout@v2
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Setup | Rust
-        uses: ATiltedTree/setup-rust@v1
+      - uses: ATiltedTree/setup-rust@v1
         with:
           rust-version: stable
       - uses: actions/setup-go@v3
         with:
-          go-version: '1.18.4' # The Go version to download (if necessary) and use.
-      - name: Build | Compile
-        run: cargo build --release
-      - name: Build | All in one
+          go-version: '1.18.4'
+      
+      - name: Build
+        run: |
+          cargo build --release
+      - name: Test
+        run: |
+          cargo test --release*
+      - name: All in one
         run: |
           cd exes/all
-          make build
-        shell: bash
-      - name: Finish | Prepare artifacts
+          mingw32-make.exe build
+      
+      - name: Move artifacts
         run: |
           mkdir -p artifacts
-          cp target/release/{cache,gateway,webhook,ratelimit} ./artifacts
-          cp exes/all/build/all ./artifacts
-        shell: bash
-      - name: Finish | Archive build results
-        uses: actions/upload-artifact@v3
+          cp target/release/{cache,gateway,webhook,ratelimit}* ./artifacts
+          cp exes/all/build/all ./artifacts/nova
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: artifacts/*
+
+  build_windows:
+    name: 'Build for Windows'
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: msys2/setup-msys2@v2
+        with:
+          install: git mingw-w64-x86_64-go mingw-w64-x86_64-make mingw-w64-x86_64-protobuf mingw-w64-x86_64-rust mingw-w64-x86_64-gcc
+      
+      - name: Build
+        run: |
+          cargo build --release
+      - name: Test
+        run: |
+          cargo test --release*
+      - name: All in one
+        run: |
+          cd exes/all
+          mingw32-make.exe build
+      
+      - name: Move artifacts
+        run: |
+          mkdir -p artifacts
+          cp target/release/{cache,gateway,webhook,ratelimit}* ./artifacts
+          cp exes/all/build/all ./artifacts/nova
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: artifacts/*
+
+  build_linux:
+    name: 'Build for Linux'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: arduino/setup-protoc@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ATiltedTree/setup-rust@v1
+        with:
+          rust-version: stable
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18.4'
+      
+      - name: Build
+        run: |
+          cargo build --release
+      - name: Test
+        run: |
+          cargo test --release*
+      - name: All in one
+        run: |
+          cd exes/all
+          mingw32-make.exe build
+      
+      - name: Move artifacts
+        run: |
+          mkdir -p artifacts
+          cp target/release/{cache,gateway,webhook,ratelimit}* ./artifacts
+          cp exes/all/build/all ./artifacts/nova
+
+      - uses: actions/upload-artifact@v3
         with:
           name: artifacts
           path: artifacts/*
