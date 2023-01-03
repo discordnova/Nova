@@ -50,8 +50,6 @@ jobs:
           - macOS-latest
         rust:
           - stable
-          - beta
-          - nightly
     runs-on: ${{ matrix.os }}
     needs: [compile]
     steps:
@@ -64,6 +62,25 @@ jobs:
       - name: Setup | Rust
         uses: ATiltedTree/setup-rust@v1
         with:
-          rust-version: ${{ matrix.rust }}
+          rust-version: stable
+        - uses: actions/setup-go@v3
+          with:
+            go-version: '1.16.1' # The Go version to download (if necessary) and use.
       - name: Build | Compile
-        run: cargo test
+        run: cargo build --release
+      - name: Build | All in one
+        run:
+          - cd exes/all
+          - make build
+        shell: bash
+      - name: Finish | Prepare artifacts
+        run:
+          - mkdir -p artifacts
+          - cp target/release/{cache,gateway,webhook,ratelimit} ./artifacts
+          - cp exes/all/build/all ./artifacts
+        shell: bash
+      - name: Finish | Archive build results
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: artifacts/*

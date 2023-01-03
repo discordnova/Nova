@@ -2,7 +2,6 @@ use anyhow::Result;
 use serde::de::DeserializeOwned;
 use shared::{
     config::Settings,
-    log::{error, info},
 };
 use std::{future::Future, pin::Pin};
 use tokio::{signal::unix::SignalKind, sync::oneshot};
@@ -32,21 +31,15 @@ pub trait Component: Send + Sync + 'static + Sized {
             tokio::spawn(async move {});
 
             tokio::spawn(async move {
-                match tokio::signal::unix::signal(SignalKind::terminate())
+                #[cfg(unix)]
+                tokio::signal::unix::signal(SignalKind::terminate())
                     .unwrap()
                     .recv()
-                    .await
-                {
-                    Some(()) => {
-                        info!("Stopping program.");
+                    .await;
+                #[cfg(not(unix))]
+                tokio::signal::ctrl_c().await;
 
-                        stop.send(()).unwrap();
-                    }
-                    None => {
-                        error!("Unable to listen for shutdown signal");
-                        // we also shut down in case of error
-                    }
-                }
+                stop.send(()).unwrap();
             });
             self.start(settings?, stop_channel).await
         })
