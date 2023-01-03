@@ -41,8 +41,8 @@ jobs:
         with:
           go-version: '1.18.4'
       - run: |
-        brew uninstall openssl
-        brew untap local/openssl
+          brew uninstall openssl
+          brew untap local/openssl
       - name: Build
         run: |
           cargo build --release
