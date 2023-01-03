@@ -52,6 +52,7 @@ jobs:
       - name: All in one
         run: |
           cd exes/all
+          export CGO_LDFLAGS="-L/usr/local/opt/openssl@3/lib"
           make build
       
       - name: Move artifacts
