@@ -86,7 +86,7 @@ jobs:
       - name: All in one
         run: |
           cd exes/all
-          export LDFLAGS='-lntdll -lWs2_32 -lcrypt32 -lSecur32 -luserenv -lNcrypt -lbcrypt'
+          export CGO_LDFLAGS='-lntdll -lWs2_32 -lcrypt32 -lSecur32 -luserenv -lNcrypt -lbcrypt'
           mingw32-make.exe build
       
       - name: Move artifacts

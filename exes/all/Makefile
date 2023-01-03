@@ -6,7 +6,7 @@ library:
 
 build: library
 	cp ../../target/release/liball.a ./build
-	go build -a -ldflags '-s $(LDFLAGS)' -o build/all
+	go build -a -ldflags '-s' -o build/all
 
 all: library build
 
