@@ -1,10 +1,8 @@
 use anyhow::Result;
 use serde::de::DeserializeOwned;
-use shared::{
-    config::Settings,
-};
+use shared::config::Settings;
 use std::{future::Future, pin::Pin};
-use tokio::{signal::unix::SignalKind, sync::oneshot};
+use tokio::sync::oneshot;
 
 pub type AnyhowResultFuture<T> = Pin<Box<dyn Future<Output = Result<T>> + Send>>;
 pub trait Component: Send + Sync + 'static + Sized {
@@ -32,7 +30,7 @@ pub trait Component: Send + Sync + 'static + Sized {
 
             tokio::spawn(async move {
                 #[cfg(unix)]
-                tokio::signal::unix::signal(SignalKind::terminate())
+                tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
                     .unwrap()
                     .recv()
                     .await;
