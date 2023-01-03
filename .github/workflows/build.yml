@@ -46,7 +46,7 @@ jobs:
           cargo build --release
       - name: Test
         run: |
-          cargo test --release*
+          cargo test --release
       - name: All in one
         run: |
           cd exes/all
@@ -82,7 +82,7 @@ jobs:
           cargo build --release
       - name: Test
         run: |
-          cargo test --release*
+          cargo test --release
       - name: All in one
         run: |
           cd exes/all
@@ -121,7 +121,7 @@ jobs:
           cargo build --release
       - name: Test
         run: |
-          cargo test --release*
+          cargo test --release
       - name: All in one
         run: |
           cd exes/all
