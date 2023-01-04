@@ -98,7 +98,7 @@ pub unsafe extern "C" fn stop_instance(instance: *mut AllInOneInstance) {
 #[no_mangle]
 /// Initialized a new nova instance and an async runtime (tokio reactor)
 /// Dont forget to stop this instance using `stop_instance`
-pub extern "C" fn start_instance(config: *const libc::c_char) -> *mut AllInOneInstance {
+pub unsafe extern "C" fn start_instance(config: *const libc::c_char) -> *mut AllInOneInstance {
     let buf_name = unsafe { CStr::from_ptr(config).to_bytes() };
     let settings = String::from_utf8(buf_name.to_vec()).unwrap();
     let (stop, trigger_stop) = oneshot::channel();
