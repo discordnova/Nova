@@ -203,6 +203,4 @@ jobs:
           artifacts: "windows/*,macos/*,linux_glibc/*"
           draft: true
           generateReleaseNotes: true
-          prerelease: true
           skipIfReleaseExists: true
-          updateOnlyUnreleased: true
