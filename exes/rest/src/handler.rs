@@ -106,11 +106,21 @@ pub async fn handle_request(
     request.headers_mut().remove("proxy-connection");
     request.headers_mut().remove(TRANSFER_ENCODING);
     request.headers_mut().remove(UPGRADE);
-    request.headers_mut().remove(AUTHORIZATION);
-    request.headers_mut().append(
-        AUTHORIZATION,
-        HeaderValue::from_str(&format!("Bot {}", token))?,
-    );
+    
+    if let Some(auth) = request.headers_mut().get_mut(AUTHORIZATION) {
+        if auth
+            .to_str()
+            .expect("Failed to check header")
+            .starts_with("Bot")
+        {
+            *auth = HeaderValue::from_str(&format!("Bot {}", token))?;
+        }
+    } else {
+        request.headers_mut().insert(
+            AUTHORIZATION,
+            HeaderValue::from_str(&format!("Bot {}", token))?,
+        );
+    }
 
     let uri = match Uri::from_str(&uri_string) {
         Ok(uri) => uri,
@@ -139,7 +149,7 @@ pub async fn handle_request(
         "X-Upstream-Ms",
         HeaderValue::from_str(&upstream_time_took.as_millis().to_string()).unwrap(),
     );
-    
+
     let ratelimit_headers = resp
         .headers()
         .into_iter()
