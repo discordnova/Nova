@@ -1,6 +1,6 @@
 # Nova
 
-[![Build](https://github.com/discordnova/Nova/actions/workflows/rust.yml/badge.svg)](https://github.com/discordnova/Nova/actions/workflows/rust.yml)
+[![Build](https://github.com/discordnova/Nova/actions/workflows/build.yml/badge.svg)](https://github.com/discordnova/Nova/actions/workflows/build.yml)
 
 ## What is nova ?
 
