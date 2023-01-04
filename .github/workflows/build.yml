@@ -40,6 +40,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: arduino/setup-protoc@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
@@ -74,15 +83,7 @@ jobs:
         with:
           name: macos
           path: artifacts/*
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
 
   build_windows:
     name: 'Build for Windows'
@@ -94,10 +95,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
       - uses: msys2/setup-msys2@v2
         with:
           install: git mingw-w64-x86_64-go mingw-w64-x86_64-make mingw-w64-x86_64-protobuf mingw-w64-x86_64-rust mingw-w64-x86_64-gcc mingw-w64-x86_64-dlfcn
-      
+
       - name: Build
         run: |
           cargo build --release
@@ -120,6 +131,13 @@ jobs:
         with:
           name: windows
           path: artifacts/*
+
+  build_linux:
+    name: 'Build for Linux'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
       - uses: actions/cache@v3
         with:
           path: |
@@ -130,12 +148,6 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-  build_linux:
-    name: 'Build for Linux'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
       - uses: arduino/setup-protoc@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
@@ -167,12 +179,3 @@ jobs:
         with:
           name: linux_glibc
           path: artifacts/*
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
