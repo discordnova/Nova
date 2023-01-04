@@ -24,6 +24,15 @@ jobs:
           components: clippy
       - name: Build | Lint
         run: cargo clippy
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: lint
   
   build_macos:
     name: 'Build for MacOS'
@@ -65,6 +74,15 @@ jobs:
         with:
           name: macos
           path: artifacts/*
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
   build_windows:
     name: 'Build for Windows'
@@ -102,6 +120,15 @@ jobs:
         with:
           name: windows
           path: artifacts/*
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
   build_linux:
     name: 'Build for Linux'
@@ -140,3 +167,12 @@ jobs:
         with:
           name: linux_glibc
           path: artifacts/*
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
