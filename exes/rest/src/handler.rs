@@ -56,7 +56,7 @@ pub async fn handle_request(
         };
 
         let request_path = request.uri().path();
-        let (api_path, trimmed_path) = normalize_path(&request_path);
+        let (api_path, trimmed_path) = normalize_path(request_path);
 
         let mut uri_string = format!("https://discord.com{}{}", api_path, trimmed_path);
         if let Some(query) = request.uri().query() {

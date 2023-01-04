@@ -7,15 +7,8 @@ pub struct RedisConfiguration {
     pub url: String,
 }
 
-// Allows the configuration to directly create a nats connection
-impl Into<Client> for RedisConfiguration {
-    fn into(self) -> Client {
-        redis::Client::open(self.url).unwrap()
-    }
-}
-
 impl From<RedisConfiguration>
-    for Pin<Box<dyn Future<Output = anyhow::Result<MultiplexedConnection>>>>
+    for Pin<Box<dyn Future<Output = anyhow::Result<MultiplexedConnection>> + Send>>
 {
     fn from(value: RedisConfiguration) -> Self {
         Box::pin(async move {

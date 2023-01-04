@@ -14,11 +14,11 @@ impl WebhookError {
     }
 }
 
-impl Into<Response<Body>> for WebhookError {
-    fn into(self) -> Response<Body> {
+impl From<WebhookError> for Response<Body> {
+    fn from(value: WebhookError) -> Self {
         Response::builder()
-            .status(self.code)
-            .body(self.message.into())
+            .status(value.code)
+            .body(value.message.into())
             .unwrap()
     }
 }

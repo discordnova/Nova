@@ -1,5 +1,7 @@
 use self::bucket::{Bucket, BucketQueueTask};
-use shared::redis_crate::{Client, Commands};
+use shared::redis_crate::aio::MultiplexedConnection;
+use shared::redis_crate::{AsyncCommands};
+use tokio::sync::Mutex;
 use twilight_http_ratelimiting::ticket::{self, TicketNotifier};
 use twilight_http_ratelimiting::GetTicketFuture;
 mod bucket;
@@ -7,12 +9,12 @@ mod bucket;
 use futures_util::future;
 use std::{
     collections::hash_map::{Entry, HashMap},
-    sync::{Arc, Mutex},
+    sync::Arc,
     time::Duration,
 };
 
 #[derive(Debug)]
-struct RedisLockPair(tokio::sync::Mutex<Client>);
+struct RedisLockPair(Mutex<MultiplexedConnection>);
 
 impl RedisLockPair {
     /// Set the global ratelimit as exhausted.
@@ -26,27 +28,28 @@ impl RedisLockPair {
                 1,
                 (duration.as_secs() + 1).try_into().unwrap(),
             )
+            .await
             .unwrap();
     }
 
     pub async fn is_locked(&self) -> bool {
-        self.0.lock().await.exists("nova:rls:lock").unwrap()
+        self.0.lock().await.exists("nova:rls:lock").await.unwrap()
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct RedisGlobalLocalBucketRatelimiter {
-    buckets: Arc<Mutex<HashMap<String, Arc<Bucket>>>>,
+    buckets: Arc<std::sync::Mutex<HashMap<String, Arc<Bucket>>>>,
 
     global: Arc<RedisLockPair>,
 }
 
 impl RedisGlobalLocalBucketRatelimiter {
     #[must_use]
-    pub fn new(redis: tokio::sync::Mutex<Client>) -> Self {
+    pub fn new(redis: MultiplexedConnection) -> Self {
         Self {
             buckets: Arc::default(),
-            global: Arc::new(RedisLockPair(redis)),
+            global: Arc::new(RedisLockPair(Mutex::new(redis))),
         }
     }
 

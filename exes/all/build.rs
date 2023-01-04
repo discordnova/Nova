@@ -19,7 +19,7 @@ fn main() {
         ..Default::default()
     };
 
-    cbindgen::generate_with_config(&crate_dir, config)
+    cbindgen::generate_with_config(crate_dir, config)
       .unwrap()
-      .write_to_file(&output_file);
+      .write_to_file(output_file);
 }

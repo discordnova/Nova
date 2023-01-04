@@ -23,7 +23,7 @@ fn demo<T, const N: usize>(v: Vec<T>) -> [T; N] {
         .unwrap_or_else(|v: Vec<T>| panic!("Expected a Vec of length {} but it was {}", N, v.len()))
 }
 
-pub fn validate_signature(public_key: &PublicKey, data: &Vec<u8>, hex_signature: &str) -> bool {
+pub fn validate_signature(public_key: &PublicKey, data: &[u8], hex_signature: &str) -> bool {
     SIGNATURE_COUNTER.inc();
     let timer = SIGNATURE_TIME_HISTOGRAM.with_label_values(&["webhook_main"]).start_timer();
 

@@ -25,7 +25,7 @@ where
     D: Deserializer<'de>,
 {
     let str = String::deserialize(deserializer)?;
-    let public_key = PublicKey::from_bytes(&hex::decode(&str).unwrap()).unwrap();
+    let public_key = PublicKey::from_bytes(&hex::decode(str).unwrap()).unwrap();
     Ok(public_key)
 }
 

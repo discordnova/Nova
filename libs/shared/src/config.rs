@@ -13,7 +13,7 @@ pub struct Settings<T: Clone + DeserializeOwned + Default> {
     pub redis: crate::redis::RedisConfiguration,
 }
 
-impl<'de, T: Clone + DeserializeOwned + Default> Settings<T>
+impl<T: Clone + DeserializeOwned + Default> Settings<T>
 {
     pub fn new(service_name: &str) -> Result<Settings<T>, GenericError> {
         let mut builder = Config::builder();

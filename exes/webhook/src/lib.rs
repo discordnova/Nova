@@ -4,7 +4,7 @@ use std::{future::Future, pin::Pin};
 
 use crate::{
     config::WebhookConfig,
-    handler::{handler::WebhookService, make_service::MakeSvc},
+    handler::{make_service::MakeSvc, WebhookService},
 };
 use hyper::Server;
 use leash::{AnyhowResultFuture, Component};
@@ -28,10 +28,10 @@ impl Component for WebhookServer {
 
             let bind = settings.server.listening_adress;
             info!("NAts connected!");
-            let nats =
-                Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>>>::into(settings.nats)
-
-                    .await?;
+            let nats = Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>>>::into(
+                settings.nats,
+            )
+            .await?;
 
             let make_service = MakeSvc::new(WebhookService {
                 config: settings.config,
@@ -40,9 +40,11 @@ impl Component for WebhookServer {
 
             let server = Server::bind(&bind).serve(make_service);
 
-            server.with_graceful_shutdown(async {
-                stop.await.expect("should not fail");
-            }).await?;
+            server
+                .with_graceful_shutdown(async {
+                    stop.await.expect("should not fail");
+                })
+                .await?;
 
             Ok(())
         })

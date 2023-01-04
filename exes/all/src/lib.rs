@@ -1,3 +1,5 @@
+#![allow(clippy::missing_safety_doc)]
+
 extern crate libc;
 use anyhow::Result;
 use config::{Config, Environment, File};

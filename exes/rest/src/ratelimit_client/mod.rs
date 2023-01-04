@@ -27,13 +27,21 @@ impl Drop for RemoteRatelimiter {
     }
 }
 
+type IssueTicket = Pin<
+    Box<
+        dyn Future<Output = anyhow::Result<oneshot::Sender<HashMap<String, String>>>>
+            + Send
+            + 'static,
+    >,
+>;
+
 impl RemoteRatelimiter {
     async fn get_ratelimiters(&self) -> Result<(), anyhow::Error> {
         // get list of dns responses
         /*let responses = dns_lookup::lookup_host("localhost")
-            .unwrap()
-            .into_iter()
-            .map(|f| f.to_string());*/
+        .unwrap()
+        .into_iter()
+        .map(|f| f.to_string());*/
 
         let mut write = self.remotes.write().await;
 
@@ -42,7 +50,7 @@ impl RemoteRatelimiter {
             write.add(a.clone());
         }
 
-        return Ok(());
+        Ok(())
     }
 
     #[must_use]
@@ -74,16 +82,7 @@ impl RemoteRatelimiter {
         obj
     }
 
-    pub fn ticket(
-        &self,
-        path: String,
-    ) -> Pin<
-        Box<
-            dyn Future<Output = anyhow::Result<oneshot::Sender<HashMap<String, String>>>>
-                + Send
-                + 'static,
-        >,
-    > {
+    pub fn ticket(&self, path: String) -> IssueTicket {
         let remotes = self.remotes.clone();
         let (tx, rx) = oneshot::channel::<HashMap<String, String>>();
 

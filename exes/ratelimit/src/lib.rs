@@ -1,11 +1,11 @@
-use std::net::ToSocketAddrs;
-
 use futures_util::FutureExt;
 use grpc::RLServer;
 use leash::{AnyhowResultFuture, Component};
 use proto::nova::ratelimit::ratelimiter::ratelimiter_server::RatelimiterServer;
 use redis_global_local_bucket_ratelimiter::RedisGlobalLocalBucketRatelimiter;
-use shared::{config::Settings, redis_crate::Client};
+use shared::{config::Settings, redis_crate::aio::MultiplexedConnection};
+use std::future::Future;
+use std::{net::ToSocketAddrs, pin::Pin};
 use tokio::sync::oneshot;
 use tonic::transport::Server;
 
@@ -23,9 +23,12 @@ impl Component for RatelimiterServerComponent {
         stop: oneshot::Receiver<()>,
     ) -> AnyhowResultFuture<()> {
         Box::pin(async move {
-            // let config = Arc::new(settings.config);
-            let redis: Client = settings.redis.into();
-            let server = RLServer::new(RedisGlobalLocalBucketRatelimiter::new(redis.into()));
+            let redis = Into::<
+                Pin<Box<dyn Future<Output = anyhow::Result<MultiplexedConnection>> + Send>>,
+            >::into(settings.redis)
+            .await?;
+
+            let server = RLServer::new(RedisGlobalLocalBucketRatelimiter::new(redis));
 
             Server::builder()
                 .add_service(RatelimiterServer::new(server))
