@@ -89,12 +89,7 @@ pub async fn handle_request(
         }
     };
     let time_took_ticket = Instant::now() - start_ticket_request;
-
-    request.headers_mut().insert(
-        AUTHORIZATION,
-        HeaderValue::from_bytes(token.as_bytes())
-            .expect("strings are guaranteed to be valid utf-8"),
-    );
+    
     request
         .headers_mut()
         .insert(HOST, HeaderValue::from_static("discord.com"));
