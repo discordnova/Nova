@@ -12,7 +12,7 @@ use http::{
     HeaderValue, Method as HttpMethod, Request, Response, Uri,
 };
 use hyper::{client::HttpConnector, Body, Client};
-use hyper_tls::HttpsConnector;
+use hyper_rustls::HttpsConnector;
 use shared::log::error;
 use twilight_http_ratelimiting::{Method, Path};
 

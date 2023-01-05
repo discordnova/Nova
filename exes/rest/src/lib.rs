@@ -6,7 +6,6 @@ use hyper::{
     service::{make_service_fn, service_fn},
     Body, Client, Request, Server,
 };
-use hyper_tls::HttpsConnector;
 use leash::{AnyhowResultFuture, Component};
 use shared::config::Settings;
 use std::{convert::Infallible, sync::Arc};
@@ -29,8 +28,13 @@ impl Component for ReverseProxyServer {
         Box::pin(async move {
             // Client to the remote ratelimiters
             let ratelimiter = ratelimit_client::RemoteRatelimiter::new();
-            let client = Client::builder().build(HttpsConnector::new());
+            let https = hyper_rustls::HttpsConnectorBuilder::new()
+                .with_native_roots()
+                .https_only()
+                .enable_http1()
+                .build();
 
+            let client: Client<_, hyper::Body> = Client::builder().build(https);
             let token = Arc::new(settings.discord.token.clone());
             let service_fn = make_service_fn(move |_: &AddrStream| {
                 let client = client.clone();

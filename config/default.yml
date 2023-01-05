@@ -1,0 +1,51 @@
+gateway:
+  token: ODA3MTg4MzM1NzE3Mzg0MjEy.Gtk5vu.Ejt9d70tnB9W_tXYMUATsBU24nqwQjlUZy7QUo
+  intents: 3276799
+  shard: 0
+  shard_total: 1
+
+rest:
+  discord:
+    token: ODA3MTg4MzM1NzE3Mzg0MjEy.Gtk5vu.Ejt9d70tnB9W_tXYMUATsBU24nqwQjlUZy7QUo
+  server:
+    listening_adress: 0.0.0.0:8090
+
+webhook:
+  discord:
+    public_key: a3d9368eda990e11ca501655d219a2d88591de93d32037f62f453a8587a46ff5
+    client_id: 807188335717384212
+  server:
+    listening_adress: 0.0.0.0:8091
+
+cache:
+  toggles:
+    - channels_cache
+    - guilds_cache
+    - guild_schedules_cache
+    - stage_instances_cache
+    - integrations_cache
+    - members_cache
+    - bans_cache
+    - reactions_cache
+    - messages_cache
+    - threads_cache
+    - invites_cache
+    - roles_cache
+    - automoderation_cache
+    - voice_states_cache
+
+ratelimiter:
+  
+
+# Prometheus monitoring configuration
+monitoring:
+  enabled: false
+  address: 0.0.0.0
+  port: 9000
+
+# Nats broker configuration
+nats:
+  host: nats
+
+redis:
+  url: redis://redis
