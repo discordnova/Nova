@@ -6,11 +6,12 @@ use crate::{
     config::WebhookConfig,
     handler::{make_service::MakeSvc, WebhookService},
 };
+use async_nats::Client;
 use hyper::Server;
 use leash::{AnyhowResultFuture, Component};
-use shared::{config::Settings, log::info, nats_crate::Client};
+use shared::config::Settings;
 use tokio::sync::oneshot;
-
+use tracing::info;
 #[derive(Clone, Copy)]
 pub struct WebhookServer {}
 
@@ -27,7 +28,7 @@ impl Component for WebhookServer {
             info!("Starting server on {}", settings.server.listening_adress);
 
             let bind = settings.server.listening_adress;
-            info!("NAts connected!");
+            info!("Nats connected!");
             let nats = Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>>>::into(
                 settings.nats,
             )

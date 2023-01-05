@@ -4,3 +4,5 @@ target/
 .ijwb
 .idea
 config.yml
+
+config/

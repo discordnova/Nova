@@ -1,11 +1,3 @@
-use std::{
-    collections::hash_map::DefaultHasher,
-    convert::TryFrom,
-    hash::{Hash, Hasher},
-    str::FromStr,
-    time::Instant,
-};
-
 use anyhow::bail;
 use http::{
     header::{AUTHORIZATION, CONNECTION, HOST, TRANSFER_ENCODING, UPGRADE},
@@ -13,7 +5,13 @@ use http::{
 };
 use hyper::{client::HttpConnector, Body, Client};
 use hyper_tls::HttpsConnector;
-use shared::log::error;
+use std::{
+    collections::hash_map::DefaultHasher,
+    convert::TryFrom,
+    hash::{Hash, Hasher},
+    str::FromStr,
+};
+use tracing::{debug_span, error, instrument, Instrument};
 use twilight_http_ratelimiting::{Method, Path};
 
 use crate::ratelimit_client::RemoteRatelimiter;
@@ -36,6 +34,7 @@ fn normalize_path(request_path: &str) -> (&str, &str) {
     }
 }
 
+#[instrument]
 pub async fn handle_request(
     client: Client<HttpsConnector<HttpConnector>, Body>,
     ratelimiter: RemoteRatelimiter,
@@ -72,7 +71,7 @@ pub async fn handle_request(
                     "Failed to parse path for {:?} {}: {:?}",
                     method, trimmed_path, e
                 );
-                bail!("failed o parse");
+                bail!("failed to parse");
             }
         }
         .hash(&mut hash);
@@ -80,21 +79,18 @@ pub async fn handle_request(
         (hash.finish().to_string(), uri_string)
     };
 
-    let start_ticket_request = Instant::now();
-    let header_sender = match ratelimiter.ticket(hash).await {
+    let span = debug_span!("ticket validation request");
+    let header_sender = match span
+        .in_scope(|| ratelimiter.ticket(hash))
+        .await
+    {
         Ok(sender) => sender,
         Err(e) => {
             error!("Failed to receive ticket for ratelimiting: {:?}", e);
             bail!("failed to reteive ticket");
         }
     };
-    let time_took_ticket = Instant::now() - start_ticket_request;
-
-    request.headers_mut().insert(
-        AUTHORIZATION,
-        HeaderValue::from_bytes(token.as_bytes())
-            .expect("strings are guaranteed to be valid utf-8"),
-    );
+    
     request
         .headers_mut()
         .insert(HOST, HeaderValue::from_static("discord.com"));
@@ -106,7 +102,7 @@ pub async fn handle_request(
     request.headers_mut().remove("proxy-connection");
     request.headers_mut().remove(TRANSFER_ENCODING);
     request.headers_mut().remove(UPGRADE);
-    
+
     if let Some(auth) = request.headers_mut().get_mut(AUTHORIZATION) {
         if auth
             .to_str()
@@ -130,25 +126,14 @@ pub async fn handle_request(
         }
     };
     *request.uri_mut() = uri;
-
-    let start_upstream_req = Instant::now();
-    let mut resp = match client.request(request).await {
+    let span = debug_span!("upstream request to discord");
+    let resp = match client.request(request).instrument(span).await {
         Ok(response) => response,
         Err(e) => {
             error!("Error when requesting the Discord API: {:?}", e);
             bail!("failed to request the discord api");
         }
     };
-    let upstream_time_took = Instant::now() - start_upstream_req;
-
-    resp.headers_mut().append(
-        "X-TicketRequest-Ms",
-        HeaderValue::from_str(&time_took_ticket.as_millis().to_string()).unwrap(),
-    );
-    resp.headers_mut().append(
-        "X-Upstream-Ms",
-        HeaderValue::from_str(&upstream_time_took.as_millis().to_string()).unwrap(),
-    );
 
     let ratelimit_headers = resp
         .headers()

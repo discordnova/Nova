@@ -1,8 +1,6 @@
-use std::{error::Error, pin::Pin};
+use std::{error::Error, future::Future, pin::Pin};
 
 use async_nats::{Client, Subscriber};
-use futures_util::{stream::StreamExt, Future};
-use log::info;
 use managers::{
     automoderation::Automoderation, bans::Bans, channels::Channels,
     guild_schedules::GuildSchedules, guilds::Guilds, integrations::Integrations, invites::Invites,
@@ -10,6 +8,8 @@ use managers::{
     stage_instances::StageInstances, threads::Threads, CacheManager,
 };
 use shared::{config::Settings, payloads::CachePayload};
+use tokio_stream::StreamExt;
+use tracing::info;
 use twilight_model::gateway::event::DispatchEvent;
 
 use crate::config::CacheConfiguration;
@@ -43,8 +43,8 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let settings: Settings<CacheConfiguration> = Settings::new("cache").unwrap();
     info!("loaded configuration: {:?}", settings);
     let nats =
-        Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>>>::into(settings.nats).await?;
-    // let redis: redis::Client = settings.redis.into();
+        Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>>>::into(settings.nats)
+            .await?;
 
     let mut cache = Cache::default();
 

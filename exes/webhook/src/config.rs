@@ -9,7 +9,6 @@ fn default_listening_address() -> SocketAddr {
 
 #[derive(Debug, Deserialize, Clone, Copy)]
 pub struct ServerSettings {
-    #[serde(default = "default_listening_address")]
     pub listening_adress: SocketAddr,
 }
 impl Default for ServerSettings {

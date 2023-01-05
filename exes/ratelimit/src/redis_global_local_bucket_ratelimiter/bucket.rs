@@ -4,7 +4,6 @@
 //! and respects the global ratelimit.
 
 use super::RedisLockPair;
-use twilight_http_ratelimiting::{headers::RatelimitHeaders, ticket::TicketNotifier};
 use std::{
     collections::HashMap,
     mem,
@@ -21,6 +20,7 @@ use tokio::{
     },
     time::{sleep, timeout},
 };
+use twilight_http_ratelimiting::{headers::RatelimitHeaders, ticket::TicketNotifier};
 
 /// Time remaining until a bucket will reset.
 #[derive(Clone, Debug)]
@@ -265,8 +265,8 @@ impl BucketQueueTask {
             RatelimitHeaders::None => return,
             RatelimitHeaders::Present(present) => {
                 Some((present.limit(), present.remaining(), present.reset_after()))
-            },
-            _=> unreachable!()
+            }
+            _ => unreachable!(),
         };
 
         tracing::debug!(path=?self.path, "updating bucket");

@@ -1,4 +1,5 @@
 use crate::config::WebhookConfig;
+use async_nats::Client;
 use ed25519_dalek::PublicKey;
 use error::WebhookError;
 use hyper::{
@@ -6,11 +7,7 @@ use hyper::{
     service::Service,
     Body, Method, Request, Response, StatusCode,
 };
-use shared::nats_crate::Client;
-use shared::{
-    log::{debug, error},
-    payloads::{CachePayload, DispatchEventTagged, Tracing},
-};
+use shared::payloads::{CachePayload, DispatchEventTagged};
 use signature::validate_signature;
 use std::{
     future::Future,
@@ -18,6 +15,7 @@ use std::{
     str::from_utf8,
     task::{Context, Poll},
 };
+use tracing::{debug, error};
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::{
     application::interaction::{Interaction, InteractionType},
@@ -98,10 +96,6 @@ impl WebhookService {
                                     // this should hopefully not fail ?
 
                                     let data = CachePayload {
-                                        tracing: Tracing {
-                                            node_id: "".to_string(),
-                                            span: None,
-                                        },
                                         data: DispatchEventTagged {
                                             data: DispatchEvent::InteractionCreate(Box::new(
                                                 InteractionCreate(value),

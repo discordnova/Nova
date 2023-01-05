@@ -1,9 +1,9 @@
-use futures_util::FutureExt;
 use grpc::RLServer;
 use leash::{AnyhowResultFuture, Component};
 use proto::nova::ratelimit::ratelimiter::ratelimiter_server::RatelimiterServer;
+use redis::aio::MultiplexedConnection;
 use redis_global_local_bucket_ratelimiter::RedisGlobalLocalBucketRatelimiter;
-use shared::{config::Settings, redis_crate::aio::MultiplexedConnection};
+use shared::config::Settings;
 use std::future::Future;
 use std::{net::ToSocketAddrs, pin::Pin};
 use tokio::sync::oneshot;
@@ -34,7 +34,9 @@ impl Component for RatelimiterServerComponent {
                 .add_service(RatelimiterServer::new(server))
                 .serve_with_shutdown(
                     "0.0.0.0:8093".to_socket_addrs().unwrap().next().unwrap(),
-                    stop.map(|_| ()),
+                    async move {
+                        let _ = stop.await;
+                    },
                 )
                 .await?;
 

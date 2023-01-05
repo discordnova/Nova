@@ -8,12 +8,15 @@ edition = "2018"
 [dependencies]
 shared = { path = "../../libs/shared" }
 proto = { path = "../../libs/proto" }
-async-nats = "0.25.1"
-tokio = { version = "1", features = ["full"] }
+
+tokio = { version = "1", features = ["rt"] }
+tokio-stream = "0.1.11"
+
 serde = { version = "1.0.8", features = ["derive"] }
-log = { version = "0.4", features = ["std"] }
 serde_json = { version = "1.0" }
-redis = "*"
-futures-util = "*"
+
+async-nats = "0.25.1"
 twilight-model = "0.14"
 anyhow = "1.0.68"
+
+tracing = "0.1.37"
