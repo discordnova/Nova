@@ -66,6 +66,7 @@ jobs:
       - name: All in one
         run: |
           cd exes/all
+          export CGO_LDFLAGS="-framework Security -framework CoreFoundation"
           make build
       
       - name: Move artifacts
