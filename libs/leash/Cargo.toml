@@ -8,6 +8,6 @@ edition = "2021"
 [dependencies]
 shared = { path = "../shared" }
 anyhow = "1.0.68"
-tokio = { version = "1.23.0", features = ["full"] }
+tokio = { version = "1.23.1", features = ["full"] }
 pretty_env_logger = "0.4"
 serde = "1.0.152"
