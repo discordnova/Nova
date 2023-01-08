@@ -5,7 +5,6 @@ use crate::CacheSourcedEvents;
 use super::CacheManager;
 use std::future::Future;
 
-
 #[derive(Default)]
 pub struct GuildSchedules {}
 impl CacheManager for GuildSchedules {

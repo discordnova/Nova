@@ -5,7 +5,6 @@ use crate::CacheSourcedEvents;
 use super::CacheManager;
 use std::future::Future;
 
-
 #[derive(Default)]
 pub struct Messages {}
 impl CacheManager for Messages {
@@ -15,10 +14,10 @@ impl CacheManager for Messages {
     ) -> std::pin::Pin<Box<dyn Future<Output = crate::CacheSourcedEvents>>> {
         Box::pin(async move {
             match event {
-                DispatchEvent::MessageCreate(_) => {},
-                DispatchEvent::MessageDelete(_) => {},
-                DispatchEvent::MessageDeleteBulk(_) => {},
-                DispatchEvent::MessageUpdate(_) => {},
+                DispatchEvent::MessageCreate(_) => {}
+                DispatchEvent::MessageDelete(_) => {}
+                DispatchEvent::MessageDeleteBulk(_) => {}
+                DispatchEvent::MessageUpdate(_) => {}
                 _ => unreachable!(),
             };
 

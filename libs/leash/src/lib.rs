@@ -1,8 +1,17 @@
 use anyhow::Result;
+use opentelemetry::sdk::propagation::TraceContextPropagator;
+use opentelemetry::sdk::trace::{self};
+use opentelemetry::sdk::Resource;
+use opentelemetry::{global, KeyValue};
+use opentelemetry_otlp::WithExportConfig;
 use serde::de::DeserializeOwned;
 use shared::config::Settings;
+use std::str::FromStr;
 use std::{future::Future, pin::Pin};
 use tokio::sync::oneshot;
+use tracing::{info, log::trace};
+use tracing_subscriber::filter::Directive;
+use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 pub type AnyhowResultFuture<T> = Pin<Box<dyn Future<Output = Result<T>> + Send>>;
 pub trait Component: Send + Sync + 'static + Sized {
@@ -18,27 +27,48 @@ pub trait Component: Send + Sync + 'static + Sized {
 
     fn _internal_start(self) -> AnyhowResultFuture<()> {
         Box::pin(async move {
-            pretty_env_logger::init();
+            global::set_text_map_propagator(TraceContextPropagator::new());
+            let tracer = opentelemetry_otlp::new_pipeline()
+                .tracing()
+                .with_trace_config(trace::config().with_resource(Resource::new(vec![
+                    KeyValue::new("service.name", Self::SERVICE_NAME),
+                ])))
+                .with_exporter(opentelemetry_otlp::new_exporter().tonic().with_env())
+                .install_batch(opentelemetry::runtime::Tokio)?;
+
+            let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
+
+            tracing_subscriber::registry()
+                .with(fmt::layer())
+                .with(telemetry)
+                .with(
+                    EnvFilter::builder()
+                        .with_default_directive(Directive::from_str("info").unwrap())
+                        .from_env()?,
+                )
+                .init();
+
+            info!("Starting nova");
             let settings = Settings::<Self::Config>::new(Self::SERVICE_NAME);
             let (stop, stop_channel) = oneshot::channel();
 
-            // Start the grpc healthcheck
-            tokio::spawn(async move {});
-
-            // Start the prometheus monitoring job
-            tokio::spawn(async move {});
-
             tokio::spawn(async move {
+                trace!("started signal watching");
                 #[cfg(unix)]
                 tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
                     .unwrap()
                     .recv()
                     .await;
                 #[cfg(not(unix))]
-                tokio::signal::ctrl_c().await;
+                return tokio::signal::ctrl_c().await.unwrap();
 
                 stop.send(()).unwrap();
             });
+
+            trace!(
+                "Starting component {component}",
+                component = Self::SERVICE_NAME
+            );
             self.start(settings?, stop_channel).await
         })
     }

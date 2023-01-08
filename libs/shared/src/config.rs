@@ -1,23 +1,21 @@
-use std::{env, ops::Deref};
 use config::{Config, Environment, File};
-use log::info;
-use serde::{Deserialize, de::DeserializeOwned};
+use serde::{de::DeserializeOwned, Deserialize};
+use std::{env, ops::Deref};
+use tracing::info;
 
 use crate::error::GenericError;
 #[derive(Debug, Deserialize, Clone)]
 pub struct Settings<T: Clone + DeserializeOwned + Default> {
     #[serde(skip_deserializing)]
     pub config: T,
-    pub monitoring: crate::monitoring::MonitoringConfiguration,
     pub nats: crate::nats::NatsConfiguration,
     pub redis: crate::redis::RedisConfiguration,
 }
 
-impl<T: Clone + DeserializeOwned + Default> Settings<T>
-{
+impl<T: Clone + DeserializeOwned + Default> Settings<T> {
     pub fn new(service_name: &str) -> Result<Settings<T>, GenericError> {
         let mut builder = Config::builder();
-        
+
         builder = builder.add_source(File::with_name("config/default"));
         let mode = env::var("ENV").unwrap_or_else(|_| "development".into());
         info!("Configuration Environment: {}", mode);
@@ -28,7 +26,7 @@ impl<T: Clone + DeserializeOwned + Default> Settings<T>
         let env = Environment::with_prefix("NOVA").separator("__");
         // we can configure each component using environment variables
         builder = builder.add_source(env);
-        
+
         let config = builder.build()?;
         let mut settings: Settings<T> = config.clone().try_deserialize()?;
 
@@ -39,7 +37,7 @@ impl<T: Clone + DeserializeOwned + Default> Settings<T>
     }
 }
 
-impl<T: Clone + DeserializeOwned + Default>  Deref for Settings<T> {
+impl<T: Clone + DeserializeOwned + Default> Deref for Settings<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {

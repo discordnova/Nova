@@ -6,6 +6,7 @@ services:
     ports:
       - 4222:4222
       - 8222:8222
+  
   redis:
     image: redis
 
@@ -17,12 +18,14 @@ services:
       args:
         - COMPONENT=cache
     volumes:
-      - ./config.yml:/config/default.yml
+      - ./config/default.yml:/config/default.yml
     environment:
-      - RUST_LOG=info
+      - RUST_LOG=debug
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
     depends_on:
       - nats
       - redis
+      - otelcol
   
   gateway:
     image: ghcr.io/discordnova/nova/gateway
@@ -32,13 +35,13 @@ services:
       args:
         - COMPONENT=gateway
     volumes:
-      - ./config.yml:/config/default.yml
+      - ./config/default.yml:/config/default.yml
     environment:
-      - RUST_LOG=info
+      - RUST_LOG=debug
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
     depends_on:
       - nats
-    ports:
-      - 9000:9000
+      - otelcol
 
   rest:
     image: ghcr.io/discordnova/nova/rest
@@ -48,14 +51,16 @@ services:
       args:
         - COMPONENT=rest
     volumes:
-      - ./config.yml:/config/default.yml
+      - ./config/default.yml:/config/default.yml
     environment:
-      - RUST_LOG=info
+      - RUST_LOG=debug
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
     depends_on:
       - ratelimit
+      - otelcol
     ports:
       - 9001:9000
-      - 8080:8080
+      - 8090:8090
 
   webhook:
     image: ghcr.io/discordnova/nova/webhook
@@ -63,16 +68,19 @@ services:
     build: 
       context: .
       args:
+        - RUST_LOG=debug
         - COMPONENT=webhook
     volumes:
-      - ./config.yml:/config/default.yml
+      - ./config/default.yml:/config/default.yml
     environment:
-      - RUST_LOG=info
+      - RUST_LOG=debug
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
     depends_on:
       - nats
+      - otelcol
     ports:
       - 9002:9000
-      - 8081:8080
+      - 8091:8091
   ratelimit:
     image: ghcr.io/discordnova/nova/ratelimit
     restart: always
@@ -81,12 +89,84 @@ services:
       args:
         - COMPONENT=ratelimit
     volumes:
-      - ./config.yml:/config/default.yml
+      - ./config/default.yml:/config/default.yml
     environment:
-      - RUST_LOG=info
+      - RUST_LOG=debug
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
     depends_on:
       - nats
       - redis
+      - otelcol
+
+  # ********************
+  # Telemetry Components
+  # ********************
+  # Jaeger
+  jaeger:
+    image: jaegertracing/all-in-one
+    container_name: jaeger
+    command:
+      - "--memory.max-debugs"
+      - "10000"
+      - "--query.base-path"
+      - "/jaeger/ui"
+      - "--prometheus.server-url"
+      - "http://${PROMETHEUS_ADDR}"
+    deploy:
+      resources:
+        limits:
+          memory: 275M
+    restart: always
     ports:
-      - 9003:9000
-      - 8082:8080
+      - "${JAEGER_SERVICE_PORT}:${JAEGER_SERVICE_PORT}"                    # Jaeger UI
+      - "4317"                           # OTLP gRPC default port
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - METRICS_STORAGE_TYPE=prometheus
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:9.1.0
+    container_name: grafana
+    volumes:
+      - ./otel/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./otel/grafana/provisioning/:/etc/grafana/provisioning/
+    ports:
+      - "${GRAFANA_SERVICE_PORT}:${GRAFANA_SERVICE_PORT}"
+
+  # OpenTelemetry Collector
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:0.61.0
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    restart: always
+    command: [ "--config=/etc/otelcol-config.yml", "--config=/etc/otelcol-config-extras.yml" ]
+    volumes:
+      - ./otel/otelcollector/otelcol-config.yml:/etc/otelcol-config.yml
+      - ./otel/otelcollector/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml
+    ports:
+      - "4317:4317"          # OTLP over gRPC receiver
+      - "4318:4318"     # OTLP over HTTP receiver
+      - "9464"          # Prometheus exporter
+      - "8888"          # metrics endpoint
+    depends_on:
+      - jaeger
+
+  # Prometheus
+  prometheus:
+    image: quay.io/prometheus/prometheus:v2.34.0
+    container_name: prometheus
+    command:
+      - --web.console.templates=/etc/prometheus/consoles
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --storage.tsdb.retention.time=1h
+      - --config.file=/etc/prometheus/prometheus-config.yaml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+      - --web.route-prefix=/
+    volumes:
+      - ./otel/prometheus/prometheus-config.yaml:/etc/prometheus/prometheus-config.yaml
+    ports:
+      - "${PROMETHEUS_SERVICE_PORT}:${PROMETHEUS_SERVICE_PORT}"

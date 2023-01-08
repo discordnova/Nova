@@ -14,12 +14,12 @@ impl CacheManager for Threads {
     ) -> std::pin::Pin<Box<dyn Future<Output = crate::CacheSourcedEvents>>> {
         Box::pin(async move {
             match event {
-                DispatchEvent::ThreadCreate(_) => {},
-                DispatchEvent::ThreadDelete(_) => {},
-                DispatchEvent::ThreadListSync(_) => {},
-                DispatchEvent::ThreadMemberUpdate(_) => {},
-                DispatchEvent::ThreadMembersUpdate(_) => {},
-                DispatchEvent::ThreadUpdate(_) => {},
+                DispatchEvent::ThreadCreate(_) => {}
+                DispatchEvent::ThreadDelete(_) => {}
+                DispatchEvent::ThreadListSync(_) => {}
+                DispatchEvent::ThreadMemberUpdate(_) => {}
+                DispatchEvent::ThreadMembersUpdate(_) => {}
+                DispatchEvent::ThreadUpdate(_) => {}
                 _ => unreachable!(),
             };
 

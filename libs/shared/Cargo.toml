@@ -4,22 +4,21 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-log = { version = "0.4", features = ["std"] }
 serde = { version = "1.0.8", features = ["derive"] }
-serde_repr = "0.1"
-config = "0.13"
-hyper = { version = "0.14", features = ["full"] }
-tokio = { version = "1", features = ["full"] }
-enumflags2 = { version = "0.7.1", features = ["serde"] }
-prometheus = { version = "0.13", features = ["process"] }
-async-nats = "0.25.1"
-testcontainers = "0.14"
-twilight-model = "0.14"
 serde_json = { version = "1.0" }
+serde_repr = "0.1"
+
+config = { version = "0.13", default-features = false, features = ["json", "yaml-rust", "ini"] }
+
+async-nats = "0.25.1"
+redis = { version = "0.22.1", features = ["cluster", "connection-manager", "tokio-comp"] }
+
+tokio = { version = "1", features = ["signal", "rt"] }
+
+twilight-model = "0.14"
 thiserror = "1.0.38"
-inner = "0.1.1"
 anyhow = "1.0.68"
 
-[dependencies.redis]
-version = "*"
-features = ["cluster", "connection-manager", "tokio-comp"]
+serde_test = "1.0.152"
+
+tracing = "0.1.37"

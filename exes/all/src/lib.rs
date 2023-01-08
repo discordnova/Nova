@@ -5,20 +5,32 @@ use anyhow::Result;
 use config::{Config, Environment, File};
 use gateway::GatewayServer;
 use leash::Component;
+use opentelemetry::{
+    global,
+    sdk::{propagation::TraceContextPropagator, trace, Resource},
+    KeyValue,
+};
+use opentelemetry_otlp::WithExportConfig;
 use ratelimit::RatelimiterServerComponent;
 use rest::ReverseProxyServer;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
-use shared::{config::Settings, log::info};
+use shared::config::Settings;
 use std::{
     env,
     ffi::{CStr, CString},
+    str::FromStr,
     time::Duration,
 };
 use tokio::{
     runtime::Runtime,
     sync::oneshot::{self, Sender},
     task::JoinHandle,
+};
+use tracing::info;
+use tracing_subscriber::{
+    filter::Directive, fmt, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt,
+    EnvFilter,
 };
 use webhook::WebhookServer;
 
@@ -83,9 +95,7 @@ pub extern "C" fn load_config() -> *const libc::c_char {
 #[no_mangle]
 /// Initialise les logs des composants de nova
 /// Utilise la crate `pretty_log_env`
-pub extern "C" fn init_logs() {
-    pretty_env_logger::init();
-}
+pub extern "C" fn init_logs() {}
 
 #[no_mangle]
 /// Stops a nova instance
@@ -108,6 +118,29 @@ pub unsafe extern "C" fn start_instance(config: *const libc::c_char) -> *mut All
     // Initialize a tokio runtime
     let rt = Runtime::new().unwrap();
     rt.block_on(async move {
+        global::set_text_map_propagator(TraceContextPropagator::new());
+        let tracer =
+            opentelemetry_otlp::new_pipeline()
+                .tracing()
+                .with_trace_config(trace::config().with_resource(Resource::new(vec![
+                    KeyValue::new("service.name", "all-in-one"),
+                ])))
+                .with_exporter(opentelemetry_otlp::new_exporter().tonic().with_env())
+                .install_batch(opentelemetry::runtime::Tokio)
+                .unwrap();
+
+        let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
+
+        tracing_subscriber::registry()
+            .with(fmt::layer())
+            .with(telemetry)
+            .with(
+                EnvFilter::builder()
+                    .with_default_directive(Directive::from_str("info").unwrap())
+                    .from_env()
+                    .unwrap(),
+            )
+            .init();
         // Start the gateway server
 
         let mut aio = vec![];

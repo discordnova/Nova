@@ -1,4 +1,6 @@
 use core::fmt::Debug;
+use std::convert::TryFrom;
+use opentelemetry::propagation::Injector;
 use proto::nova::ratelimit::ratelimiter::ratelimiter_client::RatelimiterClient;
 use std::hash::Hash;
 use std::ops::Deref;
@@ -31,6 +33,20 @@ impl Hash for VNode {
         self.address.hash(state);
     }
 }
+
+pub struct MetadataMap<'a>(pub &'a mut tonic::metadata::MetadataMap);
+
+impl<'a> Injector for MetadataMap<'a> {
+    /// Set a key and value in the MetadataMap.  Does nothing if the key or value are not valid inputs
+    fn set(&mut self, key: &str, value: String) {
+        if let Ok(key) = tonic::metadata::MetadataKey::from_bytes(key.as_bytes()) {
+            if let Ok(val) = tonic::metadata::MetadataValue::try_from(&value) {
+                self.0.insert(key, val);
+            }
+        }
+    }
+}
+
 
 impl VNode {
     pub async fn new(address: String) -> Result<Self, tonic::transport::Error> {

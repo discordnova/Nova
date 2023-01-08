@@ -7,6 +7,8 @@ use hyper::{
     Body, Client, Request, Server,
 };
 use leash::{AnyhowResultFuture, Component};
+use opentelemetry::{global, trace::{Tracer}};
+use opentelemetry_http::HeaderExtractor;
 use shared::config::Settings;
 use std::{convert::Infallible, sync::Arc};
 use tokio::sync::oneshot;
@@ -42,6 +44,12 @@ impl Component for ReverseProxyServer {
                 let token = token.clone();
                 async move {
                     Ok::<_, Infallible>(service_fn(move |request: Request<Body>| {
+                        let parent_cx = global::get_text_map_propagator(|propagator| {
+                            propagator.extract(&HeaderExtractor(request.headers()))
+                        });
+                        let _span = global::tracer("")
+                            .start_with_context("handle_request", &parent_cx);
+
                         let client = client.clone();
                         let ratelimiter = ratelimiter.clone();
                         let token = token.clone();

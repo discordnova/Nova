@@ -1,4 +1,4 @@
-use leash::ignite;
 use gateway::GatewayServer;
+use leash::ignite;
 
 ignite!(GatewayServer);

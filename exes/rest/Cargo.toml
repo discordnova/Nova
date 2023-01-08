@@ -10,20 +10,23 @@ shared = { path = "../../libs/shared" }
 proto = { path = "../../libs/proto" }
 leash = { path = "../../libs/leash" }
 
-hyper = { version = "0.14", features = ["full"] }
-tokio = { version = "1", features = ["full"] }
+hyper= "0.14"
+http = "0.2.8"
+
+tokio = { version = "1", features = ["rt"] }
 serde = { version = "1.0.8", features = ["derive"] }
 futures-util = "0.3.17"
 hyper-rustls = "0.23.2"
 lazy_static = "1.4.0"
 xxhash-rust = { version = "0.8.2", features = ["xxh32"] }
 twilight-http-ratelimiting = { git = "https://github.com/MatthieuCoder/twilight.git" }
+
 tracing = "0.1.37"
+anyhow = "1.0.68"
 hashring = "0.3.0"
-anyhow = "*"
 tonic = "0.8.3"
-serde_json = { version = "1.0" }
-http = "0.2.8"
 tokio-stream = "0.1.11"
 dns-lookup = "1.0.8"
-tokio-scoped = "0.2.0"
+opentelemetry = "0.18.0"
+opentelemetry-http = "0.7.0"
+tracing-opentelemetry = "0.18.0"

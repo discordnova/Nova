@@ -1,4 +1,4 @@
-use shared::serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use twilight_gateway::Intents;
 
 #[derive(Serialize, Deserialize, Clone)]

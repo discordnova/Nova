@@ -1,5 +1,5 @@
-use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 use serde::Deserialize;
+use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 
 fn default_listening_address() -> SocketAddr {
     SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 8090))
@@ -7,8 +7,7 @@ fn default_listening_address() -> SocketAddr {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct ServerSettings {
-    #[serde(default = "default_listening_address")]
-    pub listening_adress: SocketAddr
+    pub listening_adress: SocketAddr,
 }
 impl Default for ServerSettings {
     fn default() -> Self {
@@ -20,7 +19,7 @@ impl Default for ServerSettings {
 
 #[derive(Debug, Deserialize, Clone, Default)]
 pub struct Discord {
-    pub token: String
+    pub token: String,
 }
 
 #[derive(Debug, Deserialize, Clone, Default)]

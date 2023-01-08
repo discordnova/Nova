@@ -1,9 +1,8 @@
 extern crate cbindgen;
 
+use cbindgen::{Config, Language};
 use std::env;
 use std::path::PathBuf;
-use cbindgen::{Config, Language};
-
 
 fn main() {
     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -20,6 +19,6 @@ fn main() {
     };
 
     cbindgen::generate_with_config(crate_dir, config)
-      .unwrap()
-      .write_to_file(output_file);
+        .unwrap()
+        .write_to_file(output_file);
 }

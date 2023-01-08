@@ -1,12 +1,11 @@
 use self::bucket::{Bucket, BucketQueueTask};
-use shared::redis_crate::aio::MultiplexedConnection;
-use shared::redis_crate::{AsyncCommands};
+use redis::aio::MultiplexedConnection;
+use redis::AsyncCommands;
 use tokio::sync::Mutex;
 use twilight_http_ratelimiting::ticket::{self, TicketNotifier};
 use twilight_http_ratelimiting::GetTicketFuture;
 mod bucket;
-
-use futures_util::future;
+use std::future;
 use std::{
     collections::hash_map::{Entry, HashMap},
     sync::Arc,
@@ -97,6 +96,6 @@ impl RedisGlobalLocalBucketRatelimiter {
             );
         }
 
-        Box::pin(future::ok(rx))
+        Box::pin(future::ready(Ok(rx)))
     }
 }

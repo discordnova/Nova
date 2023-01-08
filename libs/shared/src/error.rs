@@ -14,5 +14,5 @@ pub enum GenericError {
     StepFailed(String),
 
     #[error("io error")]
-    Io(#[from] io::Error)
+    Io(#[from] io::Error),
 }

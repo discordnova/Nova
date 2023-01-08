@@ -4,21 +4,19 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-hyper = { version = "0.14", features = ["full"] }
-tokio = { version = "1", features = ["full"] }
+hyper = "0.14"
+tokio = { version = "1", features = ["rt"] }
 shared = { path = "../../libs/shared" }
 proto = { path = "../../libs/proto" }
 leash = { path = "../../libs/leash" }
+tracing = "0.1.37"
 
 serde = { version = "1.0.8", features = ["derive"] }
-hex = "0.4.3"
 serde_json = { version = "1.0" }
-lazy_static = "1.4.0"
+
+hex = "0.4.3"
 ed25519-dalek = "1"
 twilight-model = { version = "0.14" }
 anyhow = "1.0.68"
-futures-util = "0.3.25"
 
-[[bin]]
-name = "webhook"
-path = "src/main.rs"
+async-nats = "0.25.1"
