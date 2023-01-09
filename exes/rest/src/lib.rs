@@ -7,7 +7,7 @@ use hyper::{
     Body, Client, Request, Server,
 };
 use leash::{AnyhowResultFuture, Component};
-use opentelemetry::{global, trace::{Tracer}};
+use opentelemetry::{global, trace::Tracer};
 use opentelemetry_http::HeaderExtractor;
 use shared::config::Settings;
 use std::{convert::Infallible, sync::Arc};
@@ -29,7 +29,7 @@ impl Component for ReverseProxyServer {
     ) -> AnyhowResultFuture<()> {
         Box::pin(async move {
             // Client to the remote ratelimiters
-            let ratelimiter = ratelimit_client::RemoteRatelimiter::new();
+            let ratelimiter = ratelimit_client::RemoteRatelimiter::new(settings.config.clone());
             let https = hyper_rustls::HttpsConnectorBuilder::new()
                 .with_native_roots()
                 .https_only()
@@ -47,8 +47,8 @@ impl Component for ReverseProxyServer {
                         let parent_cx = global::get_text_map_propagator(|propagator| {
                             propagator.extract(&HeaderExtractor(request.headers()))
                         });
-                        let _span = global::tracer("")
-                            .start_with_context("handle_request", &parent_cx);
+                        let _span =
+                            global::tracer("").start_with_context("handle_request", &parent_cx);
 
                         let client = client.clone();
                         let ratelimiter = ratelimiter.clone();

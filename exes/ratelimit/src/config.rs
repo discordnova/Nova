@@ -18,14 +18,6 @@ impl Default for ServerSettings {
 }
 
 #[derive(Debug, Deserialize, Clone, Default)]
-pub struct Discord {
-    pub token: String,
-}
-
-#[derive(Debug, Deserialize, Clone, Default)]
-pub struct ReverseProxyConfig {
+pub struct RatelimitServerConfig {
     pub server: ServerSettings,
-    pub discord: Discord,
-    pub ratelimiter_address: String,
-    pub ratelimiter_port: u16,
 }

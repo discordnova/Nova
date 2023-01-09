@@ -1,7 +1,7 @@
 use core::fmt::Debug;
-use std::convert::TryFrom;
 use opentelemetry::propagation::Injector;
 use proto::nova::ratelimit::ratelimiter::ratelimiter_client::RatelimiterClient;
+use std::convert::TryFrom;
 use std::hash::Hash;
 use std::ops::Deref;
 use std::ops::DerefMut;
@@ -47,10 +47,10 @@ impl<'a> Injector for MetadataMap<'a> {
     }
 }
 
-
 impl VNode {
-    pub async fn new(address: String) -> Result<Self, tonic::transport::Error> {
-        let client = RatelimiterClient::connect(format!("http://{}:8093", address.clone())).await?;
+    pub async fn new(address: String, port: u16) -> Result<Self, tonic::transport::Error> {
+        let client =
+            RatelimiterClient::connect(format!("http://{}:{}", address.clone(), port)).await?;
 
         Ok(VNode { client, address })
     }

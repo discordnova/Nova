@@ -1,3 +1,5 @@
+use crate::config::ReverseProxyConfig;
+
 use self::remote_hashring::{HashRingWrapper, MetadataMap, VNode};
 use opentelemetry::global;
 use proto::nova::ratelimit::ratelimiter::bucket_submit_ticket_request::{Data, Headers};
@@ -13,7 +15,7 @@ use tokio::sync::oneshot::{self};
 use tokio::sync::{broadcast, mpsc, RwLock};
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::Request;
-use tracing::{debug, debug_span, Instrument, Span, instrument};
+use tracing::{debug, debug_span, instrument, Instrument, Span};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 mod remote_hashring;
@@ -22,6 +24,7 @@ mod remote_hashring;
 pub struct RemoteRatelimiter {
     remotes: Arc<RwLock<HashRingWrapper>>,
     stop: Arc<tokio::sync::broadcast::Sender<()>>,
+    config: ReverseProxyConfig,
 }
 
 impl Drop for RemoteRatelimiter {
@@ -41,15 +44,15 @@ type IssueTicket = Pin<
 impl RemoteRatelimiter {
     async fn get_ratelimiters(&self) -> Result<(), anyhow::Error> {
         // get list of dns responses
-        /*let responses = dns_lookup::lookup_host("localhost")
-        .unwrap()
-        .into_iter()
-        .map(|f| f.to_string());*/
+        let responses = dns_lookup::lookup_host(&self.config.ratelimiter_address)
+            .unwrap()
+            .into_iter()
+            .map(|f| f.to_string());
 
         let mut write = self.remotes.write().await;
 
-        for ip in ["ratelimit"] {
-            let a = VNode::new(ip.into()).await?;
+        for ip in responses {
+            let a = VNode::new(ip, self.config.ratelimiter_port).await?;
             write.add(a.clone());
         }
 
@@ -57,11 +60,12 @@ impl RemoteRatelimiter {
     }
 
     #[must_use]
-    pub fn new() -> Self {
+    pub fn new(config: ReverseProxyConfig) -> Self {
         let (rx, mut tx) = broadcast::channel(1);
         let obj = Self {
             remotes: Arc::new(RwLock::new(HashRingWrapper::default())),
             stop: Arc::new(rx),
+            config,
         };
 
         let obj_clone = obj.clone();
