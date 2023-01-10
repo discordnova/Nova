@@ -61,7 +61,7 @@ impl Component for ReverseProxyServer {
                 }
             });
 
-            let server = Server::bind(&settings.config.server.listening_adress).serve(service_fn);
+            let server = Server::bind(&settings.config.server.listening_adress).http1_only(true).serve(service_fn);
 
             server
                 .with_graceful_shutdown(async {
