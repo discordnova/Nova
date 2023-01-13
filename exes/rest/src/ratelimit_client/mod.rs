@@ -20,6 +20,8 @@ mod remote_hashring;
 #[derive(Clone, Debug)]
 pub struct RemoteRatelimiter {
     remotes: Arc<RwLock<HashRingWrapper>>,
+    current_remotes: Vec<String>,
+
     stop: Arc<tokio::sync::broadcast::Sender<()>>,
     config: ReverseProxyConfig,
 }
@@ -37,16 +39,19 @@ impl Drop for RemoteRatelimiter {
 impl RemoteRatelimiter {
     async fn get_ratelimiters(&self) -> Result<(), anyhow::Error> {
         // get list of dns responses
-        let responses = dns_lookup::lookup_host(&self.config.ratelimiter_address)?
+        let responses: Vec<String> = dns_lookup::lookup_host(&self.config.ratelimiter_address)?
             .into_iter()
             .filter(|address| address.is_ipv4())
-            .map(|address| address.to_string());
+            .map(|address| address.to_string())
+            .collect();
 
         let mut write = self.remotes.write().await;
 
-        for ip in responses {
-            let a = VNode::new(ip, self.config.ratelimiter_port).await?;
-            write.add(a.clone());
+        for ip in &responses {
+            if !self.current_remotes.contains(&ip) {
+                let a = VNode::new(ip.to_owned(), self.config.ratelimiter_port).await?;
+                write.add(a.clone());
+            }
         }
 
         Ok(())
@@ -59,6 +64,7 @@ impl RemoteRatelimiter {
             remotes: Arc::new(RwLock::new(HashRingWrapper::default())),
             stop: Arc::new(rx),
             config,
+            current_remotes: vec![]
         };
 
         let obj_clone = obj.clone();
@@ -76,7 +82,7 @@ impl RemoteRatelimiter {
                     }
                 }
 
-                let sleep = tokio::time::sleep(Duration::from_secs(10));
+                let sleep = tokio::time::sleep(Duration::from_secs(5));
                 tokio::pin!(sleep);
                 tokio::select! {
                     () = &mut sleep => {

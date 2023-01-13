@@ -35,7 +35,7 @@ impl Component for ReverseProxyServer {
             ));
             let https = hyper_rustls::HttpsConnectorBuilder::new()
                 .with_native_roots()
-                .https_only()
+                .https_or_http()
                 .enable_http1()
                 .build();
 

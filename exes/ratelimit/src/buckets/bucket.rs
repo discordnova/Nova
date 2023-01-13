@@ -6,7 +6,7 @@ use std::{
     time::Duration,
 };
 use tokio::{sync::oneshot, task::JoinHandle};
-use tracing::debug;
+use tracing::{debug, trace};
 use twilight_http_ratelimiting::headers::Present;
 
 use super::{async_queue::AsyncQueue, atomic_instant::AtomicInstant, redis_lock::RedisLock};
@@ -86,7 +86,7 @@ impl Bucket {
                     this.remaining.fetch_sub(1, Ordering::Relaxed);
                     let _ = element
                         .send(())
-                        .map_err(|_| debug!("response channel was closed."));
+                        .map_err(|_| trace!("response channel was closed."));
                 }
             });
         }
