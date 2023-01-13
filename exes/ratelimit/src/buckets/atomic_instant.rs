@@ -16,7 +16,7 @@ impl AtomicInstant {
             SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
-                .as_millis() as u64 as u64
+                .as_millis() as u64
                 - self.0.load(Ordering::SeqCst),
         )
     }

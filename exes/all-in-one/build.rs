@@ -22,6 +22,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
 
     cbindgen::generate_with_config(crate_dir, config)?.write_to_file(output_file);
-    
+
     Ok(())
 }

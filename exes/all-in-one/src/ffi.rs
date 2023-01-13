@@ -1,3 +1,4 @@
+#![allow(clippy::missing_safety_doc)]
 use std::{
     ffi::{c_char, c_int, CString},
     mem::take,
@@ -44,16 +45,16 @@ pub extern "C" fn load_config() -> *mut c_char {
 }
 
 #[no_mangle]
-pub extern "C" fn stop_instance(instance: *mut AllInOneInstance) {
+pub unsafe extern "C" fn stop_instance(instance: *mut AllInOneInstance) {
     wrap_result(move || {
-        let mut instance = unsafe { Box::from_raw(instance) };
+        let mut instance = Box::from_raw(instance);
         let handles = take(&mut instance.handles);
         instance.runtime.block_on(async move {
             for (name, sender, join) in handles {
                 debug!("Halting component {}", name);
                 let _ = sender
                     .send(())
-                    .or_else(|_| Err(error!("Component {} is not online", name)));
+                    .map_err(|_| error!("Component {} is not online", name));
                 match join.await {
                     Ok(_) => {}
                     Err(error) => error!("Task for component {} panic'ed {}", name, error),
@@ -69,9 +70,9 @@ pub extern "C" fn stop_instance(instance: *mut AllInOneInstance) {
 }
 
 #[no_mangle]
-pub extern "C" fn create_instance(config: *mut c_char) -> *mut AllInOneInstance {
+pub unsafe extern "C" fn create_instance(config: *mut c_char) -> *mut AllInOneInstance {
     wrap_result(move || {
-        let value = unsafe { CString::from_raw(config) };
+        let value = CString::from_raw(config);
         let json = value.to_str()?;
 
         // Main stop signal for this instance
@@ -125,7 +126,7 @@ pub extern "C" fn create_instance(config: *mut c_char) -> *mut AllInOneInstance 
 
         handles.push(start_component::<WebhookServer>(
             json,
-            error_sender.clone(),
+            error_sender,
             &runtime,
         )?);
 

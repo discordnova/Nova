@@ -57,29 +57,14 @@ jobs:
       - uses: ATiltedTree/setup-rust@v1
         with:
           rust-version: stable
-      - name: Build
+      - name: Build all
         run: |
-          cargo build --release
-      - name: Test
-        run: |
-          cargo test --release
-      - name: All in one
-        run: |
-          cd exes/all
           export CGO_LDFLAGS="-framework Security -framework CoreFoundation"
-          make build
-      
-      - name: Move artifacts
-        run: |
-          mkdir -p artifacts
-          cp target/release/{cache,gateway,webhook,ratelimit} ./artifacts
-          cp exes/all/build/all ./artifacts/nova
-
+          make all
       - uses: actions/upload-artifact@v3
         with:
           name: macos
-          path: artifacts/*
-
+          path: build/*
 
   build_windows:
     name: 'Build for Windows'
@@ -105,28 +90,14 @@ jobs:
         with:
           install: git mingw-w64-x86_64-go mingw-w64-x86_64-make mingw-w64-x86_64-protobuf mingw-w64-x86_64-rust mingw-w64-x86_64-gcc mingw-w64-x86_64-dlfcn
 
-      - name: Build
+      - name: Build all
         run: |
-          cargo build --release
-      - name: Test
-        run: |
-          cargo test --release
-      - name: All in one
-        run: |
-          cd exes/all
           export CGO_LDFLAGS='-lntdll -lWs2_32 -lcrypt32 -lSecur32 -luserenv -lNcrypt -lbcrypt'
-          mingw32-make.exe build
-      
-      - name: Move artifacts
-        run: |
-          mkdir -p artifacts
-          cp target/release/{cache,gateway,webhook,ratelimit}.exe ./artifacts
-          cp exes/all/build/all ./artifacts/nova.exe
-
+          make all
       - uses: actions/upload-artifact@v3
         with:
-          name: windows
-          path: artifacts/*
+          name: macos
+          path: build/*
 
   build_linux:
     name: 'Build for Linux'
@@ -154,27 +125,14 @@ jobs:
         with:
           go-version: '1.18.4'
       
-      - name: Build
+      - name: Build all
         run: |
-          cargo build --release
-      - name: Test
-        run: |
-          cargo test --release
-      - name: All in one
-        run: |
-          cd exes/all
-          make build
-      
-      - name: Move artifacts
-        run: |
-          mkdir -p artifacts
-          cp target/release/{cache,gateway,webhook,ratelimit} ./artifacts
-          cp exes/all/build/all ./artifacts/nova
-
+          export CGO_LDFLAGS='-lntdll -lWs2_32 -lcrypt32 -lSecur32 -luserenv -lNcrypt -lbcrypt'
+          make all
       - uses: actions/upload-artifact@v3
         with:
-          name: linux_glibc
-          path: artifacts/*
+          name: macos
+          path: build/*
 
   release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')

@@ -84,7 +84,9 @@ impl Bucket {
                     }
 
                     this.remaining.fetch_sub(1, Ordering::Relaxed);
-                    let _ = element.send(()).map_err(|_| { debug!("response channel was closed.") });
+                    let _ = element
+                        .send(())
+                        .map_err(|_| debug!("response channel was closed."));
                 }
             });
         }
@@ -123,7 +125,7 @@ impl Bucket {
 
             TimeRemaining::Some(Duration::from_millis(reset_after) - elapsed)
         } else {
-            return TimeRemaining::NotStarted;
+            TimeRemaining::NotStarted
         }
     }
 

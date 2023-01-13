@@ -7,7 +7,7 @@ use hyper::{
     Body, Client, Request, Server,
 };
 use leash::{AnyhowResultFuture, Component};
-use opentelemetry::{global};
+use opentelemetry::global;
 use opentelemetry_http::HeaderExtractor;
 use shared::config::Settings;
 use std::{convert::Infallible, sync::Arc};

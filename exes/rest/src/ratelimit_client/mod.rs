@@ -104,7 +104,7 @@ impl RemoteRatelimiter {
                     .instrument(trace_span!("acquiring ring lock"))
                     .await
                     .get(&path)
-                    .and_then(|node| Some(node.clone()))
+                    .cloned()
                     .ok_or_else(|| {
                         anyhow!(
                             "did not compute ratelimit because no ratelimiter nodes are detected"
@@ -142,7 +142,7 @@ impl RemoteRatelimiter {
                 .instrument(trace_span!("acquiring ring lock"))
                 .await
                 .get(&path)
-                .and_then(|node| Some(node.clone()))
+                .cloned()
                 .ok_or_else(|| {
                     anyhow!("did not compute ratelimit because no ratelimiter nodes are detected")
                 })?;

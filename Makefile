@@ -16,6 +16,17 @@ internal/pkg/all-in-one/all-in-one.h: build/lib/liball_in_one.a
 build/bin/nova: build/lib/liball_in_one.a internal/pkg/all-in-one/all-in-one.h
 	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
-all: build/{lib,bin}/nova
+all: build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
 
-.PHONY: all
+docker-images:
+	docker-compose build
+
+docker-push:
+	docker-compose push
+
+rust-test:
+	cargo test
+
+test: rust-test
+
+.PHONY: all docker-images docker-push test rust-test

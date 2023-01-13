@@ -88,7 +88,10 @@ impl Ratelimiter for RLServer {
                 // If we are globally ratelimited, we lock using the redis lock
                 // This is using redis because a global ratelimit should be executed in all
                 // ratelimit workers.
-                debug!("global ratelimit headers detected: {}", global.retry_after());
+                debug!(
+                    "global ratelimit headers detected: {}",
+                    global.retry_after()
+                );
                 self.global
                     .lock_for(Duration::from_secs(global.retry_after()))
                     .await;

@@ -1,8 +1,8 @@
+use anyhow::Result;
 use config::{Config, Environment, File};
 use serde::{de::DeserializeOwned, Deserialize};
 use std::{env, ops::Deref};
 use tracing::info;
-use anyhow::Result;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Settings<T: Clone + DeserializeOwned + Default> {

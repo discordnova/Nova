@@ -35,7 +35,6 @@ pub fn handle_error(error: anyhow::Error) {
 
         error!("Error emitted: {}", stacktrace);
         if let Some(func) = *val.borrow() {
-
             // Call the error handler
             unsafe {
                 func(

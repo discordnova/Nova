@@ -6,13 +6,13 @@ use proto::nova::ratelimit::ratelimiter::ratelimiter_server::RatelimiterServer;
 use redis::aio::MultiplexedConnection;
 use shared::config::Settings;
 use std::future::Future;
-use std::{pin::Pin};
+use std::pin::Pin;
 use tokio::sync::oneshot;
 use tonic::transport::Server;
 
+mod buckets;
 mod config;
 mod grpc;
-mod buckets;
 
 pub struct RatelimiterServerComponent {}
 impl Component for RatelimiterServerComponent {
