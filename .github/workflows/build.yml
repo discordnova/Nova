@@ -127,7 +127,6 @@ jobs:
       
       - name: Build all
         run: |
-          export CGO_LDFLAGS='-lntdll -lWs2_32 -lcrypt32 -lSecur32 -luserenv -lNcrypt -lbcrypt'
           make all
       - uses: actions/upload-artifact@v3
         with:
