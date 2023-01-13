@@ -24,6 +24,7 @@ impl<'a> Injector for MetadataMap<'a> {
 }
 
 pub struct GatewayServer {}
+
 impl Component for GatewayServer {
     type Config = GatewayConfig;
     const SERVICE_NAME: &'static str = "gateway";

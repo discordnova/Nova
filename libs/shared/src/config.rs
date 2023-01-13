@@ -2,8 +2,8 @@ use config::{Config, Environment, File};
 use serde::{de::DeserializeOwned, Deserialize};
 use std::{env, ops::Deref};
 use tracing::info;
+use anyhow::Result;
 
-use crate::error::GenericError;
 #[derive(Debug, Deserialize, Clone)]
 pub struct Settings<T: Clone + DeserializeOwned + Default> {
     #[serde(skip_deserializing)]
@@ -13,7 +13,7 @@ pub struct Settings<T: Clone + DeserializeOwned + Default> {
 }
 
 impl<T: Clone + DeserializeOwned + Default> Settings<T> {
-    pub fn new(service_name: &str) -> Result<Settings<T>, GenericError> {
+    pub fn new(service_name: &str) -> Result<Settings<T>> {
         let mut builder = Config::builder();
 
         builder = builder.add_source(File::with_name("config/default"));

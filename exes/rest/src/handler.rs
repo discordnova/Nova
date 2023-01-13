@@ -10,8 +10,9 @@ use std::{
     convert::TryFrom,
     hash::{Hash, Hasher},
     str::FromStr,
+    sync::Arc,
 };
-use tracing::{debug_span, error, instrument, Instrument};
+use tracing::{debug_span, error, info_span, instrument, Instrument};
 use twilight_http_ratelimiting::{Method, Path};
 
 use crate::ratelimit_client::RemoteRatelimiter;
@@ -37,8 +38,8 @@ fn normalize_path(request_path: &str) -> (&str, &str) {
 #[instrument]
 pub async fn handle_request(
     client: Client<HttpsConnector<HttpConnector>, Body>,
-    ratelimiter: RemoteRatelimiter,
-    token: &str,
+    ratelimiter: Arc<RemoteRatelimiter>,
+    token: String,
     mut request: Request<Body>,
 ) -> Result<Response<Body>, anyhow::Error> {
     let (hash, uri_string) = {
@@ -78,19 +79,12 @@ pub async fn handle_request(
 
         (hash.finish().to_string(), uri_string)
     };
+    // waits for the request to be authorized
+    ratelimiter
+        .ticket(hash.clone())
+        .instrument(debug_span!("ticket validation request"))
+        .await?;
 
-    let span = debug_span!("ticket validation request");
-    let header_sender = match span
-        .in_scope(|| ratelimiter.ticket(hash))
-        .await
-    {
-        Ok(sender) => sender,
-        Err(e) => {
-            error!("Failed to receive ticket for ratelimiting: {:?}", e);
-            bail!("failed to reteive ticket");
-        }
-    };
-    
     request
         .headers_mut()
         .insert(HOST, HeaderValue::from_static("discord.com"));
@@ -135,15 +129,18 @@ pub async fn handle_request(
         }
     };
 
-    let ratelimit_headers = resp
+    let headers = resp
         .headers()
         .into_iter()
-        .map(|(k, v)| (k.to_string(), v.to_str().unwrap().to_string()))
+        .map(|(k, v)| (k.to_string(), v.to_str().map(|f| f.to_string())))
+        .filter(|f| f.1.is_ok())
+        .map(|f| (f.0, f.1.expect("errors should be filtered")))
         .collect();
 
-    if header_sender.send(ratelimit_headers).is_err() {
-        error!("Error when sending ratelimit headers to ratelimiter");
-    };
+    let _ = ratelimiter
+        .submit_headers(hash, headers)
+        .instrument(info_span!("submitting headers"))
+        .await;
 
     Ok(resp)
 }

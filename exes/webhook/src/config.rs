@@ -32,7 +32,6 @@ where
 pub struct Discord {
     #[serde(deserialize_with = "deserialize_pk")]
     pub public_key: PublicKey,
-    pub client_id: u32,
 }
 
 #[derive(Debug, Deserialize, Clone, Default, Copy)]

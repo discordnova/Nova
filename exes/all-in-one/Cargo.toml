@@ -1,5 +1,5 @@
 [package]
-name = "all"
+name = "all-in-one"
 version = "0.1.0"
 edition = "2021"
 
@@ -15,11 +15,12 @@ gateway = { path = "../gateway" }
 ratelimit = { path = "../ratelimit" }
 rest = { path = "../rest" }
 webhook = { path = "../webhook" }
+ctrlc = "3.2.4"
 
 tokio = { version = "1.23.1", features = ["rt"] }
 serde = "1.0.152"
 serde_json = "1.0.91"
-anyhow = "1.0.68"
+anyhow = { version = "1.0.68", features = ["backtrace"] }
 
 tracing = "0.1.37"
 
@@ -31,7 +32,7 @@ opentelemetry = { version ="0.18.0", features = ["rt-tokio"] }
 opentelemetry-otlp = { version = "0.11.0" }
 
 [lib]
-crate-type = ["staticlib"]
+crate-type = ["staticlib", "rlib"]
 
 [build-dependencies]
 cbindgen = "0.24.3"

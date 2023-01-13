@@ -6,6 +6,7 @@ use std::hash::Hash;
 use std::ops::Deref;
 use std::ops::DerefMut;
 use tonic::transport::Channel;
+use tracing::debug;
 
 #[derive(Debug, Clone)]
 pub struct VNode {
@@ -49,14 +50,13 @@ impl<'a> Injector for MetadataMap<'a> {
 
 impl VNode {
     pub async fn new(address: String, port: u16) -> Result<Self, tonic::transport::Error> {
-        let client =
-            RatelimiterClient::connect(format!("http://{}:{}", address.clone(), port)).await?;
+        let host = format!("http://{}:{}", address.clone(), port);
+        debug!("connecting to {}", host);
+        let client = RatelimiterClient::connect(host).await?;
 
         Ok(VNode { client, address })
     }
 }
-
-unsafe impl Send for VNode {}
 
 #[repr(transparent)]
 #[derive(Default)]

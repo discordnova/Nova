@@ -7,11 +7,12 @@ use hyper::{
     Body, Client, Request, Server,
 };
 use leash::{AnyhowResultFuture, Component};
-use opentelemetry::{global, trace::Tracer};
+use opentelemetry::{global};
 use opentelemetry_http::HeaderExtractor;
 use shared::config::Settings;
 use std::{convert::Infallible, sync::Arc};
 use tokio::sync::oneshot;
+use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 mod config;
 mod handler;
@@ -29,7 +30,9 @@ impl Component for ReverseProxyServer {
     ) -> AnyhowResultFuture<()> {
         Box::pin(async move {
             // Client to the remote ratelimiters
-            let ratelimiter = ratelimit_client::RemoteRatelimiter::new(settings.config.clone());
+            let ratelimiter = Arc::new(ratelimit_client::RemoteRatelimiter::new(
+                settings.config.clone(),
+            ));
             let https = hyper_rustls::HttpsConnectorBuilder::new()
                 .with_native_roots()
                 .https_only()
@@ -37,31 +40,37 @@ impl Component for ReverseProxyServer {
                 .build();
 
             let client: Client<_, hyper::Body> = Client::builder().build(https);
-            let token = Arc::new(settings.discord.token.clone());
+            let token = settings.config.discord.token.clone();
+
             let service_fn = make_service_fn(move |_: &AddrStream| {
                 let client = client.clone();
                 let ratelimiter = ratelimiter.clone();
                 let token = token.clone();
                 async move {
                     Ok::<_, Infallible>(service_fn(move |request: Request<Body>| {
+                        let token = token.clone();
                         let parent_cx = global::get_text_map_propagator(|propagator| {
                             propagator.extract(&HeaderExtractor(request.headers()))
                         });
-                        let _span =
-                            global::tracer("").start_with_context("handle_request", &parent_cx);
+
+                        let span = tracing::span!(tracing::Level::INFO, "request process");
+                        span.set_parent(parent_cx);
 
                         let client = client.clone();
                         let ratelimiter = ratelimiter.clone();
-                        let token = token.clone();
+
                         async move {
-                            let token = token.as_str();
+                            let token = token.clone();
+                            let ratelimiter = ratelimiter.clone();
                             handle_request(client, ratelimiter, token, request).await
                         }
                     }))
                 }
             });
 
-            let server = Server::bind(&settings.config.server.listening_adress).http1_only(true).serve(service_fn);
+            let server = Server::bind(&settings.config.server.listening_adress)
+                .http1_only(true)
+                .serve(service_fn);
 
             server
                 .with_graceful_shutdown(async {

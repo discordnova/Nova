@@ -1,24 +1,20 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
+
 package nova.ratelimit.ratelimiter;
 
 service Ratelimiter {
-    rpc SubmitTicket(stream BucketSubmitTicketRequest) returns (stream BucketSubmitTicketResponse);
+    rpc SubmitTicket(BucketSubmitTicketRequest) returns (google.protobuf.Empty);
+    rpc SubmitHeaders(HeadersSubmitRequest) returns (google.protobuf.Empty);
 }
 
 message BucketSubmitTicketRequest {
-    oneof data {
-        string path = 1;
-        Headers headers = 2;
-    }
-
-    message Headers {
-        map<string, string> headers = 1;
-        uint64 precise_time = 2;
-    }
-    
+    string path = 1;
 }
 
-message BucketSubmitTicketResponse {
-    int64 accepted = 1;
+message HeadersSubmitRequest {
+    map<string, string> headers = 1;
+    uint64 precise_time = 2;
+    string path = 3;
 }

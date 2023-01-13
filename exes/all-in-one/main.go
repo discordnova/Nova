@@ -1,8 +1,8 @@
 package main
 
 /*
-#cgo LDFLAGS: -L./build -lall -lz -lm
-#include "./build/all.h"
+#cgo LDFLAGS: -L./build -lall_in_one -lz -lm
+#include "./build/all-in-one.h"
 */
 import "C"
 

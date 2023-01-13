@@ -1,24 +1,33 @@
-use opentelemetry::{global, propagation::Extractor};
-use proto::nova::ratelimit::ratelimiter::{
-    ratelimiter_server::Ratelimiter, BucketSubmitTicketRequest, BucketSubmitTicketResponse,
-};
-use std::pin::Pin;
-use tokio::sync::mpsc;
-use tokio_stream::{wrappers::ReceiverStream, Stream, StreamExt};
-use tonic::{Request, Response, Status, Streaming};
-use tracing::{debug, debug_span, info, Instrument};
-use tracing_opentelemetry::OpenTelemetrySpanExt;
-use twilight_http_ratelimiting::{ticket::TicketReceiver, RatelimitHeaders};
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::Duration;
 
-use crate::redis_global_local_bucket_ratelimiter::RedisGlobalLocalBucketRatelimiter;
+use opentelemetry::global;
+use opentelemetry::propagation::Extractor;
+use proto::nova::ratelimit::ratelimiter::HeadersSubmitRequest;
+use proto::nova::ratelimit::ratelimiter::{
+    ratelimiter_server::Ratelimiter, BucketSubmitTicketRequest,
+};
+use tokio::sync::RwLock;
+use tonic::Response;
+use tracing::debug;
+use tracing_opentelemetry::OpenTelemetrySpanExt;
+use twilight_http_ratelimiting::RatelimitHeaders;
+
+use crate::buckets::bucket::Bucket;
+use crate::buckets::redis_lock::RedisLock;
 
 pub struct RLServer {
-    ratelimiter: RedisGlobalLocalBucketRatelimiter,
+    global: Arc<RedisLock>,
+    buckets: RwLock<HashMap<String, Arc<Bucket>>>,
 }
 
 impl RLServer {
-    pub fn new(ratelimiter: RedisGlobalLocalBucketRatelimiter) -> Self {
-        Self { ratelimiter }
+    pub fn new(redis_lock: Arc<RedisLock>) -> Self {
+        Self {
+            global: redis_lock,
+            buckets: RwLock::new(HashMap::new()),
+        }
     }
 }
 
@@ -44,66 +53,85 @@ impl<'a> Extractor for MetadataMap<'a> {
 
 #[tonic::async_trait]
 impl Ratelimiter for RLServer {
-    type SubmitTicketStream =
-        Pin<Box<dyn Stream<Item = Result<BucketSubmitTicketResponse, Status>> + Send>>;
+    async fn submit_headers(
+        &self,
+        request: tonic::Request<HeadersSubmitRequest>,
+    ) -> Result<tonic::Response<()>, tonic::Status> {
+        let parent_cx =
+            global::get_text_map_propagator(|prop| prop.extract(&MetadataMap(request.metadata())));
+        // Generate a tracing span as usual
+        let span = tracing::span!(tracing::Level::INFO, "request process");
+        span.set_parent(parent_cx);
+
+        let data = request.into_inner();
+
+        let ratelimit_headers = RatelimitHeaders::from_pairs(
+            data.headers.iter().map(|f| (f.0 as &str, f.1.as_bytes())),
+        )
+        .unwrap();
+
+        let bucket: Arc<Bucket> = if self.buckets.read().await.contains_key(&data.path) {
+            self.buckets
+                .read()
+                .await
+                .get(&data.path)
+                .expect("impossible")
+                .clone()
+        } else {
+            let bucket = Bucket::new(self.global.clone());
+            self.buckets.write().await.insert(data.path, bucket.clone());
+            bucket
+        };
+
+        match ratelimit_headers {
+            RatelimitHeaders::Global(global) => {
+                // If we are globally ratelimited, we lock using the redis lock
+                // This is using redis because a global ratelimit should be executed in all
+                // ratelimit workers.
+                debug!("global ratelimit headers detected: {}", global.retry_after());
+                self.global
+                    .lock_for(Duration::from_secs(global.retry_after()))
+                    .await;
+            }
+            RatelimitHeaders::None => {}
+            RatelimitHeaders::Present(present) => {
+                // we should update the bucket.
+                bucket.update(present, data.precise_time);
+            }
+            _ => unreachable!(),
+        };
+
+        Ok(Response::new(()))
+    }
 
     async fn submit_ticket(
         &self,
-        req: Request<Streaming<BucketSubmitTicketRequest>>,
-    ) -> Result<Response<Self::SubmitTicketStream>, Status> {
+        request: tonic::Request<BucketSubmitTicketRequest>,
+    ) -> Result<tonic::Response<()>, tonic::Status> {
         let parent_cx =
-            global::get_text_map_propagator(|prop| prop.extract(&MetadataMap(req.metadata())));
+            global::get_text_map_propagator(|prop| prop.extract(&MetadataMap(request.metadata())));
         // Generate a tracing span as usual
         let span = tracing::span!(tracing::Level::INFO, "request process");
-
-        // Assign parent trace from external context
         span.set_parent(parent_cx);
 
-        let mut in_stream = req.into_inner();
-        let (tx, rx) = mpsc::channel(128);
-        let imrl = self.ratelimiter.clone();
+        let data = request.into_inner();
 
-        // this spawn here is required if you want to handle connection error.
-        // If we just map `in_stream` and write it back as `out_stream` the `out_stream`
-        // will be drooped when connection error occurs and error will never be propagated
-        // to mapped version of `in_stream`.
-        tokio::spawn(async move {
-            let mut receiver: Option<TicketReceiver> = None;
-            while let Some(result) = in_stream.next().await {
-                let result = result.unwrap();
+        let bucket: Arc<Bucket> = if self.buckets.read().await.contains_key(&data.path) {
+            self.buckets
+                .read()
+                .await
+                .get(&data.path)
+                .expect("impossible")
+                .clone()
+        } else {
+            let bucket = Bucket::new(self.global.clone());
+            self.buckets.write().await.insert(data.path, bucket.clone());
+            bucket
+        };
 
-                match result.data.unwrap() {
-                    proto::nova::ratelimit::ratelimiter::bucket_submit_ticket_request::Data::Path(path) => {
-                        let span = debug_span!("requesting ticket");
-                        let a = imrl.ticket(path).instrument(span).await.unwrap();
-                        receiver = Some(a);
+        // wait for the ticket to be accepted
+        bucket.ticket().await;
 
-                        tx.send(Ok(BucketSubmitTicketResponse {
-                            accepted: 1
-                        })).await.unwrap();
-                    },
-                    proto::nova::ratelimit::ratelimiter::bucket_submit_ticket_request::Data::Headers(b) => {
-                        if let Some(recv) = receiver {
-                            let span = debug_span!("waiting for headers data");
-                            let recv = recv.instrument(span).await.unwrap();
-                            let rheaders = RatelimitHeaders::from_pairs(b.headers.iter().map(|f| (f.0.as_str(), f.1.as_bytes()))).unwrap();
-
-                            recv.headers(Some(rheaders)).unwrap();
-                            break;
-                        }
-                    },
-                }
-            }
-
-            debug!("\tstream ended");
-            info!("request terminated");
-        }.instrument(span));
-
-        // echo just write the same data that was received
-        let out_stream = ReceiverStream::new(rx);
-
-        Ok(Response::new(
-            Box::pin(out_stream) as Self::SubmitTicketStream
-        ))
+        Ok(Response::new(()))
     }
 }
