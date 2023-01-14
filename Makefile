@@ -23,16 +23,17 @@ build/bin/nova: build/lib/liball_in_one.a internal/pkg/all-in-one/all-in-one.h
 	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
 all:
-	SYS := $(shell gcc -dumpmachine)
-	ifneq (, $(findstring linux, $(SYS)))
+	#SYS := $(shell gcc -dumpmachine)
+	SYS := $(shell uname -s)
+	ifeq ($(SYS),Linux)
 		# Do Linux things
  		build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
-	else ifneq(, $(findstring mingw, $(SYS)))
-		# Do MinGW things
-		build/bin/{cache,gateway,ratelimit,rest,webhook}{,.exe} build/bin/nova
-	else
- 		# Do things for others
+	else ifeq ($(SYS),Darwin)
+		# Do Darwin things
 		build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
+	else
+ 		# Do MinGW things
+		build/bin/{cache,gateway,ratelimit,rest,webhook}{,.exe} build/bin/nova
 	endif
 
 docker-images:
