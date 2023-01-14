@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 async fn listen(sub: &mut Subscriber, cache: &mut Cache, features: Vec<String>) {
     while let Some(data) = sub.next().await {
         let cp: CachePayload = serde_json::from_slice(&data.payload).unwrap();
-        let event = cp.data.data;
+        let event = cp.data.0;
         match event {
             // Channel events
             DispatchEvent::ChannelCreate(_)

@@ -6,7 +6,10 @@ use std::{
     },
     time::Duration,
 };
-use tokio::{sync::oneshot, task::JoinHandle};
+use tokio::{
+    sync::oneshot::{self, Sender},
+    task::JoinHandle,
+};
 use tracing::{debug, trace};
 use twilight_http_ratelimiting::headers::Present;
 
@@ -22,29 +25,36 @@ pub enum TimeRemaining {
 ///
 /// # Usage
 /// ```
-/// use ratelimit::buckets::bucket::Bucket;
-/// use twilight_http_ratelimiting::RatelimitHeaders;
-/// use std::time::SystemTime;
+/// # use ratelimit::buckets::bucket::Bucket;
+/// # use twilight_http_ratelimiting::RatelimitHeaders;
+/// # use std::time::SystemTime;
+/// # tokio_test::block_on(async {
 ///
-/// let bucket = Bucket::new();
+///     let bucket = Bucket::new();
 ///
-/// // Feed the headers informations into the bucket to update it
-/// let headers = [
-///     ( "x-ratelimit-bucket", "bucket id".as_bytes()),
-///     ("x-ratelimit-limit", "100".as_bytes()),
-///     ("x-ratelimit-remaining", "0".as_bytes()),
-///     ("x-ratelimit-reset", "".as_bytes()),
-///     ("x-ratelimit-reset-after", "10.000".as_bytes()),
-/// ];
+///     // Feed the headers informations into the bucket to update it
+///     let headers = [
+///         ( "x-ratelimit-bucket", "bucket id".as_bytes()),
+///         ("x-ratelimit-limit", "100".as_bytes()),
+///         ("x-ratelimit-remaining", "0".as_bytes()),
+///         ("x-ratelimit-reset", "99999999999999".as_bytes()),
+///         ("x-ratelimit-reset-after", "10.000".as_bytes()),
+///     ];
 ///
-/// // Parse the headers
-/// let present = if let Ok(RatelimitHeaders::Present(present)) = RatelimitHeaders::from_pairs(headers.into_iter()) { present } else { todo!() };
+///     // Parse the headers
+///     let present = if let Ok(RatelimitHeaders::Present(present))
+///         = RatelimitHeaders::from_pairs(headers.into_iter()) {
+///         present
+///     } else { todo!() };
 ///
-/// // this should idealy the time of the request
-/// let current_time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_millis() as u64;
+///     // this should idealy the time of the request
+///     let current_time = SystemTime::now()
+///         .duration_since(SystemTime::UNIX_EPOCH)
+///         .unwrap()
+///         .as_millis() as u64;
 ///
-/// bucket.update(present, current_time).await;
-///
+///     bucket.update(&present, current_time);
+/// # })
 /// ```
 ///
 /// # Async
@@ -63,7 +73,7 @@ pub struct Bucket {
     /// List of tasks that dequeue tasks from [`Self::queue`]
     tasks: Vec<JoinHandle<()>>,
     /// Queue of tickets to be processed.
-    queue: AsyncQueue,
+    queue: AsyncQueue<Sender<()>>,
 }
 
 impl Drop for Bucket {
@@ -88,7 +98,7 @@ impl Bucket {
             queue: AsyncQueue::default(),
             remaining: AtomicU64::new(u64::max_value()),
             reset_after: AtomicU64::new(u64::max_value()),
-            last_update: AtomicInstant::empty(),
+            last_update: AtomicInstant::default(),
             tasks,
         });
 
@@ -292,7 +302,7 @@ mod tests {
             ("x-ratelimit-limit", b"100"),
             ("x-ratelimit-remaining", b"0"),
             ("x-ratelimit-reset", mreset.as_bytes()),
-            ("x-ratelimit-reset-after", b"100.000"),
+            ("x-ratelimit-reset-after", b"10.000"),
         ];
 
         if let RatelimitHeaders::Present(present) =

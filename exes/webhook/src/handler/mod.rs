@@ -82,11 +82,9 @@ impl WebhookService {
             // this should hopefully not fail ?
 
             let data = CachePayload {
-                data: DispatchEventTagged {
-                    data: DispatchEvent::InteractionCreate(Box::new(InteractionCreate(
-                        interaction,
-                    ))),
-                },
+                data: DispatchEventTagged(DispatchEvent::InteractionCreate(Box::new(
+                    InteractionCreate(interaction),
+                ))),
             };
 
             let payload = serde_json::to_string(&data).unwrap();

@@ -93,9 +93,7 @@ async fn handle_event(event: Event, nats: &Client) -> anyhow::Result<()> {
             debug!("handling event {}", name.unwrap());
 
             let data = CachePayload {
-                data: DispatchEventTagged {
-                    data: dispatch_event,
-                },
+                data: DispatchEventTagged(dispatch_event),
             };
             let value = serde_json::to_string(&data)?;
             let bytes = bytes::Bytes::from(value);
