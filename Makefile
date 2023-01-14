@@ -1,9 +1,3 @@
-ifeq ($(OS),Windows_NT)
-	detected_OS := Windows
-else
-	detected_OS := $(shell uname -s)
-endif
-
 # Creates the bin folder for build artifacts
 build/{bin,lib}:
 	@mkdir -p build/{lib,bin}
@@ -29,13 +23,9 @@ build/bin/nova: build/lib/liball_in_one.a internal/pkg/all-in-one/all-in-one.h
 	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
 all: 
-	ifeq ($(detected_OS),Windows)
+	ifeq ($(OS),Windows)
 		build/bin/{cache,gateway,ratelimit,rest,webhook}{,.exe} build/bin/nova
-	endif
-	ifeq ($(detected_OS),Linux)
-		build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
-	endif
-	ifeq ($(detected_OS),Darwin)
+	else
 		build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
 	endif
 
