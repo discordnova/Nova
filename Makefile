@@ -22,10 +22,16 @@ internal/pkg/all-in-one/all-in-one.h: build/lib/liball_in_one.a
 build/bin/nova: build/lib/liball_in_one.a internal/pkg/all-in-one/all-in-one.h
 	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
-all: 
-	ifeq ($(OS),Windows_NT)
+all:
+	SYS := $(shell gcc -dumpmachine)
+	ifneq (, $(findstring linux, $(SYS)))
+		# Do Linux things
+ 		build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
+	else ifneq(, $(findstring mingw, $(SYS)))
+		# Do MinGW things
 		build/bin/{cache,gateway,ratelimit,rest,webhook}{,.exe} build/bin/nova
 	else
+ 		# Do things for others
 		build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
 	endif
 
