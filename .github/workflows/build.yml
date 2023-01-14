@@ -96,7 +96,7 @@ jobs:
           mingw32-make.exe all
       - uses: actions/upload-artifact@v3
         with:
-          name: macos
+          name: windows
           path: build/*
 
   build_linux:
