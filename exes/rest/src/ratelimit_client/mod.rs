@@ -1,4 +1,4 @@
-use crate::config::ReverseProxyConfig;
+use crate::config::ReverseProxy;
 
 use self::remote_hashring::{HashRingWrapper, MetadataMap, VNode};
 use anyhow::anyhow;
@@ -23,7 +23,7 @@ pub struct RemoteRatelimiter {
     current_remotes: Vec<String>,
 
     stop: Arc<tokio::sync::broadcast::Sender<()>>,
-    config: ReverseProxyConfig,
+    config: ReverseProxy,
 }
 
 impl Drop for RemoteRatelimiter {
@@ -41,15 +41,15 @@ impl RemoteRatelimiter {
         // get list of dns responses
         let responses: Vec<String> = dns_lookup::lookup_host(&self.config.ratelimiter_address)?
             .into_iter()
-            .filter(|address| address.is_ipv4())
+            .filter(std::net::IpAddr::is_ipv4)
             .map(|address| address.to_string())
             .collect();
 
         let mut write = self.remotes.write().await;
 
         for ip in &responses {
-            if !self.current_remotes.contains(&ip) {
-                let a = VNode::new(ip.to_owned(), self.config.ratelimiter_port).await?;
+            if !self.current_remotes.contains(ip) {
+                let a = VNode::new(ip.clone(), self.config.ratelimiter_port).await?;
                 write.add(a.clone());
             }
         }
@@ -58,13 +58,13 @@ impl RemoteRatelimiter {
     }
 
     #[must_use]
-    pub fn new(config: ReverseProxyConfig) -> Self {
+    pub fn new(config: ReverseProxy) -> Self {
         let (rx, mut tx) = broadcast::channel(1);
         let obj = Self {
             remotes: Arc::new(RwLock::new(HashRingWrapper::default())),
             stop: Arc::new(rx),
             config,
-            current_remotes: vec![]
+            current_remotes: vec![],
         };
 
         let obj_clone = obj.clone();
@@ -75,7 +75,7 @@ impl RemoteRatelimiter {
 
                 match obj_clone.get_ratelimiters().await {
                     Ok(_) => {
-                        debug!("refreshed ratelimiting servers")
+                        debug!("refreshed ratelimiting servers");
                     }
                     Err(err) => {
                         error!("refreshing ratelimiting servers failed {}", err);
@@ -122,7 +122,7 @@ impl RemoteRatelimiter {
                 let context = span.context();
                 let mut request = Request::new(BucketSubmitTicketRequest { path });
                 global::get_text_map_propagator(|propagator| {
-                    propagator.inject_context(&context, &mut MetadataMap(request.metadata_mut()))
+                    propagator.inject_context(&context, &mut MetadataMap(request.metadata_mut()));
                 });
 
                 // Requesting
@@ -158,13 +158,15 @@ impl RemoteRatelimiter {
             let time = SystemTime::now()
                 .duration_since(SystemTime::UNIX_EPOCH)?
                 .as_millis();
+            // truncation is expected
+            #[allow(clippy::cast_possible_truncation)]
             let mut request = Request::new(HeadersSubmitRequest {
                 path,
                 precise_time: time as u64,
                 headers,
             });
             global::get_text_map_propagator(|propagator| {
-                propagator.inject_context(&context, &mut MetadataMap(request.metadata_mut()))
+                propagator.inject_context(&context, &mut MetadataMap(request.metadata_mut()));
             });
 
             node.submit_headers(request).await?;

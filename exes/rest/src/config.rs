@@ -23,7 +23,7 @@ pub struct Discord {
 }
 
 #[derive(Debug, Deserialize, Clone, Default)]
-pub struct ReverseProxyConfig {
+pub struct ReverseProxy {
     pub server: ServerSettings,
     pub discord: Discord,
     pub ratelimiter_address: String,

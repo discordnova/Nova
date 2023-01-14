@@ -26,7 +26,7 @@ fn load_settings_for<T: Default + DeserializeOwned + Clone>(
     name: &str,
 ) -> Result<Settings<T>> {
     let value: Value = serde_json::from_str(settings)?;
-    let section: T = serde_json::from_value(value.get(name).unwrap().to_owned())?;
+    let section: T = serde_json::from_value(value.get(name).unwrap().clone())?;
     let mut settings: Settings<T> = serde_json::from_value(value)?;
     settings.config = section;
 
@@ -69,7 +69,7 @@ pub(crate) fn load_config_file() -> Result<Value> {
     let mode = std::env::var("ENV").unwrap_or_else(|_| "development".into());
     info!("Configuration Environment: {}", mode);
 
-    builder = builder.add_source(File::with_name(&format!("config/{}", mode)).required(false));
+    builder = builder.add_source(File::with_name(&format!("config/{mode}")).required(false));
     builder = builder.add_source(File::with_name("config/local").required(false));
 
     let env = Environment::with_prefix("NOVA").separator("__");

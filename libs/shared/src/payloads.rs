@@ -31,7 +31,7 @@ impl<'de> Deserialize<'de> for DispatchEventTagged {
         let tagged = DispatchEventTaggedSerialized::deserialize(deserializer)?;
         let deserializer_seed = DispatchEventWithTypeDeserializer::new(&tagged.kind);
         let dispatch_event = deserializer_seed.deserialize(tagged.data).unwrap();
-        Ok(DispatchEventTagged {
+        Ok(Self {
             data: dispatch_event,
         })
     }

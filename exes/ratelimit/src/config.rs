@@ -18,6 +18,6 @@ impl Default for ServerSettings {
 }
 
 #[derive(Debug, Deserialize, Clone, Default)]
-pub struct RatelimitServerConfig {
+pub struct Ratelimit {
     pub server: ServerSettings,
 }

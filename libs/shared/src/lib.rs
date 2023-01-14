@@ -1,5 +1,14 @@
-/// This crate is all the utilities shared by the nova rust projects
-/// It includes logging, config and protocols.
+#![deny(
+    clippy::all,
+    clippy::correctness,
+    clippy::suspicious,
+    clippy::style,
+    clippy::complexity,
+    clippy::perf,
+    clippy::pedantic,
+    clippy::nursery,
+)]
+
 pub mod config;
 pub mod nats;
 pub mod payloads;

@@ -4,23 +4,12 @@ use async_nats::Client;
 use serde::Deserialize;
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct NatsConfigurationClientCert {
-    pub cert: String,
-    pub key: String,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct NatsConfigurationTls {
-    pub mtu: Option<usize>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct NatsConfiguration {
+pub struct Configuration {
     pub host: String,
 }
 
-impl From<NatsConfiguration> for Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>> {
-    fn from(value: NatsConfiguration) -> Self {
+impl From<Configuration> for Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>> {
+    fn from(value: Configuration) -> Self {
         Box::pin(async move { Ok(async_nats::connect(value.host).await?) })
     }
 }

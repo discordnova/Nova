@@ -23,7 +23,7 @@ impl<T, V: Clone> Service<T> for MakeSvc<V> {
 }
 
 impl<T: Clone> MakeSvc<T> {
-    pub fn new(service: T) -> Self {
+    pub const fn new(service: T) -> Self {
         Self { service }
     }
 }

@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 
 use anyhow::Result;
-use libc::c_int;
 use tracing::error;
 
 thread_local! {
@@ -9,7 +8,7 @@ thread_local! {
 }
 
 /// Update the most recent error, clearing whatever may have been there before.
-pub fn stacktrace(err: anyhow::Error) -> String {
+#[must_use] pub fn stacktrace(err: &anyhow::Error) -> String {
     format!("{err}")
 }
 
@@ -23,13 +22,15 @@ where
         Ok(ok) => Some(ok),
         Err(error) => {
             // Call the handler
-            handle_error(error);
+            handle_error(&error);
             None
         }
     }
 }
 
-pub fn handle_error(error: anyhow::Error) {
+/// # Panics
+/// Panics if the stacktrace size is > than an i32
+pub fn handle_error(error: &anyhow::Error) {
     ERROR_HANDLER.with(|val| {
         let mut stacktrace = stacktrace(error);
 
@@ -38,8 +39,8 @@ pub fn handle_error(error: anyhow::Error) {
             // Call the error handler
             unsafe {
                 func(
-                    stacktrace.len() as c_int + 1,
-                    stacktrace.as_mut_ptr() as *mut i8,
+                    (stacktrace.len() + 1).try_into().unwrap(),
+                    stacktrace.as_mut_ptr().cast::<i8>(),
                 );
             }
         }

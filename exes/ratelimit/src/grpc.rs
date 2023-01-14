@@ -16,6 +16,7 @@ use twilight_http_ratelimiting::RatelimitHeaders;
 
 use crate::buckets::bucket::Bucket;
 use crate::buckets::redis_lock::RedisLock;
+use crate::buckets::GlobalLock;
 
 pub struct RLServer {
     global: Arc<RedisLock>,
@@ -34,12 +35,12 @@ impl RLServer {
 struct MetadataMap<'a>(&'a tonic::metadata::MetadataMap);
 
 impl<'a> Extractor for MetadataMap<'a> {
-    /// Get a value for a key from the MetadataMap.  If the value can't be converted to &str, returns None
+    /// Get a value for a key from the `MetadataMap`.  If the value can't be converted to &str, returns None
     fn get(&self, key: &str) -> Option<&str> {
         self.0.get(key).and_then(|metadata| metadata.to_str().ok())
     }
 
-    /// Collect all the keys from the MetadataMap.
+    /// Collect all the keys from the `MetadataMap`.
     fn keys(&self) -> Vec<&str> {
         self.0
             .keys()
@@ -70,6 +71,10 @@ impl Ratelimiter for RLServer {
         )
         .unwrap();
 
+        if let Some(duration) = self.global.is_locked().await {
+            tokio::time::sleep(duration).await;
+        }
+
         let bucket: Arc<Bucket> = if self.buckets.read().await.contains_key(&data.path) {
             self.buckets
                 .read()
@@ -78,7 +83,7 @@ impl Ratelimiter for RLServer {
                 .expect("impossible")
                 .clone()
         } else {
-            let bucket = Bucket::new(self.global.clone());
+            let bucket = Bucket::new();
             self.buckets.write().await.insert(data.path, bucket.clone());
             bucket
         };
@@ -93,13 +98,14 @@ impl Ratelimiter for RLServer {
                     global.retry_after()
                 );
                 self.global
+                    .clone()
                     .lock_for(Duration::from_secs(global.retry_after()))
                     .await;
             }
             RatelimitHeaders::None => {}
             RatelimitHeaders::Present(present) => {
                 // we should update the bucket.
-                bucket.update(present, data.precise_time);
+                bucket.update(&present, data.precise_time);
             }
             _ => unreachable!(),
         };
@@ -127,13 +133,13 @@ impl Ratelimiter for RLServer {
                 .expect("impossible")
                 .clone()
         } else {
-            let bucket = Bucket::new(self.global.clone());
+            let bucket = Bucket::new();
             self.buckets.write().await.insert(data.path, bucket.clone());
             bucket
         };
 
         // wait for the ticket to be accepted
-        bucket.ticket().await;
+        let _ = bucket.ticket().await;
 
         Ok(Response::new(()))
     }

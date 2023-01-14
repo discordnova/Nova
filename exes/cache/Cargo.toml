@@ -2,8 +2,12 @@
 name = "cache"
 version = "0.1.0"
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Stores the data from discord if needed"
+readme = "README.md"
+repository = "https://github.com/discordnova/nova.git"
+keywords = ["discord", "scaleable", "cache"]
+categories = ["microservices", "nova"]
+license = "APACHE2"
 
 [dependencies]
 shared = { path = "../../libs/shared" }

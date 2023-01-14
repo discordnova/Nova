@@ -58,7 +58,7 @@ pub async fn handle_request(
         let request_path = request.uri().path();
         let (api_path, trimmed_path) = normalize_path(request_path);
 
-        let mut uri_string = format!("http://127.0.0.1:9999{}{}", api_path, trimmed_path);
+        let mut uri_string = format!("http://127.0.0.1:9999{api_path}{trimmed_path}");
         if let Some(query) = request.uri().query() {
             uri_string.push('?');
             uri_string.push_str(query);
@@ -103,12 +103,12 @@ pub async fn handle_request(
             .expect("Failed to check header")
             .starts_with("Bot")
         {
-            *auth = HeaderValue::from_str(&format!("Bot {}", token))?;
+            *auth = HeaderValue::from_str(&format!("Bot {token}"))?;
         }
     } else {
         request.headers_mut().insert(
             AUTHORIZATION,
-            HeaderValue::from_str(&format!("Bot {}", token))?,
+            HeaderValue::from_str(&format!("Bot {token}"))?,
         );
     }
 
@@ -132,12 +132,12 @@ pub async fn handle_request(
     let headers = resp
         .headers()
         .into_iter()
-        .map(|(k, v)| (k.to_string(), v.to_str().map(|f| f.to_string())))
+        .map(|(k, v)| (k.to_string(), v.to_str().map(std::string::ToString::to_string)))
         .filter(|f| f.1.is_ok())
         .map(|f| (f.0, f.1.expect("errors should be filtered")))
         .collect();
 
-    let _ = ratelimiter
+    let _submit_headers = ratelimiter
         .submit_headers(hash, headers)
         .instrument(info_span!("submitting headers"))
         .await;

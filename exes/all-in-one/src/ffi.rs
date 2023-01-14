@@ -69,8 +69,12 @@ pub unsafe extern "C" fn stop_instance(instance: *mut AllInOneInstance) {
     });
 }
 
+/// # Panics
+/// Panics if an incorrect `RUST_LOG` variables is specified.
 #[no_mangle]
 pub unsafe extern "C" fn create_instance(config: *mut c_char) -> *mut AllInOneInstance {
+    // Returning a null pointer (unaligned) is expected.
+    #[allow(clippy::cast_ptr_alignment)]
     wrap_result(move || {
         let value = CString::from_raw(config);
         let json = value.to_str()?;
@@ -87,7 +91,7 @@ pub unsafe extern "C" fn create_instance(config: *mut c_char) -> *mut AllInOneIn
             .with(fmt::layer())
             .with(
                 EnvFilter::builder()
-                    .with_default_directive(Directive::from_str("info").unwrap())
+                    .with_default_directive(Directive::from_str("info").expect(""))
                     .from_env()
                     .unwrap(),
             )
@@ -96,7 +100,7 @@ pub unsafe extern "C" fn create_instance(config: *mut c_char) -> *mut AllInOneIn
         // Error handling task
         runtime.spawn(async move {
             while let Some(error) = errors.recv().await {
-                handle_error(error)
+                handle_error(&error);
             }
         });
 

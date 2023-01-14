@@ -1,4 +1,16 @@
-use config::ReverseProxyConfig;
+#![deny(
+    clippy::all,
+    clippy::correctness,
+    clippy::suspicious,
+    clippy::style,
+    clippy::complexity,
+    clippy::perf,
+    clippy::pedantic,
+    clippy::nursery,
+    unsafe_code
+)]
+
+use config::ReverseProxy;
 
 use handler::handle_request;
 use hyper::{
@@ -20,7 +32,7 @@ mod ratelimit_client;
 
 pub struct ReverseProxyServer {}
 impl Component for ReverseProxyServer {
-    type Config = ReverseProxyConfig;
+    type Config = ReverseProxy;
     const SERVICE_NAME: &'static str = "rest";
 
     fn start(

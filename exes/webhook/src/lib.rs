@@ -1,9 +1,21 @@
+#![deny(
+    clippy::all,
+    clippy::correctness,
+    clippy::suspicious,
+    clippy::style,
+    clippy::complexity,
+    clippy::perf,
+    clippy::pedantic,
+    clippy::nursery,
+    unsafe_code
+)]
+
 mod config;
 mod handler;
 use std::{future::Future, pin::Pin};
 
 use crate::{
-    config::WebhookConfig,
+    config::Webhook,
     handler::{make_service::MakeSvc, WebhookService},
 };
 use async_nats::Client;
@@ -16,7 +28,7 @@ use tracing::info;
 pub struct WebhookServer {}
 
 impl Component for WebhookServer {
-    type Config = WebhookConfig;
+    type Config = Webhook;
     const SERVICE_NAME: &'static str = "webhook";
 
     fn start(

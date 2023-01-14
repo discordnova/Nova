@@ -1,3 +1,4 @@
+use super::{async_queue::AsyncQueue, atomic_instant::AtomicInstant};
 use std::{
     sync::{
         atomic::{AtomicU64, Ordering},
@@ -9,8 +10,6 @@ use tokio::{sync::oneshot, task::JoinHandle};
 use tracing::{debug, trace};
 use twilight_http_ratelimiting::headers::Present;
 
-use super::{async_queue::AsyncQueue, atomic_instant::AtomicInstant, redis_lock::RedisLock};
-
 #[derive(Clone, Debug)]
 pub enum TimeRemaining {
     Finished,
@@ -18,22 +17,57 @@ pub enum TimeRemaining {
     Some(Duration),
 }
 
+/// A bucket is a simple atomic implementation of a bucket used for ratelimiting
+/// It can be updated dynamically depending on the discord api responses.
+///
+/// # Usage
+/// ```
+/// use ratelimit::buckets::bucket::Bucket;
+/// use twilight_http_ratelimiting::RatelimitHeaders;
+/// use std::time::SystemTime;
+///
+/// let bucket = Bucket::new();
+///
+/// // Feed the headers informations into the bucket to update it
+/// let headers = [
+///     ( "x-ratelimit-bucket", "bucket id".as_bytes()),
+///     ("x-ratelimit-limit", "100".as_bytes()),
+///     ("x-ratelimit-remaining", "0".as_bytes()),
+///     ("x-ratelimit-reset", "".as_bytes()),
+///     ("x-ratelimit-reset-after", "10.000".as_bytes()),
+/// ];
+///
+/// // Parse the headers
+/// let present = if let Ok(RatelimitHeaders::Present(present)) = RatelimitHeaders::from_pairs(headers.into_iter()) { present } else { todo!() };
+///
+/// // this should idealy the time of the request
+/// let current_time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_millis() as u64;
+///
+/// bucket.update(present, current_time).await;
+///
+/// ```
+///
+/// # Async
+/// You need to call this struct new method in a tokio 1.x async runtime.
 #[derive(Debug)]
 pub struct Bucket {
+    /// Limits of tickets that can be accepted
     pub limit: AtomicU64,
-    /// Queue associated with this bucket.
-    pub queue: AsyncQueue,
-    /// Number of tickets remaining.
+    /// Remaining requests that can be executed
     pub remaining: AtomicU64,
-    /// Duration after the [`Self::last_update`] time the bucket will refresh.
+    /// Time to wait after [`Self::last_update`] before accepting new tickets.
     pub reset_after: AtomicU64,
-    /// When the bucket's ratelimit refresh countdown started (unix millis)
+    /// Last update got from the discord upstream
     pub last_update: AtomicInstant,
 
-    pub tasks: Vec<JoinHandle<()>>,
+    /// List of tasks that dequeue tasks from [`Self::queue`]
+    tasks: Vec<JoinHandle<()>>,
+    /// Queue of tickets to be processed.
+    queue: AsyncQueue,
 }
 
 impl Drop for Bucket {
+    /// Simply abord the dequeue tasks to aboid leaking memory via arc(s)
     fn drop(&mut self) {
         for join in &self.tasks {
             join.abort();
@@ -42,8 +76,11 @@ impl Drop for Bucket {
 }
 
 impl Bucket {
-    /// Create a new bucket for the specified [`Path`].
-    pub fn new(global: Arc<RedisLock>) -> Arc<Self> {
+    /// Creates a new bucket with four dequeue tasks
+    /// # Async
+    /// This functions **should** be called in a tokio 1.x runtime, otherwise the function *will* panic.
+    #[must_use]
+    pub fn new() -> Arc<Self> {
         let tasks = vec![];
 
         let this = Arc::new(Self {
@@ -58,19 +95,16 @@ impl Bucket {
         // Run with 4 dequeue tasks
         for _ in 0..4 {
             let this = this.clone();
-            let global = global.clone();
             tokio::spawn(async move {
+                // continuously wait for elements in the queue to process them sequantially.
+                // this is using parallel tasks to allow (hopefully) better performance.
                 while let Some(element) = this.queue.pop().await {
-                    // we need to wait
-                    if let Some(duration) = global.locked_for().await {
-                        tokio::time::sleep(duration).await;
-                    }
-
                     if this.remaining() == 0 {
                         debug!("0 tickets remaining, we have to wait.");
 
                         match this.time_remaining() {
                             TimeRemaining::Finished => {
+                                debug!("waiting seems finished.");
                                 this.try_reset();
                             }
                             TimeRemaining::Some(duration) => {
@@ -79,7 +113,9 @@ impl Bucket {
 
                                 this.try_reset();
                             }
-                            TimeRemaining::NotStarted => {}
+                            TimeRemaining::NotStarted => {
+                                debug!("we should not wait");
+                            }
                         }
                     }
 
@@ -94,19 +130,17 @@ impl Bucket {
         this
     }
 
-    /// Total number of tickets allotted in a cycle.
+    /// Total number of tickets allowed in a cycle.
     pub fn limit(&self) -> u64 {
         self.limit.load(Ordering::Relaxed)
     }
 
-    /// Number of tickets remaining.
+    /// Number of tickets remaining in the current cycle.
     pub fn remaining(&self) -> u64 {
         self.remaining.load(Ordering::Relaxed)
     }
 
-    /// Duration after the [`started_at`] time the bucket will refresh.
-    ///
-    /// [`started_at`]: Self::started_at
+    /// Duration after the [`Self::last_update`] time the bucket will refresh.
     pub fn reset_after(&self) -> u64 {
         self.reset_after.load(Ordering::Relaxed)
     }
@@ -117,6 +151,10 @@ impl Bucket {
         let last_update = &self.last_update;
 
         if last_update.is_empty() {
+            debug!("last update is empty");
+
+            TimeRemaining::NotStarted
+        } else {
             let elapsed = last_update.elapsed();
 
             if elapsed > Duration::from_millis(reset_after) {
@@ -124,16 +162,12 @@ impl Bucket {
             }
 
             TimeRemaining::Some(Duration::from_millis(reset_after) - elapsed)
-        } else {
-            TimeRemaining::NotStarted
         }
     }
 
-    /// Try to reset this bucket's [`started_at`] value if it has finished.
+    /// Try to reset this bucket's [`Self::last_update`] value if it has finished.
     ///
     /// Returns whether resetting was possible.
-    ///
-    /// [`started_at`]: Self::started_at
     pub fn try_reset(&self) -> bool {
         if self.last_update.is_empty() {
             return false;
@@ -150,10 +184,12 @@ impl Bucket {
     }
 
     /// Update this bucket's ratelimit data after a request has been made.
-    pub fn update(&self, ratelimits: Present, time: u64) {
+    /// The time of the request should be given.
+    pub fn update(&self, ratelimits: &Present, time: u64) {
         let bucket_limit = self.limit();
 
         if self.last_update.is_empty() {
+            debug!(millis = time, "updated the last update time");
             self.last_update.set_millis(time);
         }
 
@@ -167,9 +203,122 @@ impl Bucket {
             .store(ratelimits.remaining(), Ordering::Relaxed);
     }
 
-    pub async fn ticket(&self) -> oneshot::Receiver<()> {
+    /// Submits a ticket to the queue
+    /// A oneshot receiver is returned and will be called when the ticket is accepted.
+    pub fn ticket(&self) -> oneshot::Receiver<()> {
         let (tx, rx) = oneshot::channel();
         self.queue.push(tx);
         rx
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{
+        ops::Add,
+        time::{Duration, Instant, SystemTime},
+    };
+
+    use tokio::time::timeout;
+    use tracing::info;
+    use twilight_http_ratelimiting::RatelimitHeaders;
+
+    use super::Bucket;
+
+    #[test_log::test(tokio::test)]
+    async fn should_ratelimit() {
+        let bucket = Bucket::new();
+
+        // Intialize a bucket with one remaining ticket
+        // and that resets in oue hour
+        let mreset = SystemTime::now()
+            .add(Duration::from_secs(100))
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_millis()
+            .to_string();
+        let headers: [(&str, &[u8]); 5] = [
+            ("x-ratelimit-bucket", b"123"),
+            ("x-ratelimit-limit", b"100"),
+            ("x-ratelimit-remaining", b"1"),
+            ("x-ratelimit-reset", mreset.as_bytes()),
+            ("x-ratelimit-reset-after", b"100.000"),
+        ];
+        if let RatelimitHeaders::Present(present) =
+            RatelimitHeaders::from_pairs(headers.into_iter()).unwrap()
+        {
+            // Integer truncating is expected
+            #[allow(clippy::cast_possible_truncation)]
+            bucket.update(
+                &present,
+                SystemTime::now()
+                    .duration_since(SystemTime::UNIX_EPOCH)
+                    .unwrap()
+                    .as_millis() as u64,
+            );
+        }
+
+        let ticket = bucket.ticket();
+
+        info!("first request");
+        // We should accept one ticket
+        let respo = timeout(Duration::from_secs(10), ticket).await;
+        assert!(respo.is_ok());
+
+        info!("second request");
+
+        let ticket = bucket.ticket();
+        // We should accept one ticket
+        let respo = timeout(Duration::from_secs(1), ticket).await;
+
+        // the ticket should not have responded because the queue is locked
+        assert!(respo.is_err());
+    }
+
+    #[test_log::test(tokio::test)]
+    async fn should_block_until_possible() {
+        let bucket = Bucket::new();
+
+        // Intialize a bucket with one remaining ticket
+        // and that resets in oue hour
+        let mreset = SystemTime::now()
+            .add(Duration::from_secs(100))
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_millis()
+            .to_string();
+        let headers: [(&str, &[u8]); 5] = [
+            ("x-ratelimit-bucket", b"123"),
+            ("x-ratelimit-limit", b"100"),
+            ("x-ratelimit-remaining", b"0"),
+            ("x-ratelimit-reset", mreset.as_bytes()),
+            ("x-ratelimit-reset-after", b"100.000"),
+        ];
+
+        if let RatelimitHeaders::Present(present) =
+            RatelimitHeaders::from_pairs(headers.into_iter()).unwrap()
+        {
+            // Integer truncating is expected
+            #[allow(clippy::cast_possible_truncation)]
+            bucket.update(
+                &present,
+                SystemTime::now()
+                    .duration_since(SystemTime::UNIX_EPOCH)
+                    .unwrap()
+                    .as_millis() as u64,
+            );
+        }
+
+        let ticket = bucket.ticket();
+        let start = Instant::now();
+
+        // in this case, the ratelimiter should wait 10 seconds
+        let respo = timeout(Duration::from_secs(12), ticket).await;
+        let end = start.elapsed().as_secs();
+
+        // we should have waited 10 seconds (+- 1s)
+        assert_eq!(10, end);
+        // and the ticket should be a success
+        assert!(respo.is_ok());
     }
 }

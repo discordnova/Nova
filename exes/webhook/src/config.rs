@@ -35,7 +35,7 @@ pub struct Discord {
 }
 
 #[derive(Debug, Deserialize, Clone, Default, Copy)]
-pub struct WebhookConfig {
+pub struct Webhook {
     pub server: ServerSettings,
     pub discord: Discord,
 }

@@ -38,7 +38,7 @@ impl Hash for VNode {
 pub struct MetadataMap<'a>(pub &'a mut tonic::metadata::MetadataMap);
 
 impl<'a> Injector for MetadataMap<'a> {
-    /// Set a key and value in the MetadataMap.  Does nothing if the key or value are not valid inputs
+    /// Set a key and value in the `MetadataMap`.  Does nothing if the key or value are not valid inputs
     fn set(&mut self, key: &str, value: String) {
         if let Ok(key) = tonic::metadata::MetadataKey::from_bytes(key.as_bytes()) {
             if let Ok(val) = tonic::metadata::MetadataValue::try_from(&value) {
@@ -50,11 +50,11 @@ impl<'a> Injector for MetadataMap<'a> {
 
 impl VNode {
     pub async fn new(address: String, port: u16) -> Result<Self, tonic::transport::Error> {
-        let host = format!("http://{}:{}", address.clone(), port);
+        let host = format!("http://{}:{port}", address.clone());
         debug!("connecting to {}", host);
         let client = RatelimiterClient::connect(host).await?;
 
-        Ok(VNode { client, address })
+        Ok(Self { address, client })
     }
 }
 

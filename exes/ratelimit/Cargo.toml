@@ -27,3 +27,15 @@ tokio-stream = "0.1.11"
 
 
 redis = { version = "0.22.1", features = ["cluster", "connection-manager", "tokio-comp"] }
+
+[dev-dependencies]
+criterion = { version = "0.4", features = ["async_tokio"] }
+tokio-test = "*"
+tracing-test = "0.2.3"
+tracing-subscriber = "*"
+env_logger = "*"
+test-log = { version = "0.2.11", features = ["log", "trace"] }
+
+[[bench]]
+name = "bucket"
+harness = false

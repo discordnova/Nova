@@ -1,18 +1,17 @@
-use crate::config::WebhookConfig;
+use crate::config::Webhook;
+use anyhow::bail;
 use async_nats::Client;
 use ed25519_dalek::PublicKey;
-use error::WebhookError;
 use hyper::{
     body::{to_bytes, Bytes},
     service::Service,
-    Body, Method, Request, Response, StatusCode,
+    Body, Method, Request, Response,
 };
 use shared::payloads::{CachePayload, DispatchEventTagged};
-use signature::validate_signature;
+use signature::validate;
 use std::{
     future::Future,
     pin::Pin,
-    str::from_utf8,
     task::{Context, Poll},
 };
 use tracing::{debug, error};
@@ -22,7 +21,6 @@ use twilight_model::{
     gateway::payload::incoming::InteractionCreate,
 };
 
-mod error;
 pub mod make_service;
 mod signature;
 
@@ -32,46 +30,37 @@ pub mod tests;
 /// Hyper service used to handle the discord webhooks
 #[derive(Clone)]
 pub struct WebhookService {
-    pub config: WebhookConfig,
+    pub config: Webhook,
     pub nats: Client,
 }
 
 impl WebhookService {
-    async fn check_request(req: Request<Body>, pk: PublicKey) -> Result<Bytes, WebhookError> {
+    async fn check_request(req: Request<Body>, pk: PublicKey) -> Result<Bytes, anyhow::Error> {
         if req.method() == Method::POST {
             let signature = if let Some(sig) = req.headers().get("X-Signature-Ed25519") {
-                sig.to_owned()
+                sig.clone()
             } else {
-                return Err(WebhookError::new(
-                    StatusCode::BAD_REQUEST,
-                    "missing signature header",
-                ));
+                bail!("Missing signature header");
             };
 
             let timestamp = if let Some(timestamp) = req.headers().get("X-Signature-Timestamp") {
-                timestamp.to_owned()
+                timestamp.clone()
             } else {
-                return Err(WebhookError::new(
-                    StatusCode::BAD_REQUEST,
-                    "missing timestamp header",
-                ));
+                bail!("Missing timestamp header");
             };
             let data = to_bytes(req.into_body()).await?;
 
-            if validate_signature(
+            if validate(
                 &pk,
                 &[timestamp.as_bytes().to_vec(), data.to_vec()].concat(),
                 signature.to_str()?,
             ) {
                 Ok(data)
             } else {
-                Err(WebhookError::new(
-                    StatusCode::UNAUTHORIZED,
-                    "invalid signature",
-                ))
+                bail!("invalid signature");
             }
         } else {
-            Err(WebhookError::new(StatusCode::NOT_FOUND, "not found"))
+            bail!("not found");
         }
     }
 
@@ -79,69 +68,46 @@ impl WebhookService {
         req: Request<Body>,
         nats: Client,
         pk: PublicKey,
-    ) -> Result<Response<Body>, WebhookError> {
-        match Self::check_request(req, pk).await {
-            Ok(data) => {
-                let utf8 = from_utf8(&data);
-                match utf8 {
-                    Ok(data) => match serde_json::from_str::<Interaction>(data) {
-                        Ok(value) => {
-                            match value.kind {
-                                InteractionType::Ping => Ok(Response::builder()
-                                    .header("Content-Type", "application/json")
-                                    .body(r#"{"type":1}"#.into())
-                                    .unwrap()),
-                                _ => {
-                                    debug!("calling nats");
-                                    // this should hopefully not fail ?
+    ) -> Result<Response<Body>, anyhow::Error> {
+        let data = Self::check_request(req, pk).await?;
+        let interaction: Interaction = serde_json::from_slice(&data)?;
 
-                                    let data = CachePayload {
-                                        data: DispatchEventTagged {
-                                            data: DispatchEvent::InteractionCreate(Box::new(
-                                                InteractionCreate(value),
-                                            )),
-                                        },
-                                    };
+        if interaction.kind == InteractionType::Ping {
+            Ok(Response::builder()
+                .header("Content-Type", "application/json")
+                .body(r#"{"type":1}"#.into())
+                .unwrap())
+        } else {
+            debug!("calling nats");
+            // this should hopefully not fail ?
 
-                                    let payload = serde_json::to_string(&data).unwrap();
+            let data = CachePayload {
+                data: DispatchEventTagged {
+                    data: DispatchEvent::InteractionCreate(Box::new(InteractionCreate(
+                        interaction,
+                    ))),
+                },
+            };
 
-                                    match nats
-                                        .request(
-                                            "nova.cache.dispatch.INTERACTION_CREATE".to_string(),
-                                            Bytes::from(payload),
-                                        )
-                                        .await
-                                    {
-                                        Ok(response) => Ok(Response::builder()
-                                            .header("Content-Type", "application/json")
-                                            .body(Body::from(response.payload))
-                                            .unwrap()),
+            let payload = serde_json::to_string(&data).unwrap();
 
-                                        Err(error) => {
-                                            error!("failed to request nats: {}", error);
-                                            Err(WebhookError::new(
-                                                StatusCode::INTERNAL_SERVER_ERROR,
-                                                "failed to request nats",
-                                            ))
-                                        }
-                                    }
-                                }
-                            }
-                        }
+            match nats
+                .request(
+                    "nova.cache.dispatch.INTERACTION_CREATE".to_string(),
+                    Bytes::from(payload),
+                )
+                .await
+            {
+                Ok(response) => Ok(Response::builder()
+                    .header("Content-Type", "application/json")
+                    .body(Body::from(response.payload))
+                    .unwrap()),
 
-                        Err(error) => {
-                            error!("invalid json body: {}", error);
-                            Err(WebhookError::new(
-                                StatusCode::BAD_REQUEST,
-                                "invalid json body",
-                            ))
-                        }
-                    },
-
-                    Err(_) => Err(WebhookError::new(StatusCode::BAD_REQUEST, "not utf-8 body")),
+                Err(error) => {
+                    error!("failed to request nats: {}", error);
+                    Err(anyhow::anyhow!("internal error"))
                 }
             }
-            Err(error) => Err(error),
         }
     }
 }
@@ -149,7 +115,7 @@ impl WebhookService {
 /// Implementation of the service
 impl Service<hyper::Request<Body>> for WebhookService {
     type Response = hyper::Response<Body>;
-    type Error = hyper::Error;
+    type Error = anyhow::Error;
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
     fn poll_ready(&mut self, _: &mut Context) -> Poll<Result<(), Self::Error>> {
@@ -163,7 +129,7 @@ impl Service<hyper::Request<Body>> for WebhookService {
 
             match response {
                 Ok(r) => Ok(r),
-                Err(e) => Ok(e.into()),
+                Err(e) => Err(e),
             }
         })
     }

@@ -1,5 +1,17 @@
+#![deny(
+    clippy::all,
+    clippy::correctness,
+    clippy::suspicious,
+    clippy::style,
+    clippy::complexity,
+    clippy::perf,
+    clippy::pedantic,
+    clippy::nursery,
+    unsafe_code
+)]
+
 use buckets::redis_lock::RedisLock;
-use config::RatelimitServerConfig;
+use config::Ratelimit;
 use grpc::RLServer;
 use leash::{AnyhowResultFuture, Component};
 use proto::nova::ratelimit::ratelimiter::ratelimiter_server::RatelimiterServer;
@@ -10,13 +22,13 @@ use std::pin::Pin;
 use tokio::sync::oneshot;
 use tonic::transport::Server;
 
-mod buckets;
+pub mod buckets;
 mod config;
 mod grpc;
 
 pub struct RatelimiterServerComponent {}
 impl Component for RatelimiterServerComponent {
-    type Config = RatelimitServerConfig;
+    type Config = Ratelimit;
     const SERVICE_NAME: &'static str = "ratelimiter";
 
     fn start(
