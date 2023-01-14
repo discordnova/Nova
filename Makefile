@@ -23,7 +23,7 @@ build/bin/nova: build/lib/liball_in_one.a internal/pkg/all-in-one/all-in-one.h
 	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
 all: 
-	ifeq ($(OS),Windows)
+	ifeq ($(OS),Windows_NT)
 		build/bin/{cache,gateway,ratelimit,rest,webhook}{,.exe} build/bin/nova
 	else
 		build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
