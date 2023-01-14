@@ -40,7 +40,7 @@ pub fn handle_error(error: &anyhow::Error) {
             unsafe {
                 func(
                     (stacktrace.len() + 1).try_into().unwrap(),
-                    stacktrace.as_mut_ptr().cast::<i8>(),
+                    stacktrace.as_mut_ptr().cast::<libc::c_char>(),
                 );
             }
         }

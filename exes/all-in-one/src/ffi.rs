@@ -40,7 +40,7 @@ pub extern "C" fn load_config() -> *mut c_char {
         let c_str_song = CString::new(config)?;
         Ok(c_str_song.into_raw())
     })
-    .or(Some(ptr::null::<i8>() as *mut i8))
+    .or(Some(ptr::null::<c_char>() as *mut c_char))
     .expect("something has gone terribly wrong")
 }
 
@@ -138,6 +138,6 @@ pub unsafe extern "C" fn create_instance(config: *mut c_char) -> *mut AllInOneIn
 
         Ok(all_in_one)
     })
-    .or(Some(ptr::null::<i8>() as *mut AllInOneInstance))
+    .or(Some(ptr::null::<AllInOneInstance>() as *mut AllInOneInstance))
     .expect("something has gone terribly wrong")
 }
