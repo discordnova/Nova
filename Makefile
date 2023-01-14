@@ -1,15 +1,19 @@
+ifeq ($(OS),Windows_NT)
+	detected_OS := Windows
+else
+	detected_OS := $(shell uname -s)
+endif
+
 # Creates the bin folder for build artifacts
 build/{bin,lib}:
 	@mkdir -p build/{lib,bin}
 
 # Builds all rust targets
-ifeq ($(OS),Windows_NT)
 build/lib/liball_in_one.a build/bin/{cache,gateway,ratelimit,rest,webhook}{,.exe}: build/{bin,lib}
 	@echo "Building rust project"
 	cargo build --release
 	@cp target/release/liball_in_one.a build/lib
 	@cp target/release/{cache,gateway,ratelimit,rest,webhook}{,.exe} build/bin
-endif
 
 build/lib/liball_in_one.a build/bin/{cache,gateway,ratelimit,rest,webhook}: build/{bin,lib}
 	@echo "Building rust project"
@@ -24,7 +28,15 @@ internal/pkg/all-in-one/all-in-one.h: build/lib/liball_in_one.a
 build/bin/nova: build/lib/liball_in_one.a internal/pkg/all-in-one/all-in-one.h
 	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
-all: build/bin/{cache,gateway,ratelimit,rest,webhook}{,.exe} build/bin/nova
+ifeq ($(detected_OS),Windows)
+	all: build/bin/{cache,gateway,ratelimit,rest,webhook}{,.exe} build/bin/nova
+endif
+ifeq ($(detected_OS),Linux)
+	all: build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
+endif
+ifeq ($(detected_OS),Darwin)
+	all: build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
+endif
 
 docker-images:
 	docker-compose build
