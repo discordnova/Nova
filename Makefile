@@ -28,15 +28,16 @@ internal/pkg/all-in-one/all-in-one.h: build/lib/liball_in_one.a
 build/bin/nova: build/lib/liball_in_one.a internal/pkg/all-in-one/all-in-one.h
 	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
-ifeq ($(detected_OS),Windows)
-	all: build/bin/{cache,gateway,ratelimit,rest,webhook}{,.exe} build/bin/nova
-endif
-ifeq ($(detected_OS),Linux)
-	all: build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
-endif
-ifeq ($(detected_OS),Darwin)
-	all: build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
-endif
+all: 
+	ifeq ($(detected_OS),Windows)
+		build/bin/{cache,gateway,ratelimit,rest,webhook}{,.exe} build/bin/nova
+	endif
+	ifeq ($(detected_OS),Linux)
+		build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
+	endif
+	ifeq ($(detected_OS),Darwin)
+		build/bin/{cache,gateway,ratelimit,rest,webhook} build/bin/nova
+	endif
 
 docker-images:
 	docker-compose build
