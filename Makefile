@@ -6,7 +6,7 @@ all:
 	# Builds rust
 	@echo "Building rust project"
 	cargo build --release
-	ls target/
+	ls target/release/
 	@cp target/release/liball_in_one.a build/lib
 	@cp target/release/{cache,gateway,ratelimit,rest,webhook} build/bin
 
