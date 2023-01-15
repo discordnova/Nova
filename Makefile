@@ -1,6 +1,5 @@
 # Build nova all-in-one bin
 all:
-	gcc -v
 	# Creates bin folder for artifacts
 	@mkdir -p build/{bin,lib}
 	
@@ -13,6 +12,7 @@ all:
 	@cp target/release/ratelimit build/bin
 	@cp target/release/rest build/bin
 	@cp target/release/webhook build/bin
+	gcc -v
 
 	# Builds go
 	go build -a -x -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
