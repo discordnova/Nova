@@ -15,5 +15,6 @@ mkShell {
 		gnumake
 		protobuf
 		rustc
+		zlib
 	];
 }
