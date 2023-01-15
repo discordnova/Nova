@@ -40,5 +40,5 @@ test-log = { version = "0.2.11", features = ["log", "trace"] }
 name = "bucket"
 harness = false
 
-[target.'cfg(not(target_env = "msvc"))'.dependencies]
+[target.'cfg(not(target_os = "windows"))'.dependencies]
 tikv-jemallocator = "0.5"
