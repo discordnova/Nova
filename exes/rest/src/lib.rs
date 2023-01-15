@@ -53,11 +53,12 @@ impl Component for ReverseProxyServer {
 
             let client: Client<_, hyper::Body> = Client::builder().build(https);
             let token = settings.config.discord.token.clone();
-
+            let config = settings.config.clone();
             let service_fn = make_service_fn(move |_: &AddrStream| {
                 let client = client.clone();
                 let ratelimiter = ratelimiter.clone();
                 let token = token.clone();
+                let config = config.clone();
                 async move {
                     Ok::<_, Infallible>(service_fn(move |request: Request<Body>| {
                         let token = token.clone();
@@ -71,10 +72,11 @@ impl Component for ReverseProxyServer {
                         let client = client.clone();
                         let ratelimiter = ratelimiter.clone();
 
+                        let config = config.clone();
                         async move {
                             let token = token.clone();
                             let ratelimiter = ratelimiter.clone();
-                            handle_request(client, ratelimiter, token, request).await
+                            handle_request(client, ratelimiter, config, token, request).await
                         }
                     }))
                 }

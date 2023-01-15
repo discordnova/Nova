@@ -19,4 +19,7 @@ ed25519-dalek = "1"
 twilight-model = { version = "0.14" }
 anyhow = "1.0.68"
 
-async-nats = "0.25.1"
+async-nats = "0.26.0"
+
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
+tikv-jemallocator = "0.5"

@@ -1,7 +1,7 @@
 FROM rust AS chef
 USER root
 RUN cargo install cargo-chef
-RUN apt-get update && apt-get install -y protobuf-compiler 
+RUN apt-get update && apt-get install -y protobuf-compiler
 WORKDIR /app
 
 # Planning install

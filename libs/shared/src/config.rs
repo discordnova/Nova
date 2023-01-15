@@ -10,6 +10,7 @@ pub struct Settings<T: Clone + DeserializeOwned> {
     pub config: T,
     pub nats: crate::nats::Configuration,
     pub redis: crate::redis::Configuration,
+    pub opentelemetry: Option<crate::opentelemetry::Configuration>,
 }
 
 impl<T: Clone + DeserializeOwned + Default> Settings<T> {

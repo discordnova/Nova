@@ -24,7 +24,7 @@ use tokio_stream::StreamExt;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 use twilight_gateway::{Event, Shard};
 pub mod config;
-use tracing::{debug, error, info, trace_span};
+use tracing::{debug, error, info, info_span, instrument, Instrument};
 use twilight_model::gateway::event::DispatchEvent;
 
 struct MetadataMap<'a>(&'a mut HeaderMap);
@@ -84,13 +84,15 @@ impl Component for GatewayServer {
     }
 }
 
+#[instrument]
 async fn handle_event(event: Event, nats: &Client) -> anyhow::Result<()> {
     if let Event::Ready(ready) = event {
-        info!("Logged in as {}", ready.user.name);
+        info!(username = ready.user.name, "logged in");
     } else {
         let name = event.kind().name();
         if let Ok(dispatch_event) = DispatchEvent::try_from(event) {
-            debug!("handling event {}", name.unwrap());
+            let name = name.unwrap();
+            debug!(event_name = name, "handling dispatch event");
 
             let data = CachePayload {
                 data: DispatchEventTagged(dispatch_event),
@@ -98,7 +100,7 @@ async fn handle_event(event: Event, nats: &Client) -> anyhow::Result<()> {
             let value = serde_json::to_string(&data)?;
             let bytes = bytes::Bytes::from(value);
 
-            let span = trace_span!("nats send");
+            let span = info_span!("nats send");
 
             let mut header_map = HeaderMap::new();
             let context = span.context();
@@ -106,12 +108,9 @@ async fn handle_event(event: Event, nats: &Client) -> anyhow::Result<()> {
                 propagator.inject_context(&context, &mut MetadataMap(&mut header_map));
             });
 
-            nats.publish_with_headers(
-                format!("nova.cache.dispatch.{}", name.unwrap()),
-                header_map,
-                bytes,
-            )
-            .await?;
+            nats.publish_with_headers(format!("nova.cache.dispatch.{name}"), header_map, bytes)
+                .instrument(info_span!("sending to nats"))
+                .await?;
         }
     }
 

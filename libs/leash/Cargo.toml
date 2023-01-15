@@ -16,4 +16,4 @@ tracing = "0.1.37"
 env_logger = "0.10.0"
 tracing-opentelemetry = "0.18.0"
 opentelemetry = { version ="0.18.0", features = ["rt-tokio"] }
-opentelemetry-otlp = { version = "0.11.0" }
+opentelemetry-otlp = { version = "0.11.0", features = ["metrics"] }

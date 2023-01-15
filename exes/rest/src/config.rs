@@ -28,4 +28,11 @@ pub struct ReverseProxy {
     pub discord: Discord,
     pub ratelimiter_address: String,
     pub ratelimiter_port: u16,
+    #[serde(default = "default_upstream")]
+    pub upstream: Option<String>,
+}
+
+#[allow(clippy::unnecessary_wraps)]
+fn default_upstream() -> Option<String> {
+    Some("https://discord.com".to_string())
 }

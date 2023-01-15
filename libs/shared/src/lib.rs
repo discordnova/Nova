@@ -13,3 +13,4 @@ pub mod config;
 pub mod nats;
 pub mod payloads;
 pub mod redis;
+pub mod opentelemetry;
