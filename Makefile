@@ -6,9 +6,12 @@ all:
 	# Builds rust
 	@echo "Building rust project"
 	cargo build --release
-	ls target/release/
 	@cp target/release/liball_in_one.a build/lib
-	@cp target/release/{cache,gateway,ratelimit,rest,webhook} build/bin
+	@cp target/release/cache build/bin
+	@cp target/release/gateway build/bin
+	@cp target/release/ratelimit build/bin
+	@cp target/release/rest build/bin
+	@cp target/release/webhook build/bin
 
 	# Builds go
 	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
