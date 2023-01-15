@@ -1,17 +1,21 @@
 # Build nova all-in-one bin
 all:
+	gcc -v
 	# Creates bin folder for artifacts
 	@mkdir -p build/{bin,lib}
 	
 	# Builds rust
 	@echo "Building rust project"
 	cargo build --release
-	ls target/
 	@cp target/release/liball_in_one.a build/lib
-	@cp target/release/{cache,gateway,ratelimit,rest,webhook} build/bin
+	@cp target/release/cache build/bin
+	@cp target/release/gateway build/bin
+	@cp target/release/ratelimit build/bin
+	@cp target/release/rest build/bin
+	@cp target/release/webhook build/bin
 
 	# Builds go
-	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
+	go build -a -x -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
 docker-images:
 	docker-compose build
