@@ -1,5 +1,6 @@
 # Build nova all-in-one bin
 all:
+	gcc -v
 	# Creates bin folder for artifacts
 	@mkdir -p build/{bin,lib}
 	
