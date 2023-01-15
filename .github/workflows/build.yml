@@ -88,7 +88,8 @@ jobs:
 
       - uses: msys2/setup-msys2@v2
         with:
-          install: git mingw-w64-x86_64-go mingw-w64-x86_64-make mingw-w64-x86_64-protobuf mingw-w64-x86_64-rust mingw-w64-x86_64-gcc mingw-w64-x86_64-dlfcn
+          msystem: clang64
+          install: git mingw-w64-clang-x86_64-go mingw-w64-clang-x86_64-make mingw-w64-clang-x86_64-protobuf mingw-w64-clang-x86_64-rust mingw-w64-clang-x86_64-gcc mingw-w64-clang-x86_64-dlfcn
 
       - name: Build all
         run: |
@@ -130,7 +131,7 @@ jobs:
           make all
       - uses: actions/upload-artifact@v3
         with:
-          name: macos
+          name: linux
           path: build/*
 
   release:
