@@ -11,6 +11,7 @@ mkShell {
 	buildInputs = [
 		cargo
 		gcc
+		clang
 		go
 		gnumake
 		protobuf

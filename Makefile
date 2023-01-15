@@ -12,10 +12,9 @@ all:
 	@cp target/release/ratelimit build/bin
 	@cp target/release/rest build/bin
 	@cp target/release/webhook build/bin
-	gcc -v
 
 	# Builds go
-	go build -a -x -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
+	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
 docker-images:
 	docker-compose build

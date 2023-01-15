@@ -127,6 +127,8 @@ jobs:
           go-version: '1.18.4'
       
       - name: Build all
+        env:
+          CC: clang
         run: |
           make all
       - uses: actions/upload-artifact@v3
