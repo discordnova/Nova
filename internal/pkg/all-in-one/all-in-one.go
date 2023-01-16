@@ -2,7 +2,7 @@ package allinone
 
 /*
 #cgo LDFLAGS: -L../../../build/lib -lall_in_one -lz -lm
-#include "./all-in-one.h"
+#include "./all_in_one.h"
 #include "./error_handler.h"
 */
 import "C"
