@@ -2,7 +2,7 @@ EXTENSION :=
 ifeq ($(OS),Windows_NT)
 	EXTENSION += .exe
 endif
-PROJECTS = $(shell find exes/ -mindepth 1 -maxdepth 1 -type d  -printf '%f\n')
+PROJECTS = $(shell find exes/ -mindepth 1 -maxdepth 1 -type d -printf '%f\n')
 
 # Static libraries
 target/release/lib%.a: libs/%
