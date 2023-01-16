@@ -5,8 +5,9 @@ members = [
     "exes/rest/",
     "exes/webhook/",
     "exes/ratelimit/",
-		"exes/all-in-one/",
 
+
+		"libs/all_in_one/",
     "libs/proto/",
     "libs/shared/",
     "libs/leash/"
@@ -27,7 +28,7 @@ anyhow = "1"
 tracing = "0.1"
 tracing-futures = "0.2"
 tracing-opentelemetry = "0.18"
-opentelemetry = "0.18"
+opentelemetry = { version = "0.18", features = ["rt-tokio"] }
 opentelemetry-http = "0.7"
 tikv-jemallocator = "0.5"
 

@@ -1,37 +1,43 @@
-# Build nova all-in-one bin
-all:
-	# Creates bin folder for artifacts
-	@mkdir -p build/bin
-	@mkdir -p build/lib
-	
-	@echo "Using cc, go, rust and ld versions"
-	cc -v
-	go version
-	rustc --version
-	ld -v
+EXTENSION := 
+ifeq ($(OS),Windows_NT)
+	EXTENSION += .exe
+endif
+dir_guard=@mkdir -p $(@D)
+PROJECTS = $(shell find exes/ -mindepth 1 -maxdepth 1 -type d  -printf '%f\n')
+BINS=$(PROJECTS:%=build/bin/%$(EXTENSION))
 
-	# Builds rust
-	@echo "Building rust project"
-	cargo build --release
-	@cp target/release/liball_in_one.a build/lib/
-	@cp target/release/cache build/bin/
-	@cp target/release/gateway build/bin/
-	@cp target/release/ratelimit build/bin/
-	@cp target/release/rest build/bin/
-	@cp target/release/webhook build/bin/
+# Static libraries
+target/release/lib%.a:
+	cargo build --release -p $*
 
-	# Builds go
+# Executables
+target/release/%$(EXTENSION):
+	cargo build --release -p $*
+
+# Copy static libraries
+build/lib/%: target/release/%
+	$(dir_guard)
+	cp target/release/$* build/lib
+
+# Copy executables
+build/bin/%$(EXTENSION): target/release/%$(EXTENSION)
+	$(dir_guard)
+	cp target/release/$*$(EXTENSION) build/lib/
+
+# All in one binary
+build/bin/nova$(EXTENSION): build/lib/liball_in_one.a
+	$(dir_guard)
 	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
-docker-images:
-	docker-compose build
+all: $(BINS) build/bin/nova$(EXTENSION)
 
-docker-push:
-	docker-compose push
+clean:
+	rm -rf build
+	rm -rf $(PROJECTS:%=target/release/%$(EXTENSION))
+	rm -rf target/release/liball_in_one.a
 
-rust-test:
+test:
 	cargo test
+	go test
 
-test: rust-test
-
-.PHONY: all docker-images docker-push test rust-test
+.PHONY: clean all test

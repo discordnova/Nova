@@ -1,5 +1,5 @@
 [package]
-name = "all-in-one"
+name = "all_in_one"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,11 +10,11 @@ libc = "0.2.139"
 leash = { path = "../../libs/leash" }
 shared = { path = "../../libs/shared" }
 
-cache = { path = "../cache" }
-gateway = { path = "../gateway" }
-ratelimit = { path = "../ratelimit" }
-rest = { path = "../rest" }
-webhook = { path = "../webhook" }
+cache = { path = "../../exes/cache" }
+gateway = { path = "../../exes/gateway" }
+ratelimit = { path = "../../exes/ratelimit" }
+rest = { path = "../../exes/rest" }
+webhook = { path = "../../exes/webhook" }
 ctrlc = "3.2.4"
 
 tokio = { version = "1.23.1", features = ["rt"] }

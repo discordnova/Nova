@@ -9,7 +9,6 @@ use tracing::trace_span;
 use twilight_model::gateway::event::{DispatchEvent, DispatchEventWithTypeDeserializer};
 
 #[derive(Debug, Clone, PartialEq)]
-#[repr(transparent)]
 pub struct DispatchEventTagged(pub DispatchEvent);
 
 impl Deref for DispatchEventTagged {
@@ -76,12 +75,11 @@ mod tests {
 
     #[test]
     fn serialize_event_tagged() {
-        let dispatch_event = DispatchEvent::GiftCodeUpdate;
+        let dispatch_event = DispatchEventTagged(DispatchEvent::GiftCodeUpdate);
 
         let value = serde_json::to_value(&dispatch_event);
         assert!(value.is_ok());
         let value = value.unwrap();
-
         let kind = value.get("t").and_then(serde_json::Value::as_str);
         assert_eq!(kind, Some("GIFT_CODE_UPDATE"));
     }

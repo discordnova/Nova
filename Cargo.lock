@@ -38,7 +38,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "all-in-one"
+name = "all_in_one"
 version = "0.1.0"
 dependencies = [
  "anyhow",
