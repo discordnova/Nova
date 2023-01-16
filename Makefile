@@ -1,7 +1,8 @@
 # Build nova all-in-one bin
 all:
 	# Creates bin folder for artifacts
-	@mkdir -p build/{bin,lib}
+	@mkdir -p build/bin
+	@mkdir -p build/lib
 	
 	@echo "Using cc, go, rust and ld versions"
 	cc -v
