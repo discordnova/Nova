@@ -5,7 +5,7 @@ endif
 PROJECTS = $(shell find exes/ -mindepth 1 -maxdepth 1 -type d  -printf '%f\n')
 
 # Static libraries
-target/release/lib%.a:
+target/release/lib%.a: libs/%
 	cargo build --release -p $*
 
 # Executables
