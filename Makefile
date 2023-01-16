@@ -3,6 +3,12 @@ all:
 	# Creates bin folder for artifacts
 	@mkdir -p build/{bin,lib}
 	
+	@echo "Using cc, go, rust and ld versions"
+	cc -v
+	go version
+	rustc --version
+	ld -v
+
 	# Builds rust
 	@echo "Building rust project"
 	cargo build --release
@@ -12,6 +18,8 @@ all:
 	@cp target/release/ratelimit build/bin
 	@cp target/release/rest build/bin
 	@cp target/release/webhook build/bin
+
+	tree build/
 
 	# Builds go
 	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
