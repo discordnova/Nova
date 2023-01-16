@@ -11,3 +11,29 @@ members = [
     "libs/shared/",
     "libs/leash/"
 ]
+
+[workspace.dependencies]
+shared = { path = "libs/shared" }
+proto =  { path = "libs/proto" }
+leash = { path = "libs/leash" }
+
+tokio = { version = "1", features = ["rt-multi-thread"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+hyper = "0.14.23"
+
+anyhow = "1"
+
+tracing = "0.1"
+tracing-futures = "0.2"
+tracing-opentelemetry = "0.18"
+opentelemetry = "0.18"
+opentelemetry-http = "0.7"
+tikv-jemallocator = "0.5"
+
+criterion = { version = "0.4", features = ["async_tokio"] }
+tokio-test = "0.4.2"
+tracing-test = "0.2.3"
+tracing-subscriber = "0.3.16"
+test-log = { version = "*", features = ["trace"] }
+env_logger = "0.10.0"

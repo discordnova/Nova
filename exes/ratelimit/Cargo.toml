@@ -6,39 +6,36 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-shared = { path = "../../libs/shared" }
-proto = { path = "../../libs/proto" }
-leash = { path = "../../libs/leash" }
-
-hyper = "0.14"
-tokio = { version = "1", features = ["rt"] }
-
-serde = { version = "1.0.8", features = ["derive"] }
+shared = { workspace = true }
+proto = { workspace = true }
+leash = { workspace = true }
+tracing-opentelemetry = { workspace = true }
+opentelemetry = { workspace = true }
+opentelemetry-http = { workspace = true }
+tracing = { workspace = true }
+tracing-futures = { workspace = true }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+hyper = { workspace = true }
 
 twilight-http-ratelimiting = { git = "https://github.com/MatthieuCoder/twilight.git" }
-anyhow = "*"
-tracing = "*"
-tracing-opentelemetry = "0.18.0"
-opentelemetry = "0.18.0"
-opentelemetry-http = "0.7.0"
-
 tonic = "0.8.3"
 tokio-stream = "0.1.11"
-
-
 redis = { version = "0.22.1", features = ["cluster", "connection-manager", "tokio-comp"] }
 
 [dev-dependencies]
-criterion = { version = "0.4", features = ["async_tokio"] }
-tokio-test = "*"
-tracing-test = "0.2.3"
-tracing-subscriber = "*"
-env_logger = "*"
-test-log = { version = "0.2.11", features = ["log", "trace"] }
+criterion = { workspace = true }
+tokio-test = { workspace = true }
+tracing-test = { workspace = true }
+tracing-subscriber = { workspace = true }
+test-log = { workspace = true }
+env_logger = { workspace = true }
+
+[target.'cfg(not(target_os = "windows"))'.dependencies]
+tikv-jemallocator = { workspace = true }
 
 [[bench]]
 name = "bucket"
 harness = false
-
-[target.'cfg(not(target_os = "windows"))'.dependencies]
-tikv-jemallocator = "0.5"

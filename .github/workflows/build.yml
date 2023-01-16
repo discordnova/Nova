@@ -130,7 +130,6 @@ jobs:
         env:
           CC: clang
         run: |
-          update-alternatives --set ld /usr/bin/lld
           make all
       - uses: actions/upload-artifact@v3
         with:

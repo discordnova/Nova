@@ -1,6 +1,6 @@
 use anyhow::{bail, Context};
-use futures_util::FutureExt;
-use http::{
+use futures_util::future::FutureExt;
+use hyper::http::{
     header::{AUTHORIZATION, CONNECTION, HOST, TRANSFER_ENCODING, UPGRADE},
     HeaderValue, Method as HttpMethod, Request, Response, Uri,
 };
