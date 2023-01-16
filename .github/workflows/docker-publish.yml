@@ -34,5 +34,6 @@ jobs:
         uses: docker/bake-action@v2
         with:
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          set: |
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
