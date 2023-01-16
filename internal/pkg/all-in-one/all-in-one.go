@@ -9,7 +9,6 @@ import "C"
 import (
 	"fmt"
 	"time"
-	"unsafe"
 
 	"github.com/Jeffail/gabs"
 	"github.com/alicebob/miniredis/v2"
@@ -20,14 +19,6 @@ type AllInOne struct {
 	redis    *miniredis.Miniredis
 	nats     *server.Server
 	instance *C.AllInOneInstance
-}
-
-//export goErrorHandler
-func goErrorHandler(size C.int, start *C.char) {
-	dest := make([]byte, size)
-	copy(dest, (*(*[1024]byte)(unsafe.Pointer(start)))[:size:size])
-
-	println("Error from all in one runner: %s", string(dest))
 }
 
 func NewAllInOne() (*AllInOne, error) {
@@ -55,6 +46,7 @@ func (s *AllInOne) Start() error {
 	if !s.nats.ReadyForConnections(5 * time.Second) {
 		return fmt.Errorf("nats server didn't start after 5 seconds, please check if there is another service listening on the same port as nats")
 	}
+
 	handler := C.ErrorHandler(C.allInOneErrorHandler)
 	// Set the error handler
 	C.set_error_handler(handler)
