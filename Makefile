@@ -2,9 +2,7 @@ EXTENSION :=
 ifeq ($(OS),Windows_NT)
 	EXTENSION += .exe
 endif
-dir_guard=@mkdir -p $(@D)
 PROJECTS = $(shell find exes/ -mindepth 1 -maxdepth 1 -type d  -printf '%f\n')
-BINS=$(PROJECTS:%=build/bin/%$(EXTENSION))
 
 # Static libraries
 target/release/lib%.a:
@@ -16,19 +14,20 @@ target/release/%$(EXTENSION):
 
 # Copy static libraries
 build/lib/%: target/release/%
-	$(dir_guard)
-	cp target/release/$* build/lib
+	@mkdir -p build/lib
+	cp target/release/$* build/lib/$*
 
 # Copy executables
 build/bin/%$(EXTENSION): target/release/%$(EXTENSION)
-	$(dir_guard)
-	cp target/release/$*$(EXTENSION) build/lib/
+	@mkdir -p build/bin
+	cp target/release/$*$(EXTENSION) build/bin/$*$(EXTENSION)
 
 # All in one binary
 build/bin/nova$(EXTENSION): build/lib/liball_in_one.a
-	$(dir_guard)
+	@mkdir -p build/bin
 	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
+BINS=$(PROJECTS:%=build/bin/%$(EXTENSION))
 all: $(BINS) build/bin/nova$(EXTENSION)
 
 clean:
