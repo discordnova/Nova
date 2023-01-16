@@ -23,6 +23,10 @@ all:
 	# Builds go
 	go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
+	@echo "Build nova all-in-one successfully"
+	@echo "Here nova artifcats"
+	ls build/bin
+
 docker-images:
 	docker-compose build
 
