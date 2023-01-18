@@ -15,10 +15,8 @@ use config::Ratelimit;
 use grpc::RLServer;
 use leash::{AnyhowResultFuture, Component};
 use proto::nova::ratelimit::ratelimiter::ratelimiter_server::RatelimiterServer;
-use redis::aio::MultiplexedConnection;
 use shared::config::Settings;
-use std::future::Future;
-use std::pin::Pin;
+use std::future::IntoFuture;
 use tokio::sync::oneshot;
 use tonic::transport::Server;
 
@@ -38,10 +36,7 @@ impl Component for RatelimiterServerComponent {
     ) -> AnyhowResultFuture<()> {
         Box::pin(async move {
             let listening_address = settings.server.listening_adress;
-            let redis = Into::<
-                Pin<Box<dyn Future<Output = anyhow::Result<MultiplexedConnection>> + Send>>,
-            >::into(settings.redis)
-            .await?;
+            let redis = settings.redis.into_future().await?;
 
             let server = RLServer::new(RedisLock::new(redis));
 

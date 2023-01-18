@@ -11,11 +11,11 @@ mkShell {
 	buildInputs = [
 		cargo
 		gcc
-		clang
 		go
 		gnumake
 		protobuf
 		rustc
 		zlib
+		mdbook
 	];
 }

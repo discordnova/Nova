@@ -1,6 +1,6 @@
-use std::{error::Error, future::Future, pin::Pin};
+use std::{error::Error, future::IntoFuture};
 
-use async_nats::{Client, Subscriber};
+use async_nats::Subscriber;
 use managers::{
     automoderation::Automoderation, bans::Bans, channels::Channels,
     guild_schedules::GuildSchedules, guilds::Guilds, integrations::Integrations, invites::Invites,
@@ -42,9 +42,7 @@ struct Cache {
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let settings: Settings<CacheConfiguration> = Settings::new("cache").unwrap();
     info!("loaded configuration: {:?}", settings);
-    let nats =
-        Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>>>::into(settings.nats)
-            .await?;
+    let nats = settings.nats.into_future().await?;
 
     let mut cache = Cache::default();
 

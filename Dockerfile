@@ -1,33 +1,31 @@
-FROM rust AS chef
-USER root
-COPY .cargo .cargo
-RUN cargo install cargo-chef
-RUN apt-get update && apt-get install -y protobuf-compiler
-WORKDIR /app
-
-# Planning install
-FROM chef AS planner
+# syntax=docker/dockerfile:1
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:master AS xx
+FROM --platform=$BUILDPLATFORM rust:alpine as rbuild
+RUN apk add clang lld protobuf protobuf-dev git build-base mingw-w64-gcc
 COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
+COPY --from=xx / /
 
-# Building all targets
-FROM chef AS builder
-COPY --from=planner /app/recipe.json recipe.json
+ARG TARGETPLATFORM
+RUN xx-cargo build --release --target-dir ./build
 
-# Notice that we are specifying the --target flag!
-RUN cargo chef cook --release --recipe-path recipe.json
+FROM --platform=$BUILDPLATFORM alpine as passwd
+RUN addgroup -S nova && adduser -S nova -G nova
+
+FROM --platform=$BUILDPLATFORM golang:alpine as gbuild
+RUN apk add clang lld
+COPY --from=xx / /
+ARG TARGETPLATFORM
+COPY --from=rbuild /build/release/liball_in_one.a ./build/lib/liball_in_one.a
 COPY . .
-RUN cargo build --release 
+RUN go build -a -ldflags '-s' -o build/bin/nova cmd/nova/nova.go
 
-# Base os
-FROM debian:latest AS runtime-base
-# RUN addgroup -S nova && adduser -S nova -G nova
-RUN apt-get update && apt-get install ca-certificates -y
 
-# Final os
-FROM runtime-base AS runtime
+FROM scratch as component
+COPY --from=passwd /etc/passwd /etc/passwd
 ARG COMPONENT
 ENV COMPONENT=${COMPONENT}
-COPY --from=builder /app/target/release/${COMPONENT} /usr/local/bin/
-# USER nova
+COPY --from=rbuild /build/release/${COMPONENT} /usr/local/bin/
+USER nova
 ENTRYPOINT /usr/local/bin/${COMPONENT}
+
+FROM scratch as all_in_one

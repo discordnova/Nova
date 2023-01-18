@@ -12,13 +12,12 @@
 
 mod config;
 mod handler;
-use std::{future::Future, pin::Pin};
+use std::future::IntoFuture;
 
 use crate::{
     config::Webhook,
     handler::{make_service::MakeSvc, WebhookService},
 };
-use async_nats::Client;
 use hyper::Server;
 use leash::{AnyhowResultFuture, Component};
 use shared::config::Settings;
@@ -41,10 +40,7 @@ impl Component for WebhookServer {
 
             let bind = settings.server.listening_adress;
             info!("Nats connected!");
-            let nats = Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>>>::into(
-                settings.nats,
-            )
-            .await?;
+            let nats = settings.nats.into_future().await?;
 
             let make_service = MakeSvc::new(WebhookService {
                 config: settings.config,
