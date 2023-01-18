@@ -18,7 +18,7 @@ use shared::{
     config::Settings,
     payloads::{CachePayload, DispatchEventTagged},
 };
-use std::{convert::TryFrom, future::IntoFuture, str::FromStr};
+use std::{convert::TryFrom, future::Future, pin::Pin, str::FromStr};
 use tokio::{select, sync::oneshot};
 use tokio_stream::StreamExt;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
@@ -51,7 +51,10 @@ impl Component for GatewayServer {
                 .shard(settings.shard, settings.shard_total)?
                 .build();
 
-            let nats = settings.nats.into_future().await?;
+            let nats = Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>>>::into(
+                settings.nats,
+            )
+            .await?;
             shard.start().await?;
 
             loop {

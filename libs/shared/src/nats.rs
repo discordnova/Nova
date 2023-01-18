@@ -1,7 +1,4 @@
-use std::{
-    future::{Future, IntoFuture},
-    pin::Pin,
-};
+use std::{future::Future, pin::Pin};
 
 use async_nats::Client;
 use serde::Deserialize;
@@ -11,12 +8,8 @@ pub struct Configuration {
     pub host: String,
 }
 
-impl IntoFuture for Configuration {
-    type Output = anyhow::Result<Client>;
-
-    type IntoFuture = Pin<Box<dyn Future<Output = Self::Output> + Send>>;
-
-    fn into_future(self) -> Self::IntoFuture {
-        Box::pin(async move { Ok(async_nats::connect(self.host).await?) })
+impl From<Configuration> for Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>> {
+    fn from(value: Configuration) -> Self {
+        Box::pin(async move { Ok(async_nats::connect(value.host).await?) })
     }
 }
