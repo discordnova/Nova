@@ -89,6 +89,89 @@ fn normalize_path(request_path: &str) -> (&str, &str) {
         ("/api", request_path)
     }
 }
+fn path_name(path: &Path) -> &'static str {
+    match path {
+        Path::ApplicationCommand(..) => "Application commands",
+        Path::ApplicationCommandId(..) => "Application command",
+        Path::ApplicationGuildCommand(..) => "Application commands in guild",
+        Path::ApplicationGuildCommandId(..) => "Application command in guild",
+        Path::ChannelsId(..) => "Channel",
+        Path::ChannelsIdFollowers(..) => "Channel followers",
+        Path::ChannelsIdInvites(..) => "Channel invite",
+        Path::ChannelsIdMessages(..) | Path::ChannelsIdMessagesId(..) => "Channel message",
+        Path::ChannelsIdMessagesBulkDelete(..) => "Bulk delete message",
+        Path::ChannelsIdMessagesIdCrosspost(..) => "Crosspost message",
+        Path::ChannelsIdMessagesIdReactions(..) => "Message reaction",
+        Path::ChannelsIdMessagesIdReactionsUserIdType(..) => "Message reaction for user",
+        Path::ChannelsIdMessagesIdThreads(..) => "Threads of a specific message",
+        Path::ChannelsIdPermissionsOverwriteId(..) => "Channel permission override",
+        Path::ChannelsIdPins(..) => "Channel pins",
+        Path::ChannelsIdPinsMessageId(..) => "Specific channel pin",
+        Path::ChannelsIdRecipients(..) => "Channel recipients",
+        Path::ChannelsIdThreadMembers(..) => "Thread members",
+        Path::ChannelsIdThreadMembersId(..) => "Thread member",
+        Path::ChannelsIdThreads(..) => "Channel threads",
+        Path::ChannelsIdTyping(..) => "Typing indicator",
+        Path::ChannelsIdWebhooks(..) | Path::WebhooksId(..) => "Webhook",
+        Path::Gateway => "Gateway",
+        Path::GatewayBot => "Gateway bot info",
+        Path::Guilds => "Guilds",
+        Path::GuildsId(..) => "Guild",
+        Path::GuildsIdAuditLogs(..) => "Guild audit logs",
+        Path::GuildsIdAutoModerationRules(..) => "Guild automoderation rules",
+        Path::GuildsIdAutoModerationRulesId(..) => "Guild automoderation rule",
+        Path::GuildsIdBans(..) => "Guild bans",
+        Path::GuildsIdBansId(..) => "Specific guild ban",
+        Path::GuildsIdBansUserId(..) => "Guild ban for user",
+        Path::GuildsIdChannels(..) => "Guild channel",
+        Path::GuildsIdEmojis(..) => "Guild emoji",
+        Path::GuildsIdEmojisId(..) => "Specific guild emoji",
+        Path::GuildsIdIntegrations(..) => "Guild integrations",
+        Path::GuildsIdIntegrationsId(..) => "Specific guild integration",
+        Path::GuildsIdIntegrationsIdSync(..) => "Sync guild integration",
+        Path::GuildsIdInvites(..) => "Guild invites",
+        Path::GuildsIdMembers(..) => "Guild members",
+        Path::GuildsIdMembersId(..) => "Specific guild member",
+        Path::GuildsIdMembersIdRolesId(..) => "Guild member role",
+        Path::GuildsIdMembersMeNick(..) => "Modify own nickname",
+        Path::GuildsIdMembersSearch(..) => "Search guild members",
+        Path::GuildsIdMfa(..) => "Guild MFA setting",
+        Path::GuildsIdPreview(..) => "Guild preview",
+        Path::GuildsIdPrune(..) => "Guild prune",
+        Path::GuildsIdRegions(..) => "Guild region",
+        Path::GuildsIdRoles(..) => "Guild roles",
+        Path::GuildsIdRolesId(..) => "Specific guild role",
+        Path::GuildsIdScheduledEvents(..) => "Scheduled events in guild",
+        Path::GuildsIdScheduledEventsId(..) => "Scheduled event in guild",
+        Path::GuildsIdScheduledEventsIdUsers(..) => "Users of a scheduled event",
+        Path::GuildsIdStickers(..) => "Guild stickers",
+        Path::GuildsIdTemplates(..) => "Guild templates",
+        Path::GuildsIdTemplatesCode(..) => "Specific guild template",
+        Path::GuildsIdThreads(..) => "Guild threads",
+        Path::GuildsIdVanityUrl(..) => "Guild vanity invite",
+        Path::GuildsIdVoiceStates(..) => "Guild voice states",
+        Path::GuildsIdWebhooks(..) => "Guild webhooks",
+        Path::GuildsIdWelcomeScreen(..) => "Guild welcome screen",
+        Path::GuildsIdWidget(..) => "Guild widget",
+        Path::GuildsTemplatesCode(..) => "Specific guild template",
+        Path::InteractionCallback(..) => "Interaction callback",
+        Path::InvitesCode => "Invite info",
+        Path::OauthApplicationsMe => "Current application info",
+        Path::StageInstances => "Stage instances",
+        Path::StickerPacks => "Sticker packs",
+        Path::Stickers => "Stickers",
+        Path::UsersId => "User info",
+        Path::UsersIdChannels => "User channels",
+        Path::UsersIdConnections => "User connections",
+        Path::UsersIdGuilds => "User in guild",
+        Path::UsersIdGuildsId => "Guild from user",
+        Path::UsersIdGuildsIdMember => "Member of a guild",
+        Path::VoiceRegions => "Voice region list",
+        Path::WebhooksIdToken(..) => "Webhook",
+        Path::WebhooksIdTokenMessagesId(..) => "Specific webhook message",
+        _ => "Unknown path!",
+    }
+}
 
 #[inline]
 #[allow(clippy::too_many_lines)]
@@ -101,7 +184,7 @@ pub async fn handle_request(
 ) -> Result<Response<Body>, anyhow::Error> {
     let cx = OpenTelemetryContext::current();
 
-    let (bucket, uri_string) = {
+    let (bucket, uri_string, name) = {
         let method = match *request.method() {
             HttpMethod::DELETE => Method::Delete,
             HttpMethod::GET => Method::Get,
@@ -129,7 +212,7 @@ pub async fn handle_request(
         trace!("full request uri is {uri_string}");
 
         let mut hash = DefaultHasher::new();
-        match Path::try_from((method, trimmed_path)) {
+        let path = match Path::try_from((method, trimmed_path)) {
             Ok(path) => path,
             Err(e) => {
                 error!(
@@ -138,18 +221,18 @@ pub async fn handle_request(
                 );
                 bail!("failed to parse");
             }
-        }
-        .hash(&mut hash);
+        };
+        path.hash(&mut hash);
         let bucket = hash.finish().to_string();
         trace!("Request bucket is {}", bucket);
 
-        (bucket, uri_string)
+        (bucket, uri_string, path_name(&path))
     };
 
-    REQUESTS.add(&cx, 1, &[KeyValue::new("bucket", bucket.clone())]);
+    REQUESTS.add(&cx, 1, &[KeyValue::new("bucket", name)]);
 
     let ticket_start = SystemTime::now();
-    TICKET_CALLS.add(&cx, 1, &[KeyValue::new("bucket", bucket.clone())]);
+    TICKET_CALLS.add(&cx, 1, &[KeyValue::new("bucket", name)]);
     // waits for the request to be authorized
     match ratelimiter
         .ticket(bucket.clone())
@@ -158,7 +241,7 @@ pub async fn handle_request(
             TICKET_TIMES.record(
                 &cx,
                 ticket_start.elapsed()?.as_secs_f64(),
-                &[KeyValue::new("bucket", bucket.clone())],
+                &[KeyValue::new("bucket", name)],
             );
             v
         })
@@ -208,7 +291,7 @@ pub async fn handle_request(
     *request.uri_mut() = uri;
     let span = debug_span!("upstream request to discord");
     let upstream_start = SystemTime::now();
-    UPSTREAM_CALLS.add(&cx, 1, &[KeyValue::new("bucket", bucket.clone())]);
+    UPSTREAM_CALLS.add(&cx, 1, &[KeyValue::new("bucket", name)]);
     let resp = match client
         .request(request)
         .instrument(span)
@@ -216,7 +299,7 @@ pub async fn handle_request(
             UPSTREAM_TIMES.record(
                 &cx,
                 upstream_start.elapsed()?.as_secs_f64(),
-                &[KeyValue::new("bucket", bucket.clone())],
+                &[KeyValue::new("bucket", name)],
             );
             v.context("")
         })
@@ -242,7 +325,7 @@ pub async fn handle_request(
         .map(|f| (f.0, f.1.expect("errors should be filtered")))
         .collect();
 
-    HEADERS_SUBMIT_CALLS.add(&cx, 1, &[KeyValue::new("bucket", bucket.clone())]);
+    HEADERS_SUBMIT_CALLS.add(&cx, 1, &[KeyValue::new("bucket", name)]);
     let _submit_headers = ratelimiter
         .submit_headers(bucket.clone(), headers)
         .instrument(info_span!("submitting headers"))
@@ -250,7 +333,7 @@ pub async fn handle_request(
             HEADERS_SUBMIT_TIMES.record(
                 &cx,
                 upstream_start.elapsed()?.as_secs_f64(),
-                &[KeyValue::new("bucket", bucket.clone())],
+                &[KeyValue::new("bucket", name)],
             );
             v
         })
