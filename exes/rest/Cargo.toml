@@ -30,6 +30,3 @@ hashring = "0.3.0"
 tonic = "0.8.3"
 tokio-stream = "0.1.11"
 dns-lookup = "1.0.8"
-
-[target.'cfg(not(target_os = "windows"))'.dependencies]
-tikv-jemallocator = { workspace = true }

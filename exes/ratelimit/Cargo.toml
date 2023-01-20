@@ -33,9 +33,6 @@ tracing-subscriber = { workspace = true }
 test-log = { workspace = true }
 env_logger = { workspace = true }
 
-[target.'cfg(not(target_os = "windows"))'.dependencies]
-tikv-jemallocator = { workspace = true }
-
 [[bench]]
 name = "bucket"
 harness = false
