@@ -66,45 +66,13 @@ jobs:
           name: macos
           path: build/*
 
-  build_windows:
-    name: 'Build for Windows'
-    runs-on: windows-latest
-
-    defaults:
-      run:
-        shell: msys2 {0}
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - uses: msys2/setup-msys2@v2
-        with:
-          install: git mingw-w64-x86_64-go mingw-w64-x86_64-make mingw-w64-x86_64-protobuf mingw-w64-x86_64-rust mingw-w64-x86_64-gcc mingw-w64-x86_64-dlfcn
-
-      - name: Build all
-        run: |
-          export CGO_LDFLAGS='-lntdll -lWs2_32 -lcrypt32 -lSecur32 -luserenv -lNcrypt -lbcrypt'
-          mingw32-make.exe all
-      - uses: actions/upload-artifact@v3
-        with:
-          name: windows
-          path: build/*
-
   build_linux:
     name: 'Build for Linux'
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
+      - uses: docker-practice/actions-setup-docker@master
+        timeout-minutes: 12
       - uses: actions/cache@v3
         with:
           path: |
@@ -113,47 +81,11 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - uses: arduino/setup-protoc@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: ATiltedTree/setup-rust@v1
-        with:
-          rust-version: stable
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '1.18.4'
-      
+          key: ${{ runner.os }}-cargo
       - name: Build all
         run: |
-          make all
+          ./.ci/build.sh
       - uses: actions/upload-artifact@v3
         with:
-          name: linux
+          name: release
           path: build/*
-
-  release:
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: windows
-          path: windows
-      - uses: actions/download-artifact@v3
-        with:
-          name: linux_glibc
-          path: linux_glibc
-      - uses: actions/download-artifact@v3
-        with:
-          name: macos
-          path: macos
-      - uses: ncipollo/release-action@v1
-        with:
-          artifacts: "windows/*,macos/*,linux_glibc/*"
-          draft: true
-          generateReleaseNotes: true
-          skipIfReleaseExists: true

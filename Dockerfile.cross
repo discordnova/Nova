@@ -1,0 +1,13 @@
+ARG CROSS_BASE_IMAGE
+
+FROM debian as db
+WORKDIR /dl
+RUN apt-get update && apt-get install -y curl zip
+RUN curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protoc-21.12-linux-x86_64.zip && \
+    unzip protoc-21.12-linux-x86_64.zip -d protoc3
+
+FROM $CROSS_BASE_IMAGE
+
+COPY --from=db /dl/protoc3 /dl/
+RUN mv /dl/bin/* /usr/local/bin/ && \
+    mv /dl/include/* /usr/local/include/

@@ -133,7 +133,7 @@ where
                 .recv()
                 .await;
             #[cfg(not(unix))]
-            return tokio::signal::ctrl_c().await.unwrap();
+            tokio::signal::ctrl_c().await.unwrap();
 
             stop.send(()).unwrap();
             shutdown_tracer_provider();
