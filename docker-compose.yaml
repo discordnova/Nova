@@ -23,7 +23,7 @@ services:
           - linux/amd64
           - linux/arm64/v8
           - linux/arm/v7
-          - linux/arm/v6
+          
       args:
         - COMPONENT=cache
     volumes:
@@ -47,7 +47,7 @@ services:
           - linux/amd64
           - linux/arm64/v8
           - linux/arm/v7
-          - linux/arm/v6
+          
     volumes:
       - ./config/default.yml:/config/default.yml
     environment:
@@ -68,7 +68,7 @@ services:
           - linux/amd64
           - linux/arm64/v8
           - linux/arm/v7
-          - linux/arm/v6
+          
     volumes:
       - ./config/default.yml:/config/default.yml
     environment:
@@ -93,7 +93,7 @@ services:
           - linux/amd64
           - linux/arm64/v8
           - linux/arm/v7
-          - linux/arm/v6
+          
     volumes:
       - ./config/default.yml:/config/default.yml
     environment:
@@ -116,7 +116,7 @@ services:
           - linux/amd64
           - linux/arm64/v8
           - linux/arm/v7
-          - linux/arm/v6
+          
     volumes:
       - ./config/default.yml:/config/default.yml
     environment:
