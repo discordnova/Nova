@@ -89,7 +89,7 @@ jobs:
           key: ${{ runner.os }}-cargo
       - name: Build all
         run: |
-          cargo install cross --git https://github.com/cross-rs/cross
+          cargo install cross --force --git https://github.com/cross-rs/cross
           ./.ci/build.sh
       - uses: actions/upload-artifact@v3
         with:
