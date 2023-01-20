@@ -89,7 +89,7 @@ fn normalize_path(request_path: &str) -> (&str, &str) {
         ("/api", request_path)
     }
 }
-fn path_name(path: &Path) -> &'static str {
+const fn path_name(path: &Path) -> &'static str {
     match path {
         Path::ApplicationCommand(..) => "Application commands",
         Path::ApplicationCommandId(..) => "Application command",
@@ -112,7 +112,9 @@ fn path_name(path: &Path) -> &'static str {
         Path::ChannelsIdThreadMembersId(..) => "Thread member",
         Path::ChannelsIdThreads(..) => "Channel threads",
         Path::ChannelsIdTyping(..) => "Typing indicator",
-        Path::ChannelsIdWebhooks(..) | Path::WebhooksId(..) => "Webhook",
+        Path::ChannelsIdWebhooks(..) | Path::WebhooksId(..) | Path::WebhooksIdToken(..) => {
+            "Webhook"
+        }
         Path::Gateway => "Gateway",
         Path::GatewayBot => "Gateway bot info",
         Path::Guilds => "Guilds",
@@ -146,14 +148,15 @@ fn path_name(path: &Path) -> &'static str {
         Path::GuildsIdScheduledEventsIdUsers(..) => "Users of a scheduled event",
         Path::GuildsIdStickers(..) => "Guild stickers",
         Path::GuildsIdTemplates(..) => "Guild templates",
-        Path::GuildsIdTemplatesCode(..) => "Specific guild template",
+        Path::GuildsIdTemplatesCode(..) | Path::GuildsTemplatesCode(..) => {
+            "Specific guild template"
+        }
         Path::GuildsIdThreads(..) => "Guild threads",
         Path::GuildsIdVanityUrl(..) => "Guild vanity invite",
         Path::GuildsIdVoiceStates(..) => "Guild voice states",
         Path::GuildsIdWebhooks(..) => "Guild webhooks",
         Path::GuildsIdWelcomeScreen(..) => "Guild welcome screen",
         Path::GuildsIdWidget(..) => "Guild widget",
-        Path::GuildsTemplatesCode(..) => "Specific guild template",
         Path::InteractionCallback(..) => "Interaction callback",
         Path::InvitesCode => "Invite info",
         Path::OauthApplicationsMe => "Current application info",
@@ -167,7 +170,6 @@ fn path_name(path: &Path) -> &'static str {
         Path::UsersIdGuildsId => "Guild from user",
         Path::UsersIdGuildsIdMember => "Member of a guild",
         Path::VoiceRegions => "Voice region list",
-        Path::WebhooksIdToken(..) => "Webhook",
         Path::WebhooksIdTokenMessagesId(..) => "Specific webhook message",
         _ => "Unknown path!",
     }
