@@ -74,8 +74,10 @@ jobs:
       - uses: ATiltedTree/setup-rust@v1
         with:
           rust-version: stable
-      - uses: docker-practice/actions-setup-docker@master
-        timeout-minutes: 12
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          platforms: linux/amd64,linux/arm64
       - uses: actions/cache@v3
         with:
           path: |
