@@ -1,33 +1,27 @@
-FROM rust AS chef
-USER root
-COPY .cargo .cargo
-RUN cargo install cargo-chef
-RUN apt-get update && apt-get install -y protobuf-compiler
-WORKDIR /app
-
-# Planning install
-FROM chef AS planner
+# syntax=docker/dockerfile:1
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:master AS xx
+FROM --platform=$BUILDPLATFORM rust:alpine as alpine_rbuild
+RUN apk add clang lld protobuf-dev build-base git
+# Copy the xx scripts
+COPY --from=xx / /
+# Copy source code
 COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
 
-# Building all targets
-FROM chef AS builder
-COPY --from=planner /app/recipe.json recipe.json
+RUN --mount=type=cache,target=/root/.cargo/git/db \
+    --mount=type=cache,target=/root/.cargo/registry/cache \
+    --mount=type=cache,target=/root/.cargo/registry/index \
+    cargo fetch
+ARG TARGETPLATFORM
+RUN --mount=type=cache,target=/root/.cargo/git/db \
+    --mount=type=cache,target=/root/.cargo/registry/cache \
+    --mount=type=cache,target=/root/.cargo/registry/index \
+    xx-cargo build --release --target-dir ./build
 
-# Notice that we are specifying the --target flag!
-RUN cargo chef cook --release --recipe-path recipe.json
-COPY . .
-RUN cargo build --release 
+#Copy from the build/<target triple>/release folder to the out folder
+RUN mkdir ./out && cp ./build/*/release/* ./out || true
 
-# Base os
-FROM debian:latest AS runtime-base
-# RUN addgroup -S nova && adduser -S nova -G nova
-RUN apt-get update && apt-get install ca-certificates -y
-
-# Final os
-FROM runtime-base AS runtime
+FROM alpine AS runtime
 ARG COMPONENT
 ENV COMPONENT=${COMPONENT}
-COPY --from=builder /app/target/release/${COMPONENT} /usr/local/bin/
-# USER nova
+COPY --from=alpine_rbuild /out/${COMPONENT} /usr/local/bin/
 ENTRYPOINT /usr/local/bin/${COMPONENT}

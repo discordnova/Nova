@@ -8,3 +8,4 @@ config.yml
 config/*
 build/
 *.yml
+bin/

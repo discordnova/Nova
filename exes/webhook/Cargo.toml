@@ -19,6 +19,3 @@ ed25519-dalek = "1"
 twilight-model = { version = "0.14" }
 
 async-nats = "0.26.0"
-
-[target.'cfg(not(target_os = "windows"))'.dependencies]
-tikv-jemallocator = "0.5"
