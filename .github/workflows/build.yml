@@ -69,6 +69,16 @@ jobs:
   build_linux:
     name: 'Build for Linux'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: 
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+          - armv7-unknown-linux-gnueabi
+          - armv7-unknown-linux-musleabi
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
     steps:
       - uses: actions/checkout@v2
       - uses: ATiltedTree/setup-rust@v1
@@ -82,12 +92,15 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo
+          key: ${{ runner.os }}-cargo-${{ matrix.arch }}
       - name: Build all
         run: |
           cargo install cross --force
           export CROSS_CONTAINER_ENGINE_NO_BUILDKIT=1
-          ./.ci/build.sh
+          cross build --release --target ${{ matrix.arch }}
+          mkdir -p ./build
+          cp target/${{ matrix.arch }}/release/* ./build/ || true
+          rm ./build/*.{d,rlib}
       - uses: actions/upload-artifact@v3
         with:
           name: release
