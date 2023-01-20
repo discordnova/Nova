@@ -104,5 +104,5 @@ jobs:
           rm ./build/*.{d,rlib}
       - uses: actions/upload-artifact@v3
         with:
-          name: release
+          name: release-${{ matrix.arch }}
           path: build/*
