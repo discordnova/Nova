@@ -71,6 +71,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: ATiltedTree/setup-rust@v1
+        with:
+          rust-version: stable
       - uses: docker-practice/actions-setup-docker@master
         timeout-minutes: 12
       - uses: actions/cache@v3
@@ -84,6 +87,7 @@ jobs:
           key: ${{ runner.os }}-cargo
       - name: Build all
         run: |
+          cargo install cross --git https://github.com/cross-rs/cross
           ./.ci/build.sh
       - uses: actions/upload-artifact@v3
         with:
