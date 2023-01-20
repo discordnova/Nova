@@ -41,7 +41,7 @@ jobs:
         run: |
           export TAG="${{ matrix.platform }}"
           export TAG=${TAG/linux\//}
-          echo ${TAG//\//-} > .env
+          echo -n "TAG=${TAG//\//-}" > .env
       - name: Build and push
         uses: docker/bake-action@v2
         with:
