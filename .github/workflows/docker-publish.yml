@@ -37,7 +37,11 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
+      - name: Create tag
+        run: |
+          export TAG="${{ matrix.platform }}"
+          export TAG=${TAG/linux\//}
+          echo ${TAG//\//-} > .env
       - name: Build and push
         uses: docker/bake-action@v2
         with:
