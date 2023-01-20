@@ -79,6 +79,7 @@ jobs:
           - armv7-unknown-linux-musleabi
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
+          - x86_64-pc-windows-gnu
     steps:
       - uses: actions/checkout@v2
       - uses: ATiltedTree/setup-rust@v1
