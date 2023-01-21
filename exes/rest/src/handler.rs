@@ -51,21 +51,21 @@ lazy_static! {
             .with_description("Amount of requests sent to the ratelimiter")
             .init()
     };
-    static ref UPSTREAM_TIMES: Histogram<f64> = {
+    static ref UPSTREAM_TIMES: Histogram<u64> = {
         global::meter(&METER_NAME)
-            .f64_histogram("rest.upstream_http_request_duration_seconds")
+            .u64_histogram("rest.upstream_http_request_duration_miliseconds")
             .with_description("Time took to request discord")
             .init()
     };
-    static ref TICKET_TIMES: Histogram<f64> = {
+    static ref TICKET_TIMES: Histogram<u64> = {
         global::meter(&METER_NAME)
-            .f64_histogram("rest.ticket_http_request_duration_seconds")
+            .u64_histogram("rest.ticket_http_request_duration_miliseconds")
             .with_description("Time took to get a ticket from the ratelimiter")
             .init()
     };
-    static ref HEADERS_SUBMIT_TIMES: Histogram<f64> = {
+    static ref HEADERS_SUBMIT_TIMES: Histogram<u64> = {
         global::meter(&METER_NAME)
-            .f64_histogram("rest.header_submit_http_request_duration_seconds")
+            .u64_histogram("rest.header_submit_http_request_duration_miliseconds")
             .with_description("Time took to get a ticket from the ratelimiter")
             .init()
     };
@@ -242,7 +242,7 @@ pub async fn handle_request(
         .then(|v| async {
             TICKET_TIMES.record(
                 &cx,
-                ticket_start.elapsed()?.as_secs_f64(),
+                ticket_start.elapsed()?.as_millis() as u64,
                 &[KeyValue::new("bucket", name)],
             );
             v
@@ -300,7 +300,7 @@ pub async fn handle_request(
         .then(|v| async {
             UPSTREAM_TIMES.record(
                 &cx,
-                upstream_start.elapsed()?.as_secs_f64(),
+                upstream_start.elapsed()?.as_millis() as u64,
                 &[KeyValue::new("bucket", name)],
             );
             v.context("")
@@ -327,6 +327,7 @@ pub async fn handle_request(
         .map(|f| (f.0, f.1.expect("errors should be filtered")))
         .collect();
 
+    let headers_start = SystemTime::now();
     HEADERS_SUBMIT_CALLS.add(&cx, 1, &[KeyValue::new("bucket", name)]);
     let _submit_headers = ratelimiter
         .submit_headers(bucket.clone(), headers)
@@ -334,7 +335,7 @@ pub async fn handle_request(
         .then(|v| async {
             HEADERS_SUBMIT_TIMES.record(
                 &cx,
-                upstream_start.elapsed()?.as_secs_f64(),
+                headers_start.elapsed()?.as_millis() as u64,
                 &[KeyValue::new("bucket", name)],
             );
             v

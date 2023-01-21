@@ -59,7 +59,7 @@ where
         {
             let meter = opentelemetry_otlp::new_pipeline()
                 .metrics(
-                    selectors::simple::histogram([1.0, 2.0, 5.0, 10.0, 20.0, 50.0]),
+                    selectors::simple::histogram([0.1, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0]),
                     stateless_temporality_selector(),
                     opentelemetry::runtime::Tokio,
                 )
