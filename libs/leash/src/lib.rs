@@ -100,6 +100,7 @@ where
             let otel_layer = tracing_opentelemetry::layer().with_tracer(tracer);
 
             tracing_subscriber::registry()
+                .with(fmt::layer())
                 .with(otel_layer)
                 .with(
                     // Use the info level as default
