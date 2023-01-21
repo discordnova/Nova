@@ -20,7 +20,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 hyper = { workspace = true }
 
-twilight-http-ratelimiting = { git = "https://github.com/MatthieuCoder/twilight.git" }
+twilight-http-ratelimiting = "0.14.2"
 tonic = "0.8.3"
 tokio-stream = "0.1.11"
 redis = { version = "0.22.1", features = ["cluster", "connection-manager", "tokio-comp"] }

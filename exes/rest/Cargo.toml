@@ -24,7 +24,7 @@ futures-util = "0.3.17"
 hyper-rustls = "0.23.2"
 lazy_static = "1.4.0"
 xxhash-rust = { version = "0.8.2", features = ["xxh32"] }
-twilight-http-ratelimiting = { git = "https://github.com/MatthieuCoder/twilight.git" }
+twilight-http-ratelimiting = "0.14.2"
 
 hashring = "0.3.0"
 tonic = "0.8.3"

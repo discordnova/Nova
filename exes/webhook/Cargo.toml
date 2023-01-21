@@ -16,6 +16,6 @@ anyhow = { workspace = true }
 
 hex = "0.4.3"
 ed25519-dalek = "1"
-twilight-model = { version = "0.14" }
+twilight-model = "0.14.2"
 
 async-nats = "0.26.0"

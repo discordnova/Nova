@@ -14,6 +14,6 @@ config = { version = "0.13", default-features = false, features = ["json", "yaml
 redis = { version = "0.22.1", features = ["cluster", "connection-manager", "tokio-comp"] }
 
 async-nats = "0.26.0"
-twilight-model = "0.14"
+twilight-model = "0.14.2"
 anyhow = "1.0.68"
 opentelemetry-otlp = "0.11.0"
