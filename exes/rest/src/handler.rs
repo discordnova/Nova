@@ -239,17 +239,16 @@ pub async fn handle_request(
     match ratelimiter
         .ticket(bucket.clone())
         .instrument(debug_span!("ticket validation request"))
-        .then(|v| async {
+        .await
+    {
+        Ok(_) => {
+            #[allow(clippy::cast_possible_truncation)]
             TICKET_TIMES.record(
                 &cx,
                 ticket_start.elapsed()?.as_millis() as u64,
                 &[KeyValue::new("bucket", name)],
             );
-            v
-        })
-        .await
-    {
-        Ok(_) => {}
+        }
         Err(e) => {
             error!("Error when requesting the ratelimiter: {:?}", e);
             bail!("failed to request the ratelimiter");
@@ -294,20 +293,16 @@ pub async fn handle_request(
     let span = debug_span!("upstream request to discord");
     let upstream_start = SystemTime::now();
     UPSTREAM_CALLS.add(&cx, 1, &[KeyValue::new("bucket", name)]);
-    let resp = match client
-        .request(request)
-        .instrument(span)
-        .then(|v| async {
+    let resp = match client.request(request).instrument(span).await {
+        Ok(response) => {
+            #[allow(clippy::cast_possible_truncation)]
             UPSTREAM_TIMES.record(
                 &cx,
                 upstream_start.elapsed()?.as_millis() as u64,
                 &[KeyValue::new("bucket", name)],
             );
-            v.context("")
-        })
-        .await
-    {
-        Ok(response) => response,
+            response
+        }
         Err(e) => {
             error!("Error when requesting the Discord API: {:?}", e);
             bail!("failed to request the discord api");
@@ -329,18 +324,16 @@ pub async fn handle_request(
 
     let headers_start = SystemTime::now();
     HEADERS_SUBMIT_CALLS.add(&cx, 1, &[KeyValue::new("bucket", name)]);
-    let _submit_headers = ratelimiter
+    ratelimiter
         .submit_headers(bucket.clone(), headers)
         .instrument(info_span!("submitting headers"))
-        .then(|v| async {
-            HEADERS_SUBMIT_TIMES.record(
-                &cx,
-                headers_start.elapsed()?.as_millis() as u64,
-                &[KeyValue::new("bucket", name)],
-            );
-            v
-        })
-        .await;
+        .await?;
+    #[allow(clippy::cast_possible_truncation)]
+    HEADERS_SUBMIT_TIMES.record(
+        &cx,
+        headers_start.elapsed()?.as_millis() as u64,
+        &[KeyValue::new("bucket", name)],
+    );
 
     Ok(resp)
 }
