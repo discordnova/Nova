@@ -1,5 +1,4 @@
-use anyhow::{bail, Context};
-use futures_util::future::FutureExt;
+use anyhow::bail;
 use hyper::http::{
     header::{AUTHORIZATION, CONNECTION, HOST, TRANSFER_ENCODING, UPGRADE},
     HeaderValue, Method as HttpMethod, Request, Response, Uri,

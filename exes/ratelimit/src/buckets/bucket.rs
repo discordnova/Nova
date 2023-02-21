@@ -183,7 +183,7 @@ impl Bucket {
             return false;
         }
 
-        if let TimeRemaining::Finished = self.time_remaining() {
+        if matches!(self.time_remaining(), TimeRemaining::Finished) {
             self.remaining.store(self.limit(), Ordering::Relaxed);
             self.last_update.set_millis(0);
 
