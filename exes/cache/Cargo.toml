@@ -19,7 +19,7 @@ tokio-stream = "0.1.11"
 serde = { version = "1.0.8", features = ["derive"] }
 serde_json = { version = "1.0" }
 
-async-nats = "0.26.0"
+async-nats = "0.29.0"
 twilight-model = "0.14.2"
 anyhow = "1.0.68"
 
