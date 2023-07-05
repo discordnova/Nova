@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-libc = "0.2.139"
+libc = "0.2.147"
 leash = { path = "../../libs/leash" }
 shared = { path = "../../libs/shared" }
 
@@ -15,24 +15,24 @@ gateway = { path = "../../exes/gateway" }
 ratelimit = { path = "../../exes/ratelimit" }
 rest = { path = "../../exes/rest" }
 webhook = { path = "../../exes/webhook" }
-ctrlc = "3.2.4"
+ctrlc = "3.4.0"
 
-tokio = { version = "1.24.2", features = ["rt"] }
-serde = "1.0.152"
-serde_json = "1.0.91"
-anyhow = { version = "1.0.68", features = ["backtrace"] }
+tokio = { version = "1.29.1", features = ["rt"] }
+serde = "1.0.166"
+serde_json = "1.0.100"
+anyhow = { version = "1.0.71", features = ["backtrace"] }
 
 tracing = "0.1.37"
 
 config = "0.13.3"
 
-tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
-tracing-opentelemetry = "0.18.0"
-opentelemetry = { version ="0.18.0", features = ["rt-tokio"] }
-opentelemetry-otlp = { version = "0.11.0" }
+tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
+tracing-opentelemetry = "0.19.0"
+opentelemetry = { version ="0.19.0", features = ["rt-tokio"] }
+opentelemetry-otlp = { version = "0.12.0" }
 
 [lib]
 crate-type = ["staticlib", "rlib"]
 
 [build-dependencies]
-cbindgen = "0.24.3"
+cbindgen = "0.24.5"

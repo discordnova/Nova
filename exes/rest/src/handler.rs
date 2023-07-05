@@ -18,7 +18,7 @@ use std::{
     sync::Arc,
     time::SystemTime,
 };
-use tracing::{debug_span, error, info_span, log::trace, Instrument};
+use tracing::{debug_span, error, info_span, trace, Instrument};
 use twilight_http_ratelimiting::{Method, Path};
 
 use crate::{config::ReverseProxy, ratelimit_client::RemoteRatelimiter};

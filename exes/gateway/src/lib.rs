@@ -20,9 +20,8 @@ use shared::{
 };
 use std::{convert::TryFrom, future::Future, pin::Pin, str::FromStr};
 use tokio::{select, sync::oneshot};
-use tokio_stream::StreamExt;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
-use twilight_gateway::{Event, Shard};
+use twilight_gateway::{Event, Shard, ShardId};
 pub mod config;
 use tracing::{debug, error, info, info_span, instrument, Instrument};
 use twilight_model::gateway::event::DispatchEvent;
@@ -47,25 +46,32 @@ impl Component for GatewayServer {
         mut stop: oneshot::Receiver<()>,
     ) -> AnyhowResultFuture<()> {
         Box::pin(async move {
-            let (shard, mut events) = Shard::builder(settings.token.clone(), settings.intents)
-                .shard(settings.shard, settings.shard_total)?
-                .build();
+            let mut shard = Shard::new(
+                ShardId::new(settings.shard, settings.shard_total),
+                settings.token.clone(),
+                settings.intents,
+            );
 
             let nats = Into::<Pin<Box<dyn Future<Output = anyhow::Result<Client>> + Send>>>::into(
                 settings.nats,
             )
             .await?;
-            shard.start().await?;
 
             loop {
                 select! {
-                    event = events.next() => {
-                        if let Some(event) = event {
-                           let _ = handle_event(event, &nats)
-                            .await
-                            .map_err(|err| error!(error = ?err, "event publish failed"));
-                        } else {
-                            break
+                    event = shard.next_event() => {
+                        match event {
+                            Ok(event) => {
+                                let _ = handle_event(event, &nats)
+                                    .await
+                                    .map_err(|err| error!(error = ?err, "event publish failed"));
+                            },
+                            Err(source) => {
+                                if source.is_fatal() {
+                                    break;
+                                }
+                                continue;
+                            }
                         }
                     },
                     _ = (&mut stop) => break
@@ -73,8 +79,6 @@ impl Component for GatewayServer {
             }
 
             info!("stopping shard...");
-            shard.shutdown();
-
             Ok(())
         })
     }

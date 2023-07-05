@@ -24,8 +24,7 @@ use std::str::FromStr;
 use std::time::Duration;
 use std::{future::Future, pin::Pin};
 use tokio::sync::oneshot;
-use tracing::log::error;
-use tracing::{info, log::trace};
+use tracing::{info, trace, error};
 use tracing_subscriber::filter::Directive;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 

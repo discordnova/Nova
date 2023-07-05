@@ -12,28 +12,28 @@ members = [
     "libs/shared/",
     "libs/leash/"
 ]
-
+resolver = "2"
 [workspace.dependencies]
 shared = { path = "libs/shared" }
 proto =  { path = "libs/proto" }
 leash = { path = "libs/leash" }
 
-tokio = { version = "1", features = ["rt-multi-thread"] }
+tokio = { version = "1", features = ["rt-multi-thread", "signal"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-hyper = "0.14.23"
+hyper = "0.14.27"
 
 anyhow = "1"
 
 tracing = "0.1"
 tracing-futures = "0.2"
-tracing-opentelemetry = "0.18"
-opentelemetry = { version = "0.18", features = ["rt-tokio"] }
-opentelemetry-http = "0.7"
+tracing-opentelemetry = "0.19"
+opentelemetry = { version = "0.19", features = ["rt-tokio"] }
+opentelemetry-http = "0.8"
 
-criterion = { version = "0.4", features = ["async_tokio"] }
+criterion = { version = "0.5", features = ["async_tokio"] }
 tokio-test = "0.4.2"
-tracing-test = "0.2.3"
-tracing-subscriber = "0.3.16"
+tracing-test = "0.2.4"
+tracing-subscriber = "0.3.17"
 test-log = { version = "*", features = ["trace"] }
 env_logger = "0.10.0"

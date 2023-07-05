@@ -11,7 +11,7 @@ use tokio::{
 };
 use tracing::{
     debug,
-    log::{error, info},
+    error, info,
 };
 
 /// Represents a all in one instance

@@ -15,5 +15,5 @@ tracing-opentelemetry = { workspace = true }
 tracing = { workspace = true }
 
 tracing-log = { version = "0.1.3", features = ["env_logger"] }
-tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
-opentelemetry-otlp = { version = "0.11.0", features = ["metrics"] }
+tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
+opentelemetry-otlp = { version = "0.12.0", features = ["metrics"] }
